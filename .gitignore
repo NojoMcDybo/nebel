@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+vendor/
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+~$*.docx
+_to_delete/

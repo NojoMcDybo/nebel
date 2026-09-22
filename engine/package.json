@@ -1,0 +1,21 @@
+{
+  "name": "@nebel/engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Nebel physiological engine (ExtHovorka) — headless, deterministic",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "oracle:fetch": "bash scripts/fetch-oracle.sh",
+    "smoke": "tsx scripts/smoke.ts",
+    "oracle:reference": "python3 scripts/oracle_reference.py"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
