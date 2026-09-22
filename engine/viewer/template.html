@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nebel · Engine-Viewer</title>
+<style>
+/* Farbkonzept aus dem Prototyp: alles unbunt, Chroma ausschliesslich fuer die
+   beiden Schwellen. Die beiden Kurven werden deshalb NICHT ueber Farbton
+   unterschieden, sondern ueber Helligkeit plus Strichart — Identitaet haengt
+   damit nie an Farbe allein. */
+:root{
+  --paper:#EDF1F1; --card:#FFFFFF; --sink:#E3E9E9;
+  --ink:#0A0D0D; --ink2:#576262; --ink3:#8A9494;
+  --hair:rgba(10,13,13,.11); --grid:rgba(10,13,13,.07);
+  --low:#B8362B; --high:#8E6410;
+  --band:rgba(10,13,13,.035);
+  --sh:0 1px 2px rgba(10,13,13,.06);
+  --sans:"Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1213; --card:#191E20; --sink:#262D2F;
+    --ink:#E9EFEF; --ink2:#A3AEAE; --ink3:#7E8A8A;
+    --hair:rgba(233,239,239,.14); --grid:rgba(233,239,239,.08);
+    --low:#FF7063; --high:#E8B44A;
+    --band:rgba(233,239,239,.045);
+    --sh:0 0 0 1px rgba(233,239,239,.07);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1213; --card:#191E20; --sink:#262D2F;
+  --ink:#E9EFEF; --ink2:#A3AEAE; --ink3:#7E8A8A;
+  --hair:rgba(233,239,239,.14); --grid:rgba(233,239,239,.08);
+  --low:#FF7063; --high:#E8B44A;
+  --band:rgba(233,239,239,.045);
+  --sh:0 0 0 1px rgba(233,239,239,.07);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 var(--sans);
+  padding:24px 16px 48px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-size:19px;font-weight:650;margin:0 0 2px;letter-spacing:-.01em}
+.sub{color:var(--ink2);font-size:13px;margin:0 0 20px}
+.card{background:var(--card);border-radius:10px;box-shadow:var(--sh);padding:16px;margin-bottom:16px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row + .row{margin-top:10px}
+label{color:var(--ink2);font-size:12px;letter-spacing:.02em}
+select,button,input[type=range]{font:inherit;color:inherit}
+select{background:var(--sink);border:none;border-radius:6px;padding:6px 8px;font-size:13px}
+button{background:var(--sink);border:none;border-radius:6px;padding:6px 11px;font-size:13px;
+  cursor:pointer;transition:background .12s}
+button:hover{background:var(--hair)}
+button.ghost{background:transparent;box-shadow:inset 0 0 0 1px var(--hair);color:var(--ink2)}
+.at{font:12px/1 var(--mono);color:var(--ink2);padding:6px 0}
+figure{margin:0}
+figcaption{font-size:13px;font-weight:600;margin-bottom:2px}
+.capnote{font-size:12px;color:var(--ink2);margin-bottom:12px}
+.chartbox{position:relative}
+canvas{display:block;width:100%;height:340px}
+.legend{display:flex;gap:18px;margin-top:10px;font-size:12px;color:var(--ink2);flex-wrap:wrap}
+.legend i{display:inline-block;width:22px;height:0;border-top-width:2px;margin-right:6px;
+  vertical-align:middle;border-top-style:solid}
+.tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .1s;
+  background:var(--card);box-shadow:0 2px 12px rgba(0,0,0,.18),var(--sh);border-radius:8px;
+  padding:8px 10px;font:12px/1.45 var(--mono);white-space:nowrap;z-index:5}
+.tip b{font-weight:600}
+table{width:100%;border-collapse:collapse;font:12px/1.6 var(--mono)}
+th{text-align:left;font-weight:600;color:var(--ink2);font-family:var(--sans);font-size:12px;
+  padding-bottom:6px;border-bottom:1px solid var(--hair)}
+td{padding:2px 0;border-bottom:1px solid var(--grid)}
+td:nth-child(2){text-align:right;padding-right:10px}
+td:nth-child(3){color:var(--ink3);width:70px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+.evlist{font:12px/1.7 var(--mono);color:var(--ink2)}
+.evlist span{display:inline-block;margin-right:14px}
+.note{font-size:12px;color:var(--ink3);margin-top:10px}
+@media(max-width:640px){.cols{grid-template-columns:1fr}canvas{height:260px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>nebel · Engine-Viewer</h1>
+  <p class="sub">Entwicklerwerkzeug. Zeigt den physiologischen Zustand und den angezeigten Sensorwert getrennt.
+     Keine Therapieaussage, keine Dosierungshilfe.</p>
+
+  <div class="card">
+    <div class="row">
+      <label for="subj">Subjekt</label>
+      <select id="subj"></select>
+      <span class="at" id="meta"></span>
+      <span style="flex:1"></span>
+      <label for="unit">Einheit</label>
+      <select id="unit">
+        <option value="mgdl">mg/dL</option>
+        <option value="mmol">mmol/L</option>
+      </select>
+      <button class="ghost" id="theme">Dunkel/Hell</button>
+    </div>
+    <div class="row">
+      <label>Einfügen bei</label><span class="at" id="cursor">— bewege den Zeiger über die Kurve</span>
+    </div>
+    <div class="row">
+      <button data-ev="mealFast">Mahlzeit 40 g schnell</button>
+      <button data-ev="mealSlow">Mahlzeit 60 g langsam</button>
+      <button data-ev="bolus">Bolus nach KE-Faktor</button>
+      <button data-ev="sportMod">Sport moderat 45 min</button>
+      <button data-ev="sportHard">Intervalle hart 15 min</button>
+      <button data-ev="temp50">Temp-Basal 50 % / 60 min</button>
+      <button data-ev="stop">Pumpenstopp 60 min</button>
+      <button class="ghost" id="undo">Letztes zurück</button>
+      <button class="ghost" id="reset">Alles zurücksetzen</button>
+    </div>
+    <div class="row">
+      <label for="noise">Sensorrauschen</label>
+      <input type="range" id="noise" min="0" max="0.6" step="0.05" value="0" style="width:150px">
+      <span class="at" id="noiseval">0.00 mmol/L</span>
+      <span class="at" style="color:var(--ink3)">— Nebel-Annahme, nicht belegt</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <figure>
+      <figcaption>Glukoseverlauf über 24 Stunden</figcaption>
+      <p class="capnote" id="cap"></p>
+      <div class="chartbox">
+        <canvas id="chart"></canvas>
+        <div class="tip" id="tip"></div>
+      </div>
+      <div class="legend">
+        <span><i style="border-color:var(--ink)"></i>Sensorwert — was angezeigt wird</span>
+        <span><i style="border-color:var(--ink2);border-top-style:dashed"></i>Physiologische Glukose — was der Körper tut</span>
+        <span><i style="border-color:var(--low)"></i>3,9 mmol/L · 70 mg/dL</span>
+        <span><i style="border-color:var(--high)"></i>10,0 mmol/L · 180 mg/dL</span>
+      </div>
+    </figure>
+    <p class="evlist" id="evlist"></p>
+  </div>
+
+  <div class="card">
+    <figcaption style="font-size:13px;font-weight:600;margin-bottom:2px">Zustandsvektor am Zeiger</figcaption>
+    <p class="capnote">Alle 16 Zustände von ExtHovorka. Ohne Zeiger: Werte am Ende des Laufs.</p>
+    <div class="cols">
+      <table><thead><tr><th>Zustand</th><th></th><th>Einheit</th></tr></thead><tbody id="stA"></tbody></table>
+      <table><thead><tr><th>Zustand</th><th></th><th>Einheit</th></tr></thead><tbody id="stB"></tbody></table>
+    </div>
+    <p class="note" id="derived"></p>
+  </div>
+</div>
+
+<script>/*__SUBJECTS__*/</script>
+<script>/*__ENGINE__*/</script>
+<script>
+(() => {
+"use strict";
+const N = window.Nebel, S = window.SUBJECTS;
+const DUR = 1440, STEP = 1;
+const MGDL = N.MGDL_PER_MMOLL;
+
+const el = (id) => document.getElementById(id);
+const state = { idx: 0, unit: "mgdl", events: [], cursorMin: null, noise: 0, run: null };
+
+/* ---------- Simulation ---------- */
+function simulate() {
+  const s = S[state.idx];
+  const p = N.withPopulationConstants(s.subject);
+  const sensor = { ...N.DEFAULT_SENSOR, noiseSd: state.noise, seed: 20260922 };
+  state.run = N.simulate({
+    durationMin: DUR, stepMin: STEP, parameters: p, therapy: s.therapy,
+    pump: N.flatBasalProfile(s.therapy.basalRateUPerH),
+    events: state.events, sensor, solver: "rk4",
+  });
+  state.params = p;
+}
+
+/* ---------- Ereignisse ---------- */
+/* Ein Belastungsblock sind drei Stuetzstellen, aber eine Handlung: nur die erste
+   traegt das Label und zaehlt damit als ein Ereignis. */
+const label = (evs, text) => evs.map((e, i) => i === 0 ? { ...e, label: text } : e);
+
+function addEvent(kind) {
+  const t = state.cursorMin ?? 480;
+  const s = S[state.idx], p = N.withPopulationConstants(s.subject);
+  const mk = {
+    mealFast: () => [{ kind: "meal", t, fastCarbsG: 40, slowCarbsG: 0, label: "40 g schnell" }],
+    mealSlow: () => [{ kind: "meal", t, fastCarbsG: 0, slowCarbsG: 60, label: "60 g langsam" }],
+    bolus:    () => [{ kind: "bolus", t, units: +(40 / s.therapy.carbRatioGPerU).toFixed(2), label: "Bolus" }],
+    sportMod: () => label(N.exerciseBlock(t, 45, p.HRrest + 0.5 * (p.HRmax - p.HRrest), p.HRrest), "Sport moderat 45 min"),
+    sportHard:() => label(N.exerciseBlock(t, 15, p.HRrest + 0.95 * (p.HRmax - p.HRrest), p.HRrest), "Intervalle hart 15 min"),
+    temp50:   () => [{ kind: "tempBasal", t, factor: 0.5, durationMin: 60, label: "Temp-Basal 50 %" }],
+    stop:     () => [{ kind: "tempBasal", t, factor: 0, durationMin: 60, label: "Pumpenstopp 60 min" }],
+  }[kind];
+  if (!mk) return;
+  state.events = state.events.concat(mk());
+  render();
+}
+
+const hhmm = (min) => String(Math.floor(min / 60) % 24).padStart(2, "0") + ":" + String(Math.round(min) % 60).padStart(2, "0");
+const conv = (mmol) => state.unit === "mgdl" ? mmol * MGDL : mmol;
+const fmt = (mmol) => state.unit === "mgdl" ? conv(mmol).toFixed(0) : conv(mmol).toFixed(1);
+const unitLabel = () => state.unit === "mgdl" ? "mg/dL" : "mmol/L";
+
+/* ---------- Diagramm ---------- */
+const cv = el("chart"), ctx = cv.getContext("2d");
+let box = { x0: 0, x1: 0, y0: 0, y1: 0, lo: 0, hi: 0, w: 0, h: 0 };
+
+function css(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+function draw() {
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth, h = cv.clientHeight;
+  cv.width = w * dpr; cv.height = h * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+
+  const r = state.run;
+  const padL = 46, padR = 12, padT = 10, padB = 26;
+  const x0 = padL, x1 = w - padR, y0 = padT, y1 = h - padB;
+
+  const all = r.G.concat(r.gSensor);
+  let lo = Math.min(3.2, Math.min(...all) - 0.6);
+  let hi = Math.max(11.5, Math.max(...all) + 0.6);
+  box = { x0, x1, y0, y1, lo, hi, w, h };
+
+  const X = (min) => x0 + (min / DUR) * (x1 - x0);
+  const Y = (v) => y1 - ((v - lo) / (hi - lo)) * (y1 - y0);
+
+  /* Zielbereich als Flaeche, sehr zurueckhaltend */
+  ctx.fillStyle = css("--band");
+  ctx.fillRect(x0, Y(10), x1 - x0, Y(3.9) - Y(10));
+
+  /* Raster und Zeitachse */
+  ctx.strokeStyle = css("--grid"); ctx.lineWidth = 1;
+  ctx.fillStyle = css("--ink3"); ctx.font = "11px " + css("--mono");
+  for (let t = 0; t <= DUR; t += 180) {
+    ctx.beginPath(); ctx.moveTo(X(t) + .5, y0); ctx.lineTo(X(t) + .5, y1); ctx.stroke();
+    ctx.textAlign = t === 0 ? "left" : t === DUR ? "right" : "center";
+    ctx.fillText(hhmm(t), X(t), y1 + 16);
+  }
+  ctx.textAlign = "right";
+  const stepY = state.unit === "mgdl" ? 50 / MGDL : 2;
+  for (let v = Math.ceil(lo / stepY) * stepY; v <= hi; v += stepY) {
+    ctx.strokeStyle = css("--grid");
+    ctx.beginPath(); ctx.moveTo(x0, Y(v) + .5); ctx.lineTo(x1, Y(v) + .5); ctx.stroke();
+    ctx.fillStyle = css("--ink3");
+    ctx.fillText(fmt(v), x0 - 8, Y(v) + 4);
+  }
+
+  /* Schwellen */
+  for (const [v, c] of [[3.9, css("--low")], [10, css("--high")]]) {
+    ctx.strokeStyle = c; ctx.lineWidth = 1; ctx.setLineDash([]);
+    ctx.globalAlpha = .55;
+    ctx.beginPath(); ctx.moveTo(x0, Y(v) + .5); ctx.lineTo(x1, Y(v) + .5); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  /* Ereignismarken */
+  ctx.strokeStyle = css("--ink3");
+  for (const e of state.events) {
+    if (!e.label) continue;
+    ctx.beginPath(); ctx.moveTo(X(e.t) + .5, y1); ctx.lineTo(X(e.t) + .5, y1 - 9); ctx.stroke();
+  }
+
+  const line = (xs, ys, color, dash, width) => {
+    ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash);
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+    ctx.beginPath();
+    for (let i = 0; i < ys.length; i++) {
+      const px = X(xs[i]), py = Y(ys[i]);
+      i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+    }
+    ctx.stroke(); ctx.setLineDash([]);
+  };
+
+  /* Physiologie gestrichelt und zurueckgenommen, Sensor kraeftig — Identitaet
+     haengt an Helligkeit UND Strichart, nie an Farbe allein. */
+  line(r.t, r.G, css("--ink2"), [4, 3], 2);
+  line(r.tSensor, r.gSensor, css("--ink"), [], 2);
+
+  /* Fadenkreuz */
+  if (state.cursorMin != null) {
+    ctx.strokeStyle = css("--ink3"); ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
+    ctx.beginPath(); ctx.moveTo(X(state.cursorMin) + .5, y0); ctx.lineTo(X(state.cursorMin) + .5, y1); ctx.stroke();
+    ctx.setLineDash([]);
+    const i = Math.min(r.G.length - 1, Math.max(0, Math.round(state.cursorMin) - 1));
+    ctx.fillStyle = css("--card");
+    ctx.strokeStyle = css("--ink"); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(X(r.t[i]), Y(r.G[i]), 3.5, 0, 7); ctx.fill(); ctx.stroke();
+  }
+}
+
+/* ---------- Tabellen und Text ---------- */
+function paintState() {
+  const r = state.run;
+  const i = state.cursorMin != null
+    ? Math.min(r.states.length - 1, Math.max(0, Math.round(state.cursorMin) - 1))
+    : r.states.length - 1;
+  const s = r.states[i];
+  const names = N.STATE_NAMES, units = N.STATE_UNITS;
+  const rows = (from, to) => Array.from({ length: to - from }, (_, k) => {
+    const j = from + k, v = s[j];
+    const txt = Math.abs(v) >= 1000 || (Math.abs(v) < 0.001 && v !== 0) ? v.toExponential(2) : v.toFixed(4);
+    return `<tr><td>${names[j]}</td><td>${txt}</td><td>${units[names[j]]}</td></tr>`;
+  }).join("");
+  el("stA").innerHTML = rows(0, 8);
+  el("stB").innerHTML = rows(8, 16);
+
+  const p = state.params;
+  const G = r.G[i], Gs = r.gSensor[Math.min(r.gSensor.length - 1, Math.floor(i / 5))];
+  el("derived").textContent =
+    `G = ${fmt(G)} ${unitLabel()} · Sensor = ${fmt(Gs)} ${unitLabel()} · Differenz ${fmt(Math.abs(G - Gs))} · ` +
+    `VG ${p.VG.toFixed(1)} L · Basal ${S[state.idx].therapy.basalRateUPerH.toFixed(2)} U/h`;
+}
+
+function paintMeta() {
+  const s = S[state.idx];
+  el("meta").textContent =
+    `${s.demo.BW.toFixed(0)} kg · Basal ${s.therapy.basalRateUPerH.toFixed(2)} U/h · ` +
+    `KE-Faktor ${s.therapy.carbRatioGPerU} · p3 ${s.subject.p3.toFixed(1)}`;
+  const r = state.run;
+  const tir = r.G.filter((g) => g >= 3.9 && g <= 10).length / r.G.length * 100;
+  const acts = state.events.filter((e) => e.label);
+  el("cap").textContent =
+    `${acts.length} ${acts.length === 1 ? "Ereignis" : "Ereignisse"} · ` +
+    `Zeit im Zielbereich ${tir.toFixed(0)} % · Tiefstwert ${fmt(Math.min(...r.G))} · Höchstwert ${fmt(Math.max(...r.G))} ${unitLabel()}`;
+  el("evlist").innerHTML = acts.length
+    ? acts.map((e) => `<span>${hhmm(e.t)} · ${e.label}</span>`).join("")
+    : "<span>Keine Ereignisse — nur Basalrate.</span>";
+}
+
+function render() { simulate(); draw(); paintState(); paintMeta(); }
+
+/* ---------- Interaktion ---------- */
+cv.addEventListener("mousemove", (e) => {
+  const rect = cv.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  if (x < box.x0 || x > box.x1) return;
+  state.cursorMin = Math.round(((x - box.x0) / (box.x1 - box.x0)) * DUR);
+  const r = state.run;
+  const i = Math.min(r.G.length - 1, Math.max(0, state.cursorMin - 1));
+  const gs = r.gSensor[Math.min(r.gSensor.length - 1, Math.floor(i / 5))];
+  const tip = el("tip");
+  tip.innerHTML = `<b>${hhmm(state.cursorMin)}</b><br>Sensor ${fmt(gs)} ${unitLabel()}<br>Körper ${fmt(r.G[i])} ${unitLabel()}`;
+  tip.style.opacity = "1";
+  tip.style.left = Math.min(box.w - 150, x + 14) + "px";
+  tip.style.top = (e.clientY - rect.top - 10) + "px";
+  el("cursor").textContent = hhmm(state.cursorMin);
+  draw(); paintState();
+});
+cv.addEventListener("mouseleave", () => { el("tip").style.opacity = "0"; });
+
+document.querySelectorAll("[data-ev]").forEach((b) =>
+  b.addEventListener("click", () => addEvent(b.dataset.ev)));
+el("undo").addEventListener("click", () => {
+  let i = state.events.length - 1;
+  while (i > 0 && !state.events[i].label) i--;   // zum Anfang des letzten Blocks
+  state.events = state.events.slice(0, i);
+  render();
+});
+el("reset").addEventListener("click", () => { state.events = []; render(); });
+el("subj").addEventListener("change", (e) => { state.idx = +e.target.value; render(); });
+el("unit").addEventListener("change", (e) => { state.unit = e.target.value; render(); });
+el("noise").addEventListener("input", (e) => {
+  state.noise = +e.target.value;
+  el("noiseval").textContent = state.noise.toFixed(2) + " mmol/L";
+  render();
+});
+el("theme").addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme");
+  const dark = cur ? cur === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+  draw();
+});
+window.addEventListener("resize", draw);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+
+el("subj").innerHTML = S.map((s, i) => `<option value="${i}">${s.id}</option>`).join("");
+render();
+})();
+</script>
+</body>
+</html>

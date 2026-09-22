@@ -11,10 +11,12 @@
     "typecheck": "tsc --noEmit",
     "oracle:fetch": "bash scripts/fetch-oracle.sh",
     "smoke": "tsx scripts/smoke.ts",
-    "oracle:reference": "python3 scripts/oracle_reference.py"
+    "oracle:reference": "python3 scripts/oracle_reference.py",
+    "viewer": "node scripts/build-viewer.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.2",
+    "esbuild": "^0.28.2",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
   }

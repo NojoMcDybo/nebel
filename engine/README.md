@@ -59,4 +59,8 @@ Damit sind auch die Groessenordnungen bestaetigt, nicht nur das qualitative Verh
 
 **Referenzwerte erzeugen:** `npm run oracle:reference` (braucht python3 mit numpy). Laedt nur die Gleichungsfunktion aus py-mgipsim, fuehrt sie aus und schreibt eine Zahlentabelle nach `vendor/oracle-reference.json`. Kein Code wird uebernommen, die Ausgabe ist gitignored.
 
+**Viewer:** `npm run viewer` baut `dist/nebel-viewer.html` — eine einzelne, selbstenthaltene Datei zum Doppelklicken. Engine und alle 20 Subjektparameter sind eingebettet, damit die Seite ohne Server ueber `file://` laeuft. Weil die Parametersaetze darin stecken, landet sie in `dist/` und ist gitignored.
+
+Der Viewer zeigt physiologische Glukose und Sensorwert als getrennte Kurven, den vollstaendigen 16er-Zustandsvektor am Zeiger und laesst Mahlzeit, Bolus, Belastung, Temp-Basal und Pumpenstopp an der Zeigerposition einsetzen. Er ist das Entwicklerwerkzeug fuer die Engine und die Vorlage fuer den spaeteren Analyse-Screen.
+
 **Rauchtest:** `npm run smoke` laesst sechs Alltagsszenarien laufen und druckt den Verlauf in mg/dL. Fuer den Augenschein, nicht als Beleg.
