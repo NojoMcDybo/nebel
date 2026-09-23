@@ -115,7 +115,8 @@ td:nth-child(3){color:var(--ink3);width:70px}
     <div class="row">
       <label for="noise">Sensorfehler</label>
       <select id="noise">
-        <option value="g6">Dexcom G6 — Vettoretti et al. 2019</option>
+        <option value="v2">Nebel V2 — langsam dominiert</option>
+        <option value="g6">Dexcom G6 Labormodell — Vettoretti 2019</option>
         <option value="none">keiner — nur Verzögerung</option>
       </select>
       <span class="at" id="noiseval"></span>
@@ -161,13 +162,13 @@ const DUR = 1440, STEP = 1;
 const MGDL = N.MGDL_PER_MMOLL;
 
 const el = (id) => document.getElementById(id);
-const state = { idx: 0, unit: "mgdl", events: [], cursorMin: null, noise: "g6", run: null };
+const state = { idx: 0, unit: "mgdl", events: [], cursorMin: null, noise: "v2", run: null };
 
 /* ---------- Simulation ---------- */
 function simulate() {
   const s = S[state.idx];
   const p = N.withPopulationConstants(s.subject);
-  const sensor = state.noise === "g6" ? N.REALISTIC_SENSOR : N.DEFAULT_SENSOR;
+  const sensor = state.noise === "v2" ? N.REALISTIC_SENSOR : state.noise === "g6" ? N.LAB_G6_SENSOR : N.DEFAULT_SENSOR;
   state.run = N.simulate({
     durationMin: DUR, stepMin: STEP, parameters: p, therapy: s.therapy,
     pump: N.flatBasalProfile(s.therapy.basalRateUPerH),

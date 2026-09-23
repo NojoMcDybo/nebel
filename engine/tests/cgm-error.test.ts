@@ -6,7 +6,7 @@
 import { describe, it, expect } from "vitest";
 import {
   DEXCOM_G6_VETTORETTI_2019 as G6, arImpulseResponse, arStationarySd,
-  cgmNoiseAt, cgmGain, cgmReadingMgdl, sensorTrace, REALISTIC_SENSOR,
+  cgmNoiseAt, cgmGain, cgmReadingMgdl, sensorTrace, LAB_G6_SENSOR as REALISTIC_SENSOR,
 } from "../src/observation.js";
 
 const series = (n: number, seed = 11) => Array.from({ length: n }, (_, k) => cgmNoiseAt(G6, seed, k));

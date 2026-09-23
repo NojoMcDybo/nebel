@@ -85,6 +85,11 @@ ADA-Schwellen sind in den Dokumenten in mg/dL geführt (<70, <54), die Engine re
 ### W12 — Bestätigt, kein Widerspruch
 Die Angabe „16 Zustände, herzfrequenzgetrieben" trifft exakt zu und wurde an der Referenzimplementierung verifiziert.
 
+### W13 — Tagesplan: entschieden dagegen, im Prototyp vorhanden, im Adapter halb (24.09.2026)
+`06_Echtzeit_Modus.md` und `08_Beduerfnisse_und_Hunger.md` halten fest: kein vorgegebener Tagesablauf, ein Bedürfnismodell statt eines Plans, „nichts passiert hinter seinem Rücken". Der Prototyp dagegen hat Bewegung aus einem Tagesplan: angekündigtes Training, unangekündigte Alltagsbewegung. Der Adapter erzeugte den Plan und zählte in der Anzeige auf das Training herunter, führte ihn aber nie aus. Drei Aussagen, und die Anwendung zeigte etwas an, das nie passierte.
+
+**Korrektur:** Die Entscheidung in 06/08 betrifft die Mahlzeiten. Die entstehen weiter nur aus dem Bedürfnis, nicht aus einem Drehbuch. Bewegung kommt wieder aus dem Plan, wie im Prototyp: Training wird angekündigt, damit man sich vorbereiten kann, und bei einem Sensorwert unter 80 oder über 280 verschoben, nach drei Versuchen abgesagt. Alltagsbewegung passiert ohne Ankündigung. Das widerspricht dem Satz „nichts passiert hinter seinem Rücken" bewusst: Der Bus wartet auch im echten Leben nicht. **Zur Bestätigung durch den Projektinhaber offen.** Zurücknehmen heißt: `_runPlan` im Adapter entfernen und den Plan nicht mehr anzeigen.
+
 ---
 
 ## 2. Neue Informationen (22.09.)
@@ -129,7 +134,7 @@ Beim Portieren nicht blind übernehmen:
 | Renale Glukoseverluste | offen | **geschlossen** — `FR`, Schwelle 9 mmol/L |
 | Tageszeitabhängigkeit | offen | **entschieden** — nicht in V1 (siehe W8) |
 | Individualisierung | offen | **geschlossen** — 20 publizierte Parametervektoren; keine frei erfundenen Kombinationen nötig |
-| Model Validity Envelope | offen | **offen** — muss geschrieben werden, erste Bausteine: `G ∈ [1, 32] mmol/L`, HR ∈ `[HRrest, HRmax]`, Schrittweite ≤ 1 min |
+| Model Validity Envelope | offen | **offen** — muss geschrieben werden, erste Bausteine: `G ∈ [1, 32] mmol/L`, HR ∈ `[HRrest, HRmax]`, Schrittweite ≤ 1 min. Ergänzt 23.09.: tägliche Belastung ohne Anpassung treibt einzelne Subjekte über Tage an den Boden (Nachtrag 6) |
 
 ---
 
@@ -159,3 +164,23 @@ Drei Befunde aus der Implementierung, die in keiner Quelle stehen:
 **Herzfrequenzereignisse sind Stützstellen einer interpolierten Spur.** Zwei Punkte für einen Belastungsblock ergeben eine über den ganzen Block abfallende Rampe und damit etwa halbe Wirkung. Dafür gibt es `exerciseBlock()`. Wer das übersieht, verdächtigt die Bewegungsparameter.
 
 Offene Frage aus dem Rauchtest, jetzt beantwortet: 60 g ohne Bolus führen bei Patient 1 nur auf rund 194 mg/dL, was für Typ-1 tief wirkt. Der Orakelabgleich zeigt, dass das keine Abweichung ist, sondern das Verhalten von ExtHovorka mit diesem Parametersatz. Wer eine höhere Spitze erwartet, muss das Subjekt wechseln, nicht die Engine.
+
+---
+
+## 6. Nachtrag 23./24.09.2026 — Sensormodell V2, ein Szenariofehler, drei Adapterfehler
+
+**Sensormodell V2.** Auslöser war eine Beobachtung aus der Anwendung: Bei ruhigem Verlauf sprang der Sensorwert unrealistisch, etwa 90 → 92 → 93 → 89. Ursache: Das publizierte G6-Fehlermodell würfelt sein Rauschen pro Wert, 31 % der Schritte in ruhigen Phasen waren 4 mg/dL oder größer. V2 trennt den Fehler nach Zeitskala — fester Kalibriercharakter je Sensor, langsame Drift über Stunden, kleines Zittern — und ergänzt seltene Ereignisse mit Ursache: Druck auf den Sensor im Schlaf, Sensorwechsel mit unruhigem ersten Tag. Der erste Tag der Simulation bleibt frei davon; Ereignisse frühestens ab der zweiten Nacht. Details, Belege und Kalibrierung in `20_Parameter_Registry.md` Abschnitt 5. Das G6-Modell bleibt als `LAB_G6_SENSOR` zum Vergleich.
+
+**Szenariofehler in `exerciseBlock()` — hat Zahlen in der Dokumentation verfälscht.** Die Herzfrequenz ist eine linear interpolierte Spur (Nachtrag 5). `exerciseBlock()` setzte einen Ruhepunkt nach dem Block, aber keinen davor. Zwischen zwei Blöcken an aufeinanderfolgenden Tagen stieg die Herzfrequenz deshalb den ganzen Tag an, von 76 auf 113 bpm. In der Kalibrierungsprüfung lagen 14 von 20 Subjekten 47–71 % der Zeit unter 70 mg/dL, viele am numerischen Boden. Die daraus berichteten Sensorzahlen (G6-MARD 12,8 %, im Tiefbereich 21,9 %, „viermal so ungenau") waren falsch und sind in der Registry korrigiert (jetzt 5,3 % und 12,2 %, „doppelt so ungenau"). Die Anwendung war ebenfalls betroffen: Wer zwei Einheiten in einer Sitzung startete, bekam zwischen ihnen eine ansteigende Herzfrequenz. Behoben durch einen Ruheanker bei `start − 1`, abgesichert durch einen Regressionstest. Der Zufallsgenerator wurde dabei mitgeprüft und ist in Ordnung.
+
+**Befund, kein Implementierungsfehler: tägliche Belastung ohne Anpassung.** Patient 3 mit drei Mahlzeiten samt vollem Bolus und täglich 45 min Belastung um 17 Uhr: nachts am zweiten Tag 34 mg/dL, am dritten Tag am Boden von 18 mg/dL. Das Orakel (py-mgipsim, gleiches Szenario, Euler) liefert 35 mg/dL und danach negative Werte (−172 mg/dL), die Engine stimmt also mit der Quelle überein. Der Langzeiteffekt der Belastung summiert sich in ExtHovorka über Tage. Ob diese Stärke physiologisch plausibel ist, ist offen. Für die Anwendung gilt bis zur Klärung: Werte unter 40 mg/dL sind ein Modellrand, der Sensor zeigt dort LO. Das gehört in die Model Validity Envelope.
+
+**Vier Adapterfehler, gefunden beim Prüfen:**
+
+1. *Geplante Bewegung lief nie.* Siehe W13. Jetzt ausgeführt, mit Ankündigung, Verschieben und Absagen wie im Prototyp. Entschieden wird am Sensorwert, den die Person sieht, nicht an ihrem Blutzucker.
+2. *Überlappende Einheiten änderten die Vergangenheit.* Eine neue Herzfrequenz-Stützstelle verändert wegen der Interpolation auch die Minuten vor ihr. Startete man eine Einheit mitten in einer laufenden, wich das Nachrechnen um 4,3 mg/dL vom Live-Verlauf ab. Jetzt hält ein Anker den zuletzt gerechneten Wert fest, bevor neu gesetzt wird. Nachrechnen ist wieder bitgleich.
+3. *Speichern und Fortsetzen verlor die Physiologie.* Gespeichert wurde nur die Anzeige. Nach dem Neuladen kam der Zustandsvektor frisch aus dem Gleichgewicht, die Eingaben waren leer, und der Echtzeitmodus rechnete die verpasste Zeit von diesem falschen Zustand aus nach. Jetzt wird der Kern mitgespeichert, wie in `06_Echtzeit_Modus.md` spezifiziert: Zustandsvektor, alle Eingaben, Reserven. Alte Spielstände ohne Kern werden verworfen.
+4. *Jede Sitzung sah gleich aus.* Der Zufall ist zählerbasiert, der Seed war fest. Damit hatte jede neue Sitzung denselben Tagesplan und denselben Sensor — beim Standard-Seed sechs Tage ohne ein einziges Druckereignis. `06_Echtzeit_Modus.md` verlangt einen Plan, der zwischen Durchläufen variiert (Lernziel 4). Jetzt würfelt jede neue Sitzung ihren Seed; gespeicherte Sitzungen bringen ihren mit.
+
+Prüfstand: 112 Tests grün, `tsc` sauber, Adapterprüfung von 21 auf 28 Punkte erweitert (Plan läuft, Verschieben bei tiefem Wert, Nachrechnen bitgleich trotz Überlappung, eigener Seed je Sitzung, fremder Spielstand abgelehnt, Fortsetzen bitgleich). Gerendert: Druckereignis in Nacht 2 — Sensor fällt in 35 min von 85 auf 65, Körper bleibt bei 79.
+

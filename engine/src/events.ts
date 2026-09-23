@@ -63,17 +63,28 @@ export const validateEvents = (events: readonly SimEvent[]): void => {
 
 /**
  * Herzfrequenzereignisse sind Stuetzstellen einer kontinuierlichen Spur;
- * dazwischen wird linear interpoliert. Fuer einen Belastungsblock braucht es
- * deshalb einen Wert am Anfang, einen kurz vor dem Ende und den Ruhewert danach
- * — sonst rampt die Herzfrequenz ueber den ganzen Block ab.
+ * dazwischen wird linear interpoliert. Ein Belastungsblock braucht deshalb
+ * VIER Punkte: Ruhe direkt davor, Belastung am Anfang und kurz vor dem Ende,
+ * Ruhe danach.
+ *
+ * Fehlt die Ruhe davor, interpoliert die Spur vom Ende des vorigen Blocks
+ * bis zum Anfang des naechsten — bei Bloecken an aufeinanderfolgenden Tagen
+ * steigt die Herzfrequenz dann den ganzen Tag lang an, und die simulierte
+ * Person trainiert rund um die Uhr unterschwellig. Genau das ist passiert,
+ * gefunden am 24.09.2026.
+ *
+ * Reihenfolge der Rueckgabe: der Belastungsbeginn zuerst, damit Aufrufer ein
+ * Label auf das erste Element setzen koennen. Sortiert wird ohnehin.
  */
 export const exerciseBlock = (
   startMin: number, durationMin: number, bpm: number, restingBpm: number,
 ): HeartRateEvent[] => {
   if (durationMin <= 1) throw new RangeError("exerciseBlock: Dauer muss > 1 min sein");
-  return [
+  const block: HeartRateEvent[] = [
     { kind: "heartRate", t: startMin, bpm },
     { kind: "heartRate", t: startMin + durationMin - 1, bpm },
     { kind: "heartRate", t: startMin + durationMin, bpm: restingBpm },
   ];
+  if (startMin >= 1) block.push({ kind: "heartRate", t: startMin - 1, bpm: restingBpm });
+  return block;
 };

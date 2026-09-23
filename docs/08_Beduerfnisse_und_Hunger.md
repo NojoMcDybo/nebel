@@ -73,6 +73,8 @@ In `06_Echtzeit_Modus.md` stand offen, ob der simulierte Alltag ohne Nutzereinga
 
 Ein Tagesplan bleibt optional für geführte Szenarien — etwa einen Demomodus für Vorträge.
 
+**Präzisiert am 24.09.2026 (W13):** Das Bedürfnismodell ersetzt den Plan für Mahlzeiten. Bewegung kommt weiterhin aus einem Tagesplan, wie im Prototyp. Siehe Widerspruchsprüfung W13.
+
 ## Abgrenzung zum Nutzer
 
 Der Hunger gehört der simulierten Person, nicht dem Nutzer. Nebel fordert niemanden auf, selbst etwas zu essen oder zu lassen, führt keine Kalorien- oder Gewichtslogik und bewertet keine Essensentscheidungen. Im Echtzeit-Modus über einen ganzen Tag ist diese Trennung nicht kosmetisch, sondern notwendig.

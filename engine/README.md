@@ -47,7 +47,7 @@ Damit sind auch die Groessenordnungen bestaetigt, nicht nur das qualitative Verh
 | `model.ts` | fertig — 16 Gleichungen, Gleichgewicht per Relaxation |
 | `solver.ts` | fertig — Euler und RK4 |
 | `simulate.ts` | fertig |
-| `observation.ts` | fertig — G6-Fehlermodell (Vettoretti 2019), zaehlerbasiert, 5-min-Raster |
+| `observation.ts` | fertig — Sensormodell V2 (Standard) und G6-Fehlermodell (Vettoretti 2019) zum Vergleich, zaehlerbasiert, 5-min-Raster |
 | `realtime.ts` | fertig — Nachholintegration, Append-only, Sandbox-Fork |
 | `scenario/needs.ts` | fertig — Reserven und Hunger, Szenarioschicht |
 
@@ -67,6 +67,6 @@ Damit sind auch die Groessenordnungen bestaetigt, nicht nur das qualitative Verh
 
 Der Viewer zeigt physiologische Glukose und Sensorwert als getrennte Kurven, den vollstaendigen 16er-Zustandsvektor am Zeiger und laesst Mahlzeit, Bolus, Belastung, Temp-Basal und Pumpenstopp an der Zeigerposition einsetzen. Er ist das Entwicklerwerkzeug fuer die Engine und die Vorlage fuer den spaeteren Analyse-Screen.
 
-**Sensorkalibrierung:** `node scripts/cgm-calibration.cjs` zerlegt die Sensorabweichung ueber alle 20 Subjekte in Verzoegerung, Verstaerkungsfehler und Messrauschen und schluesselt sie nach Glukosebereich auf.
+**Sensorkalibrierung:** `node scripts/cgm-calibration.cjs` vergleicht ueber alle 20 Subjekte nur Verzoegerung, G6-Labormodell und Sensormodell V2: MARD im Messbereich 40–400 mg/dL, nach Glukosebereich, und die Schrittweite von Wert zu Wert in ruhigen Nachtphasen.
 
 **Rauchtest:** `npm run smoke` laesst sechs Alltagsszenarien laufen und druckt den Verlauf in mg/dL. Fuer den Augenschein, nicht als Beleg.

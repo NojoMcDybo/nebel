@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { sortEvents, validateEvents, exerciseBlock, type SimEvent } from "../src/events.js";
+import { heartRateAt } from "../src/simulate.js";
 
 const meal = (t: number): SimEvent => ({ kind: "meal", t, fastCarbsG: 30, slowCarbsG: 20 });
 
@@ -23,9 +24,21 @@ describe("Eventstrom", () => {
 });
 
 describe("Belastungsblock", () => {
-  it("setzt drei Stuetzstellen, damit die Herzfrequenz nicht abrampt", () => {
+  it("setzt vier Stuetzstellen: Ruhe davor, Belastung, Ruhe danach", () => {
     const b = exerciseBlock(60, 45, 150, 65);
-    expect(b.map((e) => [e.t, e.bpm])).toEqual([[60, 150], [104, 150], [105, 65]]);
+    expect(b.map((e) => [e.t, e.bpm])).toEqual([[60, 150], [104, 150], [105, 65], [59, 65]]);
+  });
+
+  it("zwischen zwei Bloecken an verschiedenen Tagen bleibt die Herzfrequenz in Ruhe", () => {
+    const ev = sortEvents([...exerciseBlock(17 * 60, 45, 120, 66), ...exerciseBlock(1440 + 17 * 60, 45, 120, 66)]);
+    for (const t of [18 * 60, 22 * 60, 1440 + 3 * 60, 1440 + 9 * 60, 1440 + 16 * 60 + 58]) {
+      expect(heartRateAt(t, ev, 66), `t=${t}`).toBe(66);
+    }
+    expect(heartRateAt(1440 + 17 * 60 + 10, ev, 66)).toBe(120);
+  });
+
+  it("ein Block ab Minute 0 kommt ohne Ruhepunkt davor aus", () => {
+    expect(exerciseBlock(0, 30, 140, 60)).toHaveLength(3);
   });
 
   it("weist zu kurze Bloecke zurueck", () => {

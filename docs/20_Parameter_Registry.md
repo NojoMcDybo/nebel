@@ -1,6 +1,6 @@
 # Nebel — Parameter Registry V1 (ExtHovorka)
 
-Stand: 2026-09-22
+Stand: 2026-09-24
 Quelle aller Werte: ExtHovorka / py-mgipsim, 20 virtuelle Patienten (`Patient_1..20.json`)
 Ranges sind **beobachtete Werte über diese 20 Subjekte**, keine publizierten Populationsverteilungen. Das ist ein Unterschied und wird nicht verwischt.
 
@@ -106,6 +106,15 @@ Das trifft die Hauptzielgruppe direkt: Eltern von Kindern mit Typ-1-Diabetes sin
 
 ## 5. Sensorfehlermodell (Beobachtungsschicht)
 
+Zwei Modelle im Code, eines in der Anwendung:
+
+| Konstante | Modell | Verwendung |
+|---|---|---|
+| `REALISTIC_SENSOR` | **Nebel V2** (5.2) | App und Viewer, Standard |
+| `LAB_G6_SENSOR` | publiziertes G6-Modell, unverändert (5.1) | Vergleich; im Viewer wählbar |
+
+### 5.1 G6-Labormodell (Vettoretti 2019)
+
 Quelle: Vettoretti et al. (2019), *Modeling the error of factory-calibrated continuous glucose monitoring sensors: application to Dexcom G6 sensor data*, Sensors 19(23):5320, Tabelle 1, Mediane der zweistufigen Identifikation. https://www.mdpi.com/1424-8220/19/23/5320
 
 Modell: `CGM(t) = a(t) · IG(t) + b0 + v(t)`, mit `a(t) = a0 + a1·t + a2·t²` und `v(k) = α1·v(k−1) + α2·v(k−2) + w(k)`.
@@ -124,39 +133,75 @@ Modell: `CGM(t) = a(t) · IG(t) + b0 + v(t)`, mit `a(t) = a0 + a1·t + a2·t²` 
 
 ⚠ **Zeiteinheit von `t` erschlossen, nicht abgelesen.** Das Paper definiert `t` als Zeit seit Setzen. Nur „Tage" ergibt eine plausible Verstärkung: in Minuten läge `a` nach einem Tag bei 6, in Stunden nach zehn Tagen bei 0,33. Gegen das PDF zu prüfen.
 
-Abgeleitete Größen: stationäre Streuung des Messrauschens 5,34 mg/dL, Lag-1-Autokorrelation 0,79. Das Rauschen ist also glatt und wandernd, nicht zappelig — genau deshalb bleibt der Verlauf lesbar, obwohl der Fehler realistisch groß ist.
+Abgeleitete Größen: stationäre Streuung des Messrauschens 5,34 mg/dL, Lag-1-Autokorrelation 0,79.
 
-Der Sensor wird nach zehn Tagen gewechselt, die Verstärkung beginnt dann wieder bei `a0`. Damit kommt die im alten Prototyp gestrichene Sensoralterung zurück — diesmal belegt.
+**Korrektur 23.09.2026.** Hier stand vorher, dieses Rauschen sei „glatt und wandernd, nicht zappelig". Das war falsch gelesen. Die Autokorrelation hält den Fehler über längere Zeit auf einer Seite, aber von Wert zu Wert springt die Anzeige in ruhigen Nachtphasen um ±3,5 mg/dL, und 31 % aller Schritte sind 4 mg/dL oder größer (5.3). Das ist genau das Muster 90 → 92 → 93 → 89, das Sensorträger aus eigener Erfahrung als unrealistisch kennen: nach 93 kommt eher 92. Das Modell beschreibt den Fehler an punktuellen Referenzmessungen. Wie sich die Anzeige von einem 5-Minuten-Wert zum nächsten verhält, war nicht sein Gegenstand. Deshalb V2.
 
-### Kalibrierungsprüfung
+### 5.2 Nebel V2 (Anwendung)
 
-`node scripts/cgm-calibration.cjs` — 20 Subjekte, je 3 Tage, drei Mahlzeiten mit Bolus nach KE-Faktor und 45 min Belastung pro Tag. Zerlegung der Sensorabweichung gegen die physiologische Glukose:
+Grundidee: Ein echter Sensor irrt **kohärent**. Er liegt über Stunden gleichmäßig daneben, von Wert zu Wert ändert sich wenig. Große Abweichungen sind selten und haben eine Ursache. V2 trennt den Fehler deshalb nach Zeitskala, statt ihn als ein Rauschen pro Wert zu würfeln:
 
-| Fehlerquelle | MARD |
-|---|---|
-| nur Verzögerung (`tsub` 5 min) | 0,5 % |
-| Verzögerung + Verstärkungsfehler | 4,0 % |
-| vollständiges G6-Modell | 12,8 % (Spanne 4,9–17,7) |
+`CGM(t) = a(t)·IG(t) + b0 + Drift(t) + Niveau(t)·Zittern(k) − Druck(t)`
 
-Nach Glukosebereich, vollständiges Modell:
+| Baustein | Zeitskala | Wert | Status | Beleg |
+|---|---|---|---|---|
+| Kalibriercharakter `a0` | je Sensor fest | Median 0,95, Streuung 0,059, Grenzen 0,85–1,05 | Q (Median, IQR) + N (Normalverteilung, Grenzen) | Vettoretti 2019; Streuung = IQR / 1,349 |
+| Kalibriercharakter `b0` | je Sensor fest | Median 0,14 mg/dL, Streuung 3,5 mg/dL | Q + N | dito |
+| Verstärkungsdrift `a1`, `a2` | Tage | 0,0039 · −0,000027 | Q ⚠ | Vettoretti 2019, Zeiteinheit erschlossen (5.1) |
+| Langsame Drift | Stunden | Streuung 4 mg/dL, Stützstellen alle 180 min | N | Struktur folgt der Beobachtung „kohärenter Fehler"; Stärke Nebel-Kalibrierung |
+| Zittern | 5–10 min | Streuung 1,2 mg/dL, AR(1) ρ = 0,5 | N, am Rand von Q | Camerlingo et al. 2023: Rauschvarianz in G6-Spuren 0,4–25 mg²/dL², also Streuung 0,6–5 mg/dL, Mittel zweier Beispielspuren 2,0 und 3,2 mg/dL |
+| Erster Tag nach dem Setzen | Stunden | ×2,5, klingt mit τ = 8 h ab | N | Richtung: Hanson et al. 2024, Libre 3 MARD Tag 1 12,8 %, Tag 2 8,6 % |
+| Bewegung | Minuten | Zuschlag 1,5 × `EEfast` | N | Richtung: Camerlingo 2023 nennt Aktivität als Rauschquelle, ohne sie zu beziffern |
+| Druck auf den Sensor | 30–90 min | p = 0,25 je Nacht, 00–05 Uhr, 15–40 mg/dL Abfall | Häufigkeit aus Q abgeleitet, Dauer und Tiefe N | Mensh et al. 2013: Liegen auf dem Sensor erzeugt Fehlwerte > 25 mg/dL, meist als plötzlicher Abfall. Baysal et al. 2014: rund 3 % der nächtlichen Werte betroffen |
+| Tragedauer | – | 10 Tage | Q | G6 |
+| Sensoralter beim Start | – | 2–7 Tage | N — Designentscheidung | siehe unten |
 
-| Bereich | MARD |
-|---|---|
-| unter 70 mg/dL | 21,9 % |
-| 70–180 mg/dL | 5,7 % |
-| über 180 mg/dL | 2,9 % |
+**Belegt vs. gesetzt, ehrlich:** Die Struktur (fester Kalibriercharakter je Sensor, Drift über die Tragedauer, Rauschen, das bei Bewegung und nach dem Setzen steigt, nächtliche Druckabfälle) ist belegt. Die Stärken von Drift, Zittern, Erster-Tag-Faktor und Bewegungszuschlag sind Nebel-Kalibrierung. Das Zittern liegt bewusst am unteren Rand der belegten Spanne: Der ruhige Normalfall soll lesbar sein, und der Mittelwert aus Camerlingo 2023 stammt aus zwei Beispielspuren, nicht aus einer Population.
 
-Lesart: Über den Tag gemittelt spielt die Verzögerung kaum eine Rolle. Im Tiefbereich ist der Sensor dagegen **viermal so ungenau** wie im Zielbereich — Verzögerung bei schnellem Abfall und ein absolut gleich großer Fehler auf einem kleinen Wert. Die Regel auf der Startseite („am stärksten im Tiefen … also genau dann, wenn du ihn brauchst") ist damit nicht mehr nur behauptet, sondern gerechnet.
+**Druck auf den Sensor, Herleitung der Häufigkeit:** 0,25 Nächte × 60 min mittlere Dauer ÷ 480 min Nacht = 3,1 % der Nachtwerte, passend zu Baysal 2014. Einschränkung: Baysal untersuchte Kinder von 3 bis 15 Jahren mit einer älteren Sensorgeneration. Die Zahl gibt die Größenordnung vor, keinen Punktwert.
 
-Der gepoolte Wert hängt stark davon ab, wie viel Zeit das Szenario im Tiefbereich verbringt. Die Spanne von 4,9 bis 17,7 % zwischen den Subjekten ist deshalb ein Szenario-Effekt, kein Modellfehler.
+**Designentscheidungen (Nutzervorgabe 23.09.2026):**
 
-**Nicht geprüft:** der Abgleich mit der klinischen MARD des G6 aus der Zulassungsstudie. Die Quelle war in der Recherchesitzung nicht abrufbar. Die Parameter werden nicht auf eine Ziel-MARD getrimmt — das Modell ist belegt, die MARD ist Ergebnis, nicht Vorgabe.
+- **Der erste Tag bleibt ruhig.** Der Start der Simulation ist schon genug zu verarbeiten. Der Sensor sitzt beim Start bereits 2–7 Tage, der erste Wechsel fällt frühestens auf Tag 3.
+- **Situative Ereignisse frühestens ab der zweiten Nacht**, zufällig. Druck auf den Sensor nur, wenn die Person schläft.
+- **Einschätzungsleistung:** Der Druckabfall ist bewusst als plötzlicher Abfall modelliert, der wie eine echte Hypo aussehen kann. Die Nutzerin muss unterscheiden: echter Wechsel oder Messfehler? Im Protokoll erscheint er nicht, auflösen soll ihn der Rückblick (offen, 6.).
+- **Sensorwechsel** erscheint als Ereignis im Protokoll („Sensor gewechselt — die ersten Stunden rauscht er mehr"), weil man im echten Leben weiß, wann man ihn gesetzt hat.
+
+**Umsetzung:** zählerbasiert wie der Rest der Beobachtungsschicht (`uniformAt`/`normalAt(seed, index)`), die Nachholintegration bleibt bitgleich. Drift als Catmull-Rom-Kurve durch Zufallsstützstellen, Zittern als AR(1) über eine abgeschnittene Impulsantwort. `engine/src/observation.ts`, Tests in `engine/tests/sensor-v2.test.ts`.
+
+Quellen:
+
+- Camerlingo N, Siviero I, Vettoretti M, Sparacino G, Del Favero S, Facchinetti A (2023). Bayesian denoising algorithm dealing with colored, non-stationary noise in continuous glucose monitoring timeseries. *Front Bioeng Biotechnol* 11:1280233. https://doi.org/10.3389/fbioe.2023.1280233
+- Hanson K, Kipnes M, Tran H (2024). Comparison of point accuracy between two widely used continuous glucose monitoring systems. *J Diabetes Sci Technol*. https://doi.org/10.1177/19322968231225676
+- Mensh BD, Wisniewski NA, Neil BM, Burnett DR (2013). Susceptibility of interstitial continuous glucose monitor performance to sleeping position. *J Diabetes Sci Technol* 7(4):863–870. https://doi.org/10.1177/193229681300700408
+- Baysal N, Cameron F, Buckingham BA et al. (2014). A novel method to detect pressure-induced sensor attenuations (PISA) in an artificial pancreas. *J Diabetes Sci Technol* 8(6):1091–1096. https://doi.org/10.1177/1932296814553267
+
+### 5.3 Kalibrierungsprüfung
+
+`node scripts/cgm-calibration.cjs` — 20 Subjekte, je 3 Tage, drei Mahlzeiten mit Bolus nach KE-Faktor, täglich 45 min Belastung bei 55 % der Herzfrequenzreserve um 17 Uhr. MARD gegen die physiologische Glukose, nur im Messbereich 40–400 mg/dL (darunter zeigt ein echter Sensor LO). „Ruhig" heißt 02–05 Uhr ohne Druckereignisse, gemessen werden Schritte zwischen gerundeten Nachbarwerten.
+
+| Variante | MARD | Spanne | < 70 | 70–180 | > 180 | Schritt ruhig | Sprünge ≥ 4 mg/dL |
+|---|---|---|---|---|---|---|---|
+| nur Verzögerung (5 min) | 0,8 % | 0,4–1,6 | – | – | – | ±0,3 | 0 % |
+| G6-Labormodell | 5,3 % | 4,7–6,2 | 12,2 % | 5,3 % | 4,9 % | ±3,5 | 31 % |
+| **Nebel V2** | **6,3 %** | 2,5–13,8 | 13,3 % | 6,3 % | 4,9 % | **±1,3** | **0 %** |
+
+Lesart:
+
+- **V2 ist im Mittel so genau wie das G6-Modell, aber anders verteilt.** Von Wert zu Wert ruhig, dafür unterscheiden sich Sensoren deutlich voneinander (2,5 bis 13,8 %). Das entspricht der Erfahrung „meistens sehr präzise, ab und zu liegt ein Sensor daneben".
+- **Im Tiefbereich ist der Sensor etwa doppelt so ungenau wie im Zielbereich** (13,3 % gegen 6,3 %): Verzögerung beim Abfall und ein absolut gleich großer Fehler auf einem kleinen Wert. Die Aussage der Startseite („am stärksten im Tiefen") bleibt gedeckt, in der Stärke „doppelt", nicht „viermal".
+- **Beide MARD liegen unter klinischen Werten** (Hanson 2024: 8,9 % und 13,6 % für zwei aktuelle Systeme). Erwartbar: Klinische MARD misst gegen eine Laborreferenz mit eigenem Fehler; hier ist die Referenz die exakte Modellglukose. Die Parameter werden nicht auf eine Ziel-MARD getrimmt.
+
+**Korrektur 23.09.2026 — die früheren Zahlen dieses Abschnitts waren falsch.** Hier stand für das G6-Modell eine MARD von 12,8 % (Spanne 4,9–17,7) und im Tiefbereich 21,9 %, „viermal so ungenau". Diese Zahlen stammten aus einem defekten Prüfszenario. `exerciseBlock()` setzte keinen Ruhepunkt vor den Block. Die Herzfrequenz ist eine linear interpolierte Spur, sie stieg deshalb zwischen den Blöcken aufeinanderfolgender Tage den ganzen Tag an (76 → 113 bpm). 14 von 20 Subjekten lagen 47–71 % der Zeit unter 70 mg/dL, viele am numerischen Boden von 18 mg/dL, wo jeder absolute Fehler relativ riesig wird. Behoben durch einen Ruheanker bei `start − 1`, abgesichert durch einen Regressionstest. Siehe Changelog, Nachtrag 6.
 
 ## 6. Offene Registry-Einträge (Nebel-Eigenleistung, noch zu belegen)
 
 | Parameter | Bereich | Status | Zu klären |
 |---|---|---|---|
 | Filterzeitkonstante | Beobachtung | N | Im G6-Modell nicht vorgesehen, bleibt 0 |
+| Drift, Zittern, Erster Tag, Bewegung (V2) | Beobachtung | N | Stärken gesetzt (5.2). Gegen echte Sensorspuren prüfen — reale Daten nur lokal und mit ausdrücklicher Zustimmung der Person |
+| Druck auf den Sensor: Dauer, Tiefe | Beobachtung | N | Häufigkeit aus Baysal 2014 abgeleitet; Dauer 30–90 min und Tiefe 15–40 mg/dL noch ohne Beleg |
+| Weitere Sensorereignisse | Beobachtung | offen | z. B. Störsubstanzen wie hochdosiertes Vitamin C (herstellerabhängig), frühestens an späteren Tagen |
 | Abtastrate | Beobachtung | N | 5 min, Gerätekonvention |
 | KH-Split schnell/langsam | Mahlzeit | N | Zuordnungsregel realer Mahlzeiten auf `uFastCarbs`/`uSlowCarbs` — braucht eine begründete Heuristik, keine Bauchzahl |
 | Bolusdauer | Pumpe | N | Modellierung als Impuls über 1 min |

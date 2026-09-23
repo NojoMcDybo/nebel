@@ -13,10 +13,11 @@
 
    Was es im Vergleich zum alten Prototyp NICHT mehr gibt: Stress,
    Schlafmangel, Krankheit, Alkohol, Fett- und Proteinwelle,
-   Sensoralterung, Druckartefakte, Hypo-Gedaechtnis und die daraus
-   gebildeten Kombinationen. Alles unbelegte Multiplikatoren, siehe
-   docs/10_Engine_Spec_V2_ExtHovorka.md Abschnitt 13. Sie fehlen
-   sichtbar statt heimlich weiterzulaufen.
+   Hypo-Gedaechtnis und die daraus gebildeten Kombinationen. Alles
+   unbelegte Multiplikatoren, siehe docs/10_Engine_Spec_V2_ExtHovorka.md
+   Abschnitt 13. Sie fehlen sichtbar statt heimlich weiterzulaufen.
+   Sensoralterung und Druck auf den Sensor sind zurueck — diesmal
+   belegt, im Sensormodell V2 (docs/20_Parameter_Registry.md, Abschnitt 5).
    ══════════════════════════════════════════════════════════════════ */
 
 const N = window.Nebel;
@@ -78,7 +79,14 @@ const P = {
 };
 
 class Engine {
-  constructor(seed = 20260812, subjectIndex = 0){
+  /* Ohne Seed wuerfelt jede neue Sitzung ihren eigenen: anderer Tagesplan,
+     anderer Sensor. Der Zufall ist zaehlerbasiert — mit festem Seed saehe
+     jede Sitzung gleich aus, und Variabilitaet (Lernziel 4) waere
+     auswendig lernbar. Gespeicherte Sitzungen bringen ihren Seed mit. */
+  constructor(seed, subjectIndex = 0){
+    if (seed === undefined) seed = (typeof crypto !== "undefined" && crypto.getRandomValues)
+      ? crypto.getRandomValues(new Uint32Array(1))[0] >>> 1
+      : Math.floor(Math.random() * 2147483647);
     const sub = window.SUBJECTS[subjectIndex];
     this.subjectId = sub.id;
     /* Quellparameter, danach die eine bewusste Nebel-Kalibrierung. */
@@ -140,9 +148,13 @@ class Engine {
       this.acts.push({ name:a.n, inten:a.i, start: base + 9*60 + Math.floor(u(110+i)*600),
                        dur: Math.round(span(a.d, 120+i)), warn: 0 });
     }
-    const tr = pick(TRAINING, 200);
-    this.acts.push({ name:tr.n, inten:tr.i, start: base + 16*60 + Math.floor(u(210)*240),
-                     dur: Math.round(span(tr.d, 220)), warn: Math.round(span(tr.w, 230)) });
+    /* Im Reality-Modus plant die Nutzerin ihr Training selbst.
+       Alltagsbewegung laeuft weiter — die plant niemand. */
+    if (!this.reality){
+      const tr = pick(TRAINING, 200);
+      this.acts.push({ name:tr.n, inten:tr.i, start: base + 16*60 + Math.floor(u(210)*240),
+                       dur: Math.round(span(tr.d, 220)), warn: Math.round(span(tr.w, 230)) });
+    }
     this.acts.sort((a,b) => a.start - b.start);
   }
 
@@ -181,12 +193,70 @@ class Engine {
   }
 
   startActivity(inten, dur){
-    const t = this.s.t;
+    this._beginActivity(`Bewegung ${Math.round(inten*100)} %`, inten, dur);
+  }
+
+  /* Eine Einheit beginnt JETZT — selbst gestartet oder aus dem Tagesplan. */
+  _beginActivity(name, inten, dur){
+    const t = this.s.t, d = Math.max(2, Math.round(dur));
     const bpm = this.p.HRrest + inten*(this.p.HRmax - this.p.HRrest);
-    this.input.push(...N.exerciseBlock(t, Math.max(2, dur), bpm, this.p.HRrest));
-    const name = `Bewegung ${Math.round(inten*100)} %`;
-    this.events.push({ kind:"move", t, name, dur: Math.round(dur), inten });
-    this._act = { name, inten, start:t, dur };
+    this._setHeartRate([
+      { t, bpm }, { t: t + d - 1, bpm }, { t: t + d, bpm: this.p.HRrest },
+    ]);
+    this.events.push({ kind:"move", t, name, dur: d, inten });
+    this._act = { name, inten, start:t, dur:d };
+  }
+
+  /* Herzfrequenz ab jetzt neu setzen, ohne die Vergangenheit anzufassen.
+     Die Spur ist linear zwischen Stuetzstellen interpoliert. Ein neuer Punkt
+     veraendert deshalb auch die Minuten VOR ihm, bis zur vorigen Stuetzstelle.
+     Laeuft gerade eine Einheit, wuerde der Rueckblick eine andere Herzfrequenz
+     sehen, als live gerechnet wurde. Darum: den Wert der letzten gerechneten
+     Minute als Anker festhalten, alles Spaetere verwerfen, dann neu setzen.
+     Der Anker liegt auf der alten Strecke, die Vergangenheit bleibt bitgleich. */
+  _setHeartRate(points){
+    const anchorT = this.s.t - 1;
+    const keep = N.heartRateAt(anchorT, this.input, this.p.HRrest);
+    for (let i = this.input.length - 1; i >= 0; i--){
+      const e = this.input[i];
+      if (e.kind === "heartRate" && e.t >= anchorT) this.input.splice(i, 1);
+    }
+    if (anchorT >= 0) this.input.push({ kind:"heartRate", t:anchorT, bpm:keep });
+    for (const p of points) this.input.push({ kind:"heartRate", t:p.t, bpm:p.bpm });
+  }
+
+  /* Tagesplan abarbeiten. Training wird angekuendigt; niemand startet es bei
+     einem Wert unter 80 oder ueber 280 — es wird verschoben und irgendwann
+     abgesagt. Alltagsbewegung findet statt, egal wie der Wert steht: zur Uni
+     muss man auch bei 60, und der Bus wartet nicht. Entschieden wird am
+     Sensorwert — den sieht die Person, nicht ihren Blutzucker. */
+  _runPlan(t){
+    for (const a of this.acts){
+      if (a.dead || a.logged) continue;
+      if (a.warn && !a.announced && t >= a.start - a.warn && t < a.start){
+        a.announced = true;
+        this.events.push({ kind:"warn", t, name:a.name, inMin:a.start - t });
+      }
+      if (t !== a.start) continue;
+      const busy = !!this._act;
+      const v = this.lastSensor, tief = v < 80, hoch = v > 280;
+      if (busy && !a.warn){ a.dead = true; continue; }
+      if (busy || (a.warn && (tief || hoch))){
+        a.tries = (a.tries || 0) + 1;
+        if (a.tries <= 3){
+          a.start = busy ? this._act.start + this._act.dur + 5 : t + 25;
+          a.announced = false;
+          this.events.push({ kind:"state", t, sev:"warn",
+            name:`${a.name} verschoben — ${busy ? "noch in Bewegung" : `Wert zu ${tief ? "tief" : "hoch"}`}` });
+        } else {
+          a.dead = true;
+          this.events.push({ kind:"state", t, sev:"warn", name:`${a.name} abgesagt` });
+        }
+        continue;
+      }
+      a.logged = true;
+      this._beginActivity(a.name, a.inten, a.dur);
+    }
   }
 
   sleepAlarm(kind, value, snoozed){
@@ -197,11 +267,44 @@ class Engine {
     return { kind, value, snoozed };
   }
 
-  setReality(on){ this.reality = !!on; }
+  setReality(on){
+    this.reality = !!on;
+    /* Bereits geplante, noch nicht begonnene Trainings entfallen. */
+    if (this.reality) for (const a of this.acts) if (a.warn && !a.logged) a.dead = true;
+    this.events.push({ kind:"state", t:this.s.t, sev:"ok",
+      name: this.reality ? "Reality-Modus — du planst selbst" : "Reality-Modus beendet" });
+  }
+
+  /* ── Speichern und Fortsetzen ──
+     Die Oberflaeche speichert ihre Anzeige selbst. Ohne diesen Kern kaeme
+     nach dem Neuladen die Physiologie frisch aus dem Gleichgewicht, waehrend
+     die Kurve den alten Tag zeigt — und der Echtzeitmodus rechnet die
+     verpasste Zeit von einem falschen Zustand aus nach. */
+  snapshot(){
+    return { v:1, subjectId:this.subjectId, seed:this.seed,
+             z:N.serializeState(this.z), input:this.input,
+             reserve:this._reserve, act:this._act, sensorIndex:this._sensorIndex };
+  }
+  canRestore(core){
+    return !!core && core.v === 1 && core.subjectId === this.subjectId && Number.isInteger(core.seed);
+  }
+  restore(core){
+    if (!this.canRestore(core)) return false;
+    this.seed = core.seed;
+    this.z = N.deserializeState(core.z);
+    this.input = core.input || [];
+    this._reserve = core.reserve ?? 1;
+    this._act = core.act || null;
+    this._sensorIndex = core.sensorIndex;
+    this.pump = N.flatBasalProfile(this.s.basalSet);
+    this._sync();
+    return true;
+  }
 
   /* ── Ein Simulationsschritt, eine Minute ── */
   step(){
     const t = this.s.t;
+    this._runPlan(t);
     const u = {
       uFastCarbs: 0, uSlowCarbs: 0,
       uHR: N.heartRateAt(t, this.input, this.p.HRrest),
@@ -240,16 +343,28 @@ class Engine {
     this.kombi = {};
   }
 
-  /* CGM-Abtastung alle fuenf Minuten, mit dem publizierten Fehlermodell
-     des Dexcom G6 (Vettoretti et al. 2019): Verstaerkungsfehler, Versatz und
-     autokorreliertes Messrauschen. Kein selbst gewaehltes Rauschen mehr. */
+  /* CGM-Abtastung alle fuenf Minuten, Sensormodell V2: je Sensor ein fester
+     Kalibriercharakter, langsame Drift, kleines Zittern. Druck auf den Sensor
+     nur, wenn die Person schlaeft — wach liegt niemand auf seinem Arm. */
   _sample(){
-    const k = Math.floor(this.s.t / 5);
-    const v = Math.max(40, Math.min(400, Math.round(
-      N.cgmReadingMgdl(N.DEXCOM_G6_VETTORETTI_2019, this.s.Gi, this.s.t, this.seed + 77, k))));
+    const raw = N.cgmReadingV2(N.NEBEL_SENSOR_V2, this.s.Gi, this.s.t, this.seed + 77, {
+      eeFast: N.get(this.z, "EEfast"),
+      compression: this.s.asleep,
+    });
+    const v = Math.max(40, Math.min(400, Math.round(raw)));
     this.lastSensor = v;
     this.trace.push({ t:this.s.t, G:this.s.G, gi:this.s.Gi, sensor:v, born:performance.now() });
     if (this.trace.length > 4032) this.trace.shift();   // 14 Tage
+
+    /* Sensorwechsel ins Protokoll — im echten Leben weiss man, wann man ihn
+       gesetzt hat. Druck auf den Sensor dagegen NICHT: den muss die Nutzerin
+       selbst erkennen. Der Rueckblick deckt ihn auf. */
+    const idx = N.sensorAgeAt(N.NEBEL_SENSOR_V2, this.seed + 77, this.s.t).index;
+    if (this._sensorIndex === undefined) this._sensorIndex = idx;
+    else if (idx !== this._sensorIndex){
+      this._sensorIndex = idx;
+      this.events.push({ kind:"state", t:this.s.t, name:"Sensor gewechselt — die ersten Stunden rauscht er mehr" });
+    }
   }
 
   /* ── Anzeigezustaende ── */

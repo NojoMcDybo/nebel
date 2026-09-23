@@ -93,6 +93,7 @@ export const simulate = (cfg: SimulationConfig): SimulationResult => {
   const states: StateVector[] = [];
   const G: number[] = [];
   const ig: number[] = [];
+  const ee: number[] = [];
 
   for (let i = 0; i < steps; i++) {
     const now = startTime + i * cfg.stepMin;
@@ -108,8 +109,9 @@ export const simulate = (cfg: SimulationConfig): SimulationResult => {
     states.push(s);
     G.push(glucoseFrom(s[6]!, p.VG));
     ig.push(s[8]!);
+    ee.push(s[13]!);
   }
 
-  const sensor = sensorTrace(ig, cfg.stepMin, cfg.sensor, startIndex);
+  const sensor = sensorTrace(ig, cfg.stepMin, cfg.sensor, startIndex, ee);
   return { t, states, G, tSensor: sensor.t, gSensor: sensor.gSensor };
 };

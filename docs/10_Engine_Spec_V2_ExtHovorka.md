@@ -197,10 +197,11 @@ ExtHovorka endet bei `IG`. Alles Weitere ist Nebel-Annahme und wird als solche g
 |---|---|
 | Physiologische Verzögerung | **5 min in der Anwendung**, kalibriert nach ISPAD (5–10 min). Der Quellwert 15 min bleibt in der Engine und wird für den Orakelabgleich verwendet. Zulässig, weil `tsub` nur die Beobachtungsschicht betrifft — `IG` wird von keinem anderen Zustand gelesen |
 | Abtastung | 5-min-Raster, wie handelsübliche CGM |
-| Rauschen und Kalibrierfehler | **Publiziertes G6-Fehlermodell** (Vettoretti et al. 2019): Verstärkungsfehler mit Drift über die Tragedauer, Versatz, AR(2)-Messrauschen. Zählerbasiert umgesetzt, damit die Nachholintegration bitgleich bleibt. Parameter und Kalibrierungsprüfung in `20_Parameter_Registry.md` Abschnitt 5 |
+| Rauschen und Kalibrierfehler | **Sensormodell V2** (seit 23.09.2026): fester Kalibriercharakter je Sensor nach Vettoretti et al. 2019, langsame Drift über Stunden, kleines Zittern, Anhebung nach dem Setzen und bei Bewegung. Das publizierte G6-Modell bleibt als Vergleich (`LAB_G6_SENSOR`); es springt von Wert zu Wert zu stark. Zählerbasiert, Nachholintegration bitgleich. Parameter, Belege und Kalibrierungsprüfung in `20_Parameter_Registry.md` Abschnitt 5 |
 | Filterung | Im Fehlermodell nicht vorgesehen; Glättung bleibt implementiert, aber aus |
-| Sensoralterung | Über die Drift der Verstärkung `a(t)` im Fehlermodell, Sensorwechsel nach 10 Tagen |
-| Druckartefakte | Nicht in V1 |
+| Sensoralterung | Über die Drift der Verstärkung `a(t)`, Sensorwechsel nach 10 Tagen. Beim Start sitzt der Sensor schon 2–7 Tage, der erste Wechsel fällt frühestens auf Tag 3 |
+| Druckartefakte | **Ja, seit 23.09.2026**: nur im Schlaf, frühestens ab der zweiten Nacht, etwa jede vierte Nacht (≈ 3 % der Nachtwerte, Baysal 2014). Nicht im Protokoll — die Nutzerin muss selbst einschätzen, ob der Abfall echt ist |
+| Messbereich | 40–400 mg/dL; außerhalb zeigt die Anzeige den Grenzwert |
 
 Die Anzeige zeigt nie `G`, sondern immer `Gsensor`. Der Unterschied zwischen beiden ist eines der Lernziele und muss im Analyse-Screen sichtbar gemacht werden können.
 

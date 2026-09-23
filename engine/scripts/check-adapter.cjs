@@ -75,3 +75,47 @@ ok("TIR berechnet", eng.tir() !== null, Math.round(eng.tir()*100)+" %");
 ok("Trend", Number.isFinite(eng.trend()), eng.trend().toFixed(2)+" mg/dL/min");
 ok("Aktivitaetsanzeige", !!eng.activity().mode, eng.activity().mode);
 ok("Keine NaN im Zustand", Object.values(eng.s).every(v=>typeof v!=="number"||Number.isFinite(v)));
+
+/* ── Tagesplan laeuft wirklich ── */
+const plan = new Engine(20260812, 0);
+const firstAlltag = plan.acts.filter(a => !a.warn).sort((a,b) => a.start-b.start)[0];
+while (plan.s.t <= firstAlltag.start) plan.step();
+ok("Geplante Alltagsbewegung startet", !!plan._act && plan._act.name === firstAlltag.name,
+   `${firstAlltag.name} um ${String(Math.floor(firstAlltag.start/60)%24).padStart(2,"0")}:${String(firstAlltag.start%60).padStart(2,"0")}`);
+ok("… und hebt die Herzfrequenz", window.Nebel.heartRateAt(firstAlltag.start, plan.input, plan.p.HRrest) > plan.p.HRrest + 5);
+
+const post = new Engine(20260812, 0);
+for (let i=0;i<30;i++) post.step();
+post.acts.push({ name:"Testtraining", inten:0.6, start:post.s.t, dur:40, warn:10 });
+post.lastSensor = 62;
+post.step();
+ok("Training bei 62 mg/dL verschoben", post.events.some(e => e.name === "Testtraining verschoben — Wert zu tief") && !post._act);
+
+/* ── Ueberlappende Einheiten: Nachrechnen muss bitgleich sein ── */
+const live = new Engine(20260812, 13);
+live.acts = [];
+for (let i=0;i<30;i++) live.step();
+live.startActivity(0.5, 40);
+for (let i=0;i<15;i++) live.step();
+live.startActivity(0.8, 20);           // mitten in die laufende Einheit
+for (let i=0;i<90;i++) live.step();
+const replay = new Engine(20260812, 13);
+replay.acts = [];
+replay.input = JSON.parse(JSON.stringify(live.input));
+for (let i=0;i<135;i++) replay.step();
+const same = live.z.every((v,i) => v === replay.z[i]);
+ok("Nachrechnen bitgleich trotz Ueberlappung", same, same ? "" : `G live ${live.s.G.toFixed(3)} / nachgerechnet ${replay.s.G.toFixed(3)}`);
+
+/* ── Speichern und Fortsetzen ── */
+const a = new Engine(20260812, 0);
+for (let i=0;i<400;i++) a.step();
+a.logMeal(40, "mixed"); a.injectBolus(3, 1, 0);
+for (let i=0;i<30;i++) a.step();
+const saved = JSON.parse(JSON.stringify({ s:a.s, core:a.snapshot(), acts:a.acts, tick:a.tick }));
+const b = new Engine(undefined, 0);   // frische Sitzung mit eigenem Seed, uebernimmt den gespeicherten
+ok("Neue Sitzungen wuerfeln ihren Seed", new Engine().seed !== new Engine().seed);
+ok("Fremder Stand wird abgelehnt", !new Engine(20260812, 3).canRestore(saved.core));
+Object.assign(b.s, saved.s); b.rng.setState(saved.tick); b.acts = saved.acts; b.restore(saved.core);
+for (let i=0;i<300;i++){ a.step(); b.step(); }
+ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.lastSensor === b.lastSensor,
+   `G ${a.s.G.toFixed(2)} / ${b.s.G.toFixed(2)} mg/dL`);
