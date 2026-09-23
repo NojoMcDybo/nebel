@@ -197,9 +197,10 @@ ExtHovorka endet bei `IG`. Alles Weitere ist Nebel-Annahme und wird als solche g
 |---|---|
 | Physiologische Verzögerung | **5 min in der Anwendung**, kalibriert nach ISPAD (5–10 min). Der Quellwert 15 min bleibt in der Engine und wird für den Orakelabgleich verwendet. Zulässig, weil `tsub` nur die Beobachtungsschicht betrifft — `IG` wird von keinem anderen Zustand gelesen |
 | Abtastung | 5-min-Raster, wie handelsübliche CGM |
-| Rauschen | Additiv, als Beobachtungsprozess, mit festem Seed → reproduzierbar |
-| Filterung | Einfache Glättung, separat implementiert und abschaltbar |
-| Sensoralterung, Drift, Druckartefakte | Nicht in V1 |
+| Rauschen und Kalibrierfehler | **Publiziertes G6-Fehlermodell** (Vettoretti et al. 2019): Verstärkungsfehler mit Drift über die Tragedauer, Versatz, AR(2)-Messrauschen. Zählerbasiert umgesetzt, damit die Nachholintegration bitgleich bleibt. Parameter und Kalibrierungsprüfung in `20_Parameter_Registry.md` Abschnitt 5 |
+| Filterung | Im Fehlermodell nicht vorgesehen; Glättung bleibt implementiert, aber aus |
+| Sensoralterung | Über die Drift der Verstärkung `a(t)` im Fehlermodell, Sensorwechsel nach 10 Tagen |
+| Druckartefakte | Nicht in V1 |
 
 Die Anzeige zeigt nie `G`, sondern immer `Gsensor`. Der Unterschied zwischen beiden ist eines der Lernziele und muss im Analyse-Screen sichtbar gemacht werden können.
 

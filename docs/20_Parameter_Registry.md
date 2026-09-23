@@ -104,12 +104,59 @@ Einschränkung: Alle 20 Subjekte sind Erwachsene mit HbA1c zwischen 5.7 und 7.6 
 
 Das trifft die Hauptzielgruppe direkt: Eltern von Kindern mit Typ-1-Diabetes sind die größte und am stärksten belastete Angehörigengruppe — und genau deren Situation bildet die Kohorte nicht ab. Kinderphysiologie (höherer Insulinbedarf pro kg, andere Absorptionszeiten, stärkere Variabilität) ist nicht durch Skalierung der Erwachsenenparameter zu erschlagen. V1 simuliert eine erwachsene Person; das muss im UI stehen, nicht im Kleingedruckten.
 
-## 5. Offene Registry-Einträge (Nebel-Eigenleistung, noch zu belegen)
+## 5. Sensorfehlermodell (Beobachtungsschicht)
+
+Quelle: Vettoretti et al. (2019), *Modeling the error of factory-calibrated continuous glucose monitoring sensors: application to Dexcom G6 sensor data*, Sensors 19(23):5320, Tabelle 1, Mediane der zweistufigen Identifikation. https://www.mdpi.com/1424-8220/19/23/5320
+
+Modell: `CGM(t) = a(t) · IG(t) + b0 + v(t)`, mit `a(t) = a0 + a1·t + a2·t²` und `v(k) = α1·v(k−1) + α2·v(k−2) + w(k)`.
+
+| Parameter | Einheit | Bedeutung | Median | IQR | Status |
+|---|---|---|---|---|---|
+| `a0` | – | Verstärkung beim Setzen | 0.95 | 0.91–0.99 | Q |
+| `a1` | 1/Tag | lineare Drift der Verstärkung | 0.0039 | 0.0010–0.0072 | Q ⚠ |
+| `a2` | 1/Tag² | quadratische Drift | −0.000027 | −0.000063–0.000009 | Q ⚠ |
+| `b0` | mg/dL | Versatz | 0.14 | −2.19–2.54 | Q |
+| `α1` | – | AR(2), erster Koeffizient | 0.62 | 0.56–0.70 | Q |
+| `α2` | – | AR(2), zweiter Koeffizient | 0.22 | 0.14–0.31 | Q |
+| `σ` | mg/dL | Standardabweichung des weißen Rauschens | 3.16 | 2.54–3.97 | Q |
+| Tragedauer | Tage | danach neuer Sensor | 10 | – | Q |
+| `τ` (Referenz) | min | Verzögerung Blut → Gewebe | 3.8 | 2.39–5.37 | Q — stützt `tsub = 5` |
+
+⚠ **Zeiteinheit von `t` erschlossen, nicht abgelesen.** Das Paper definiert `t` als Zeit seit Setzen. Nur „Tage" ergibt eine plausible Verstärkung: in Minuten läge `a` nach einem Tag bei 6, in Stunden nach zehn Tagen bei 0,33. Gegen das PDF zu prüfen.
+
+Abgeleitete Größen: stationäre Streuung des Messrauschens 5,34 mg/dL, Lag-1-Autokorrelation 0,79. Das Rauschen ist also glatt und wandernd, nicht zappelig — genau deshalb bleibt der Verlauf lesbar, obwohl der Fehler realistisch groß ist.
+
+Der Sensor wird nach zehn Tagen gewechselt, die Verstärkung beginnt dann wieder bei `a0`. Damit kommt die im alten Prototyp gestrichene Sensoralterung zurück — diesmal belegt.
+
+### Kalibrierungsprüfung
+
+`node scripts/cgm-calibration.cjs` — 20 Subjekte, je 3 Tage, drei Mahlzeiten mit Bolus nach KE-Faktor und 45 min Belastung pro Tag. Zerlegung der Sensorabweichung gegen die physiologische Glukose:
+
+| Fehlerquelle | MARD |
+|---|---|
+| nur Verzögerung (`tsub` 5 min) | 0,5 % |
+| Verzögerung + Verstärkungsfehler | 4,0 % |
+| vollständiges G6-Modell | 12,8 % (Spanne 4,9–17,7) |
+
+Nach Glukosebereich, vollständiges Modell:
+
+| Bereich | MARD |
+|---|---|
+| unter 70 mg/dL | 21,9 % |
+| 70–180 mg/dL | 5,7 % |
+| über 180 mg/dL | 2,9 % |
+
+Lesart: Über den Tag gemittelt spielt die Verzögerung kaum eine Rolle. Im Tiefbereich ist der Sensor dagegen **viermal so ungenau** wie im Zielbereich — Verzögerung bei schnellem Abfall und ein absolut gleich großer Fehler auf einem kleinen Wert. Die Regel auf der Startseite („am stärksten im Tiefen … also genau dann, wenn du ihn brauchst") ist damit nicht mehr nur behauptet, sondern gerechnet.
+
+Der gepoolte Wert hängt stark davon ab, wie viel Zeit das Szenario im Tiefbereich verbringt. Die Spanne von 4,9 bis 17,7 % zwischen den Subjekten ist deshalb ein Szenario-Effekt, kein Modellfehler.
+
+**Nicht geprüft:** der Abgleich mit der klinischen MARD des G6 aus der Zulassungsstudie. Die Quelle war in der Recherchesitzung nicht abrufbar. Die Parameter werden nicht auf eine Ziel-MARD getrimmt — das Modell ist belegt, die MARD ist Ergebnis, nicht Vorgabe.
+
+## 6. Offene Registry-Einträge (Nebel-Eigenleistung, noch zu belegen)
 
 | Parameter | Bereich | Status | Zu klären |
 |---|---|---|---|
-| Sensorrauschen (Amplitude) | Beobachtung | N | Größenordnung aus CGM-Literatur belegen, nicht schätzen |
-| Filterzeitkonstante | Beobachtung | N | Bewusst als Designentscheidung kennzeichnen |
+| Filterzeitkonstante | Beobachtung | N | Im G6-Modell nicht vorgesehen, bleibt 0 |
 | Abtastrate | Beobachtung | N | 5 min, Gerätekonvention |
 | KH-Split schnell/langsam | Mahlzeit | N | Zuordnungsregel realer Mahlzeiten auf `uFastCarbs`/`uSlowCarbs` — braucht eine begründete Heuristik, keine Bauchzahl |
 | Bolusdauer | Pumpe | N | Modellierung als Impuls über 1 min |

@@ -113,10 +113,12 @@ td:nth-child(3){color:var(--ink3);width:70px}
       <button class="ghost" id="reset">Alles zurücksetzen</button>
     </div>
     <div class="row">
-      <label for="noise">Sensorrauschen</label>
-      <input type="range" id="noise" min="0" max="0.6" step="0.05" value="0" style="width:150px">
-      <span class="at" id="noiseval">0.00 mmol/L</span>
-      <span class="at" style="color:var(--ink3)">— Nebel-Annahme, nicht belegt</span>
+      <label for="noise">Sensorfehler</label>
+      <select id="noise">
+        <option value="g6">Dexcom G6 — Vettoretti et al. 2019</option>
+        <option value="none">keiner — nur Verzögerung</option>
+      </select>
+      <span class="at" id="noiseval"></span>
     </div>
   </div>
 
@@ -159,13 +161,13 @@ const DUR = 1440, STEP = 1;
 const MGDL = N.MGDL_PER_MMOLL;
 
 const el = (id) => document.getElementById(id);
-const state = { idx: 0, unit: "mgdl", events: [], cursorMin: null, noise: 0, run: null };
+const state = { idx: 0, unit: "mgdl", events: [], cursorMin: null, noise: "g6", run: null };
 
 /* ---------- Simulation ---------- */
 function simulate() {
   const s = S[state.idx];
   const p = N.withPopulationConstants(s.subject);
-  const sensor = { ...N.DEFAULT_SENSOR, noiseSd: state.noise, seed: 20260922 };
+  const sensor = state.noise === "g6" ? N.REALISTIC_SENSOR : N.DEFAULT_SENSOR;
   state.run = N.simulate({
     durationMin: DUR, stepMin: STEP, parameters: p, therapy: s.therapy,
     pump: N.flatBasalProfile(s.therapy.basalRateUPerH),
@@ -321,6 +323,11 @@ function paintMeta() {
   const r = state.run;
   const tir = r.G.filter((g) => g >= 3.9 && g <= 10).length / r.G.length * 100;
   const acts = state.events.filter((e) => e.label);
+  const mard = r.gSensor.reduce((a, g, k) => {
+    const gi = r.G[Math.min(r.G.length - 1, Math.max(0, Math.round(r.tSensor[k]) - 1))];
+    return a + Math.abs(g - gi) / gi;
+  }, 0) / r.gSensor.length * 100;
+  el("noiseval").textContent = `MARD ${mard.toFixed(1)} %`;
   el("cap").textContent =
     `${acts.length} ${acts.length === 1 ? "Ereignis" : "Ereignisse"} · ` +
     `Zeit im Zielbereich ${tir.toFixed(0)} % · Tiefstwert ${fmt(Math.min(...r.G))} · Höchstwert ${fmt(Math.max(...r.G))} ${unitLabel()}`;
@@ -361,11 +368,7 @@ el("undo").addEventListener("click", () => {
 el("reset").addEventListener("click", () => { state.events = []; render(); });
 el("subj").addEventListener("change", (e) => { state.idx = +e.target.value; render(); });
 el("unit").addEventListener("change", (e) => { state.unit = e.target.value; render(); });
-el("noise").addEventListener("input", (e) => {
-  state.noise = +e.target.value;
-  el("noiseval").textContent = state.noise.toFixed(2) + " mmol/L";
-  render();
-});
+el("noise").addEventListener("change", (e) => { state.noise = e.target.value; render(); });
 el("theme").addEventListener("click", () => {
   const cur = document.documentElement.getAttribute("data-theme");
   const dark = cur ? cur === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;

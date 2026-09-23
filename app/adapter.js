@@ -240,12 +240,13 @@ class Engine {
     this.kombi = {};
   }
 
-  /* CGM-Abtastung alle fuenf Minuten. Das Rauschen ist eine
-     Nebel-Annahme und steht bis zum Beleg klein. */
+  /* CGM-Abtastung alle fuenf Minuten, mit dem publizierten Fehlermodell
+     des Dexcom G6 (Vettoretti et al. 2019): Verstaerkungsfehler, Versatz und
+     autokorreliertes Messrauschen. Kein selbst gewaehltes Rauschen mehr. */
   _sample(){
-    const noiseSd = 0.08;   // mmol/L — NEBEL-ANNAHME, nicht belegt
+    const k = Math.floor(this.s.t / 5);
     const v = Math.max(40, Math.min(400, Math.round(
-      this.s.Gi + toMgdl(noiseSd * N.normalAt(this.seed + 77, Math.floor(this.s.t/5))))));
+      N.cgmReadingMgdl(N.DEXCOM_G6_VETTORETTI_2019, this.s.Gi, this.s.t, this.seed + 77, k))));
     this.lastSensor = v;
     this.trace.push({ t:this.s.t, G:this.s.G, gi:this.s.Gi, sensor:v, born:performance.now() });
     if (this.trace.length > 4032) this.trace.shift();   // 14 Tage

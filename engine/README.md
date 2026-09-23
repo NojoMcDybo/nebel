@@ -47,7 +47,7 @@ Damit sind auch die Groessenordnungen bestaetigt, nicht nur das qualitative Verh
 | `model.ts` | fertig — 16 Gleichungen, Gleichgewicht per Relaxation |
 | `solver.ts` | fertig — Euler und RK4 |
 | `simulate.ts` | fertig |
-| `observation.ts` | fertig — zaehlerbasiertes Rauschen, Filter, 5-min-Raster |
+| `observation.ts` | fertig — G6-Fehlermodell (Vettoretti 2019), zaehlerbasiert, 5-min-Raster |
 | `realtime.ts` | fertig — Nachholintegration, Append-only, Sandbox-Fork |
 | `scenario/needs.ts` | fertig — Reserven und Hunger, Szenarioschicht |
 
@@ -66,5 +66,7 @@ Damit sind auch die Groessenordnungen bestaetigt, nicht nur das qualitative Verh
 **Viewer:** `npm run viewer` baut `dist/nebel-viewer.html` — eine einzelne, selbstenthaltene Datei zum Doppelklicken. Engine und alle 20 Subjektparameter sind eingebettet, damit die Seite ohne Server ueber `file://` laeuft. Weil die Parametersaetze darin stecken, landet sie in `dist/` und ist gitignored.
 
 Der Viewer zeigt physiologische Glukose und Sensorwert als getrennte Kurven, den vollstaendigen 16er-Zustandsvektor am Zeiger und laesst Mahlzeit, Bolus, Belastung, Temp-Basal und Pumpenstopp an der Zeigerposition einsetzen. Er ist das Entwicklerwerkzeug fuer die Engine und die Vorlage fuer den spaeteren Analyse-Screen.
+
+**Sensorkalibrierung:** `node scripts/cgm-calibration.cjs` zerlegt die Sensorabweichung ueber alle 20 Subjekte in Verzoegerung, Verstaerkungsfehler und Messrauschen und schluesselt sie nach Glukosebereich auf.
 
 **Rauchtest:** `npm run smoke` laesst sechs Alltagsszenarien laufen und druckt den Verlauf in mg/dL. Fuer den Augenschein, nicht als Beleg.
