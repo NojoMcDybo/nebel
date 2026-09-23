@@ -62,7 +62,12 @@ const targets = [
 ];
 for (const { tpl, out } of targets) {
   if (!existsSync(tpl)) { console.log(`uebersprungen: ${out} (keine Vorlage)`); continue; }
+  /* Der Adapter wird bei JEDEM Bau frisch eingesetzt. Vorher lag eine Kopie
+     in der Vorlage — Aenderungen an adapter.js liefen ins Leere. */
+  const adapterPath = resolve(root, "../app/adapter.js");
+  const adapter = existsSync(adapterPath) ? readFileSync(adapterPath, "utf8") : "";
   const html = readFileSync(tpl, "utf8")
+    .replace("/*__ADAPTER__*/", () => adapter)
     .replace("/*__ENGINE__*/", () => engine)
     .replace("/*__SUBJECTS__*/", () => `window.SUBJECTS = ${JSON.stringify(subjects)};`);
   writeFileSync(resolve(root, "dist", out), html, "utf8");

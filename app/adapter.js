@@ -54,8 +54,15 @@ const TRAINING = [
    die Faktoren, aus denen Kombinationen entstanden, sind gestrichen. */
 const KOMBIS = {};
 
-/* Einziger verbliebener Parameter, den die Oberflaeche liest. */
-const P = { tau_i: 110 };
+/* Was die Oberflaeche aus dem alten Parametersatz noch liest.
+   tau_sens ist die Sensorverzoegerung — daraus zeichnet die Oberflaeche die
+   Nebelzone. Sie kommt aus der Engine (tsub), damit Bild und Rechnung nicht
+   auseinanderlaufen koennen. Fehlt sie, wird die Zeichnung NaN und die
+   gesamte Anzeige friert ein. */
+const P = {
+  tau_i:    N.POPULATION_CONSTANTS.tmaxG,
+  tau_sens: N.POPULATION_CONSTANTS.tsub,
+};
 
 class Engine {
   constructor(seed = 20260812, subjectIndex = 0){
@@ -69,7 +76,12 @@ class Engine {
     const basalMU = N.basalRateToMUPerMin(this.therapy.basalRateUPerH);
     this.z = N.initialState(this.p, basalMU);
 
-    this.events = [];      // Engine-Ereignisse, append-only
+    /* ZWEI Listen, bewusst getrennt:
+       input  — Eingaben fuer die Engine (Mahlzeit, Bolus, Herzfrequenz)
+       events — Protokoll fuer die Oberflaeche, in deren Format
+       Die alte Engine hatte nur eine. Das zu vermischen kostet Anzeige. */
+    this.input = [];
+    this.events = [];
     this.meals = [];       // Protokoll fuer die Oberflaeche
     this.acts = [];        // geplante und gelaufene Bewegung
     this._boluses = [];
@@ -128,8 +140,11 @@ class Engine {
     const gReal = Math.max(0, gEst * err);
     const slowG = gReal * mt.slow, fastG = gReal - slowG;
     const t = this.s.t;
-    this.events.push({ kind:"meal", t, fastCarbsG: fastG, slowCarbsG: slowG,
-                       label: `${Math.round(gEst)} g ${mt.label}` });
+    this.input.push({ kind:"meal", t, fastCarbsG: fastG, slowCarbsG: slowG });
+    /* truth ist die tatsaechlich gegessene Menge. Der Rueckblick stellt sie
+       der Schaetzung gegenueber — das ist die Lehre der Mahlzeit. */
+    this.events.push({ kind:"meal", t, est: Math.round(gEst), truth: gReal,
+                       type, dur: Math.round(mt.tau) });
     this.meals.push({ t, gEst, gReal, type, label: mt.label });
     return gReal;
   }
@@ -137,13 +152,16 @@ class Engine {
   injectBolus(U, share = 1, over = 0){
     const t = this.s.t;
     const now = U * share, ext = U - now;
-    if (now > 0) this.events.push({ kind:"bolus", t, units: now, label:`${U.toFixed(1)} U` });
-    if (ext > 0 && over > 0)
-      this.events.push({ kind:"bolus", t, units: ext, durationMin: over, label:`${ext.toFixed(1)} U verzögert` });
+    if (now > 0) this.input.push({ kind:"bolus", t, units: now });
+    if (ext > 0 && over > 0) this.input.push({ kind:"bolus", t, units: ext, durationMin: over });
+    /* effective: ExtHovorka kennt keinen Abgabeverlust, aufgenommen ist
+       gleich gespritzt. Das Feld bleibt, damit der Rueckblick rechnet. */
+    this.events.push({ kind:"bolus", t, units: U, share, over, effective: U });
     this._boluses.push({ t, U, share, over });
   }
 
   setBasal(rate){
+    this.events.push({ kind:"basal", t:this.s.t, from:this.s.basalSet, to:rate });
     this.s.basalSet = rate;
     this.pump = N.flatBasalProfile(rate);
   }
@@ -151,12 +169,15 @@ class Engine {
   startActivity(inten, dur){
     const t = this.s.t;
     const bpm = this.p.HRrest + inten*(this.p.HRmax - this.p.HRrest);
-    this.events.push(...N.exerciseBlock(t, Math.max(2, dur), bpm, this.p.HRrest)
-      .map((e, i) => i === 0 ? { ...e, label:`Bewegung ${Math.round(inten*100)} %` } : e));
-    this._act = { name:"Bewegung", inten, start:t, dur };
+    this.input.push(...N.exerciseBlock(t, Math.max(2, dur), bpm, this.p.HRrest));
+    const name = `Bewegung ${Math.round(inten*100)} %`;
+    this.events.push({ kind:"move", t, name, dur: Math.round(dur), inten });
+    this._act = { name, inten, start:t, dur };
   }
 
   sleepAlarm(kind, value, snoozed){
+    if (kind === "alarm")
+      this.events.push({ kind:"alarm", t:this.s.t, low: value < 90, value, snoozed:!!snoozed });
     if (kind === "sleep") this.s.asleep = !!value;
     if (kind === "wake")  this.s.asleep = false;
     return { kind, value, snoozed };
@@ -169,10 +190,10 @@ class Engine {
     const t = this.s.t;
     const u = {
       uFastCarbs: 0, uSlowCarbs: 0,
-      uHR: N.heartRateAt(t, this.events, this.p.HRrest),
-      uInsulin: N.insulinInputAt(t, 1, this.pump, this.events),
+      uHR: N.heartRateAt(t, this.input, this.p.HRrest),
+      uInsulin: N.insulinInputAt(t, 1, this.pump, this.input),
     };
-    for (const e of this.events){
+    for (const e of this.input){
       if (e.kind !== "meal") continue;
       const overlap = Math.min(t+1, e.t+1) - Math.max(t, e.t);
       if (overlap <= 0) continue;
@@ -243,7 +264,7 @@ class Engine {
     return out;
   }
 
-  iob(){ return N.insulinOnBoardUnits(this.s.t, this.events); }
+  iob(){ return N.insulinOnBoardUnits(this.s.t, this.input); }
   cob(){
     const mmol = N.get(this.z,"D1Slow") + N.get(this.z,"D2Slow")
                + N.get(this.z,"D1Fast") + N.get(this.z,"D2Fast");
