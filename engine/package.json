@@ -12,7 +12,8 @@
     "oracle:fetch": "bash scripts/fetch-oracle.sh",
     "smoke": "tsx scripts/smoke.ts",
     "oracle:reference": "python3 scripts/oracle_reference.py",
-    "viewer": "node scripts/build-viewer.mjs"
+    "viewer": "node scripts/build-viewer.mjs",
+    "check:adapter": "esbuild src/index.ts --bundle --format=cjs --platform=node --target=es2022 --outfile=dist/engine.cjs --log-level=error && node scripts/check-adapter.cjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.2",

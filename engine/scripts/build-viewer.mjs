@@ -53,12 +53,19 @@ const result = await build({
 });
 const engine = result.outputFiles[0].text;
 
-const template = readFileSync(resolve(root, "viewer/template.html"), "utf8");
-const html = template
-  .replace("/*__ENGINE__*/", () => engine)
-  .replace("/*__SUBJECTS__*/", () => `window.SUBJECTS = ${JSON.stringify(subjects)};`);
-
 mkdirSync(resolve(root, "dist"), { recursive: true });
-const out = resolve(root, "dist/nebel-viewer.html");
-writeFileSync(out, html, "utf8");
-console.log(`geschrieben: dist/nebel-viewer.html  (${(html.length / 1024).toFixed(0)} KB, ${subjects.length} Subjekte)`);
+
+/* Beide Einzeldateien aus derselben Engine bauen. */
+const targets = [
+  { tpl: resolve(root, "viewer/template.html"),      out: "nebel-viewer.html" },
+  { tpl: resolve(root, "../app/template.html"),      out: "nebel.html" },
+];
+for (const { tpl, out } of targets) {
+  if (!existsSync(tpl)) { console.log(`uebersprungen: ${out} (keine Vorlage)`); continue; }
+  const html = readFileSync(tpl, "utf8")
+    .replace("/*__ENGINE__*/", () => engine)
+    .replace("/*__SUBJECTS__*/", () => `window.SUBJECTS = ${JSON.stringify(subjects)};`);
+  writeFileSync(resolve(root, "dist", out), html, "utf8");
+  console.log(`geschrieben: dist/${out}  (${(html.length / 1024).toFixed(0)} KB)`);
+}
+console.log(`${subjects.length} Subjekte eingebettet.`);

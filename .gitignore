@@ -7,3 +7,6 @@ vendor/
 Thumbs.db
 ~$*.docx
 _to_delete/
+
+# Von Cowork abgelegte Anhaenge
+Claude outputs/

@@ -59,6 +59,10 @@ Damit sind auch die Groessenordnungen bestaetigt, nicht nur das qualitative Verh
 
 **Referenzwerte erzeugen:** `npm run oracle:reference` (braucht python3 mit numpy). Laedt nur die Gleichungsfunktion aus py-mgipsim, fuehrt sie aus und schreibt eine Zahlentabelle nach `vendor/oracle-reference.json`. Kein Code wird uebernommen, die Ausgabe ist gitignored.
 
+**App:** `npm run viewer` baut neben dem Viewer auch `dist/nebel.html` — den Prototyp aus `../index.html`, dessen Simulationskern durch einen Adapter auf diese Engine ersetzt wurde. Die Oberflaeche ist unveraendert: sie spricht weiterhin `eng.s.t`, `eng.lastSensor`, `eng.trace`, `eng.step()`. Der Adapter liegt in `../app/adapter.js`, die zusammengesetzte Vorlage in `../app/template.html`.
+
+`npm run check:adapter` prueft den Adapter ohne Browser: haelt Basal den Wert, hebt eine Mahlzeit ihn, faellt IOB, leeren sich die Reserven unter Belastung, reagieren schwacher und starker Responder unterschiedlich.
+
 **Viewer:** `npm run viewer` baut `dist/nebel-viewer.html` — eine einzelne, selbstenthaltene Datei zum Doppelklicken. Engine und alle 20 Subjektparameter sind eingebettet, damit die Seite ohne Server ueber `file://` laeuft. Weil die Parametersaetze darin stecken, landet sie in `dist/` und ist gitignored.
 
 Der Viewer zeigt physiologische Glukose und Sensorwert als getrennte Kurven, den vollstaendigen 16er-Zustandsvektor am Zeiger und laesst Mahlzeit, Bolus, Belastung, Temp-Basal und Pumpenstopp an der Zeigerposition einsetzen. Er ist das Entwicklerwerkzeug fuer die Engine und die Vorlage fuer den spaeteren Analyse-Screen.
