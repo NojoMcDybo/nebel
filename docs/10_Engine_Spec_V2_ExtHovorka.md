@@ -195,7 +195,7 @@ ExtHovorka endet bei `IG`. Alles Weitere ist Nebel-Annahme und wird als solche g
 
 | Baustein | V1-Entscheidung |
 |---|---|
-| Physiologische Verzögerung | `tsub = 15 min` — Quellwert von ExtHovorka. Die Foundation zitiert 5–10 min (ISPAD); Differenz ist dokumentiert und wird nicht stillschweigend „korrigiert" |
+| Physiologische Verzögerung | **5 min in der Anwendung**, kalibriert nach ISPAD (5–10 min). Der Quellwert 15 min bleibt in der Engine und wird für den Orakelabgleich verwendet. Zulässig, weil `tsub` nur die Beobachtungsschicht betrifft — `IG` wird von keinem anderen Zustand gelesen |
 | Abtastung | 5-min-Raster, wie handelsübliche CGM |
 | Rauschen | Additiv, als Beobachtungsprozess, mit festem Seed → reproduzierbar |
 | Filterung | Einfache Glättung, separat implementiert und abschaltbar |

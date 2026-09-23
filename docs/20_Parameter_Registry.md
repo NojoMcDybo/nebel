@@ -47,7 +47,7 @@ Bemerkenswert für Nebel: Die individuelle Bewegungsantwort variiert fast aussch
 | `AG` | – | Bioverfügbare Kohlenhydratfraktion | 0.8 | QF |
 | `tmaxG` | min | Zeitkonstante langsame KH-Absorption | 40 | QF |
 | `tmaxGFast` | min | Zeitkonstante schnelle KH-Absorption | 20 | QF |
-| `tsub` | min | Verzögerung Plasma → Interstitium | 15 | QF ⚠ |
+| `tsub` | min | Verzögerung Plasma → Interstitium | 15 → **5** | QF / N ⚠ |
 | `aSI` | – | Formparameter nichtlineare Insulinsensitivität | −1.9 | QF |
 | `b` | mmol/L | Skalenparameter des `tanh`-Mappings | 0.28 | QF |
 | `c` | – | Offset des `tanh`-Mappings | 7 | QF |
@@ -59,7 +59,18 @@ Bemerkenswert für Nebel: Die individuelle Bewegungsantwort variiert fast aussch
 | `p8` | 1/min | Zeitkonstante hochintensiver Pfad | 0.1 | QF |
 | `a` | – | **Unbenutzt** — Rest des alten Exercise-Modells | 0.16–0.86 | X |
 
-⚠ `tsub = 15 min` widerspricht der in der Foundation zitierten ISPAD-Angabe von 5–10 min physiologischer Verzögerung. Der Quellwert bleibt stehen; die Abweichung ist bekannt und dokumentiert (siehe Widerspruchsprüfung W9). Nicht stillschweigend anpassen.
+⚠ **Der einzige Parameter mit zwei Werten — bewusst, und getrennt geführt.**
+
+| | Wert | Verwendung |
+|---|---|---|
+| Quellwert (ExtHovorka) | 15 min | Engine und Orakelabgleich. Unverändert, sonst wäre Validierungsstufe 0 wertlos |
+| Nebel-Kalibrierung | 5 min | Nur in der Anwendung (`app/adapter.js`), für die angezeigte Sensorverzögerung |
+
+Begründung: ISPAD gibt die physiologische Verzögerung mit 5 bis 10 min an, der Quellwert von 15 min liegt darüber. Die Kalibrierung ist damit **besser belegt** als der Quellwert, nicht schlechter.
+
+Zulässig ist der Eingriff, weil `tsub` ausschließlich in die Beobachtungsschicht fällt: `IG` wird von keinem anderen Zustand gelesen, `dIG/dt = (G − IG)/tsub` ist eine Einbahnstraße. Die Physiologie bleibt unberührt, und Abschnitt 8 der Spec führt die Beobachtungsschicht ohnehin als Nebel-Eigenleistung.
+
+Kein Freibrief: Für jeden Parameter **innerhalb** der Physiologie gilt weiterhin, dass der Quellwert unverändert bleibt.
 
 ## 3. Modellkonstanten (nicht parametrisiert)
 

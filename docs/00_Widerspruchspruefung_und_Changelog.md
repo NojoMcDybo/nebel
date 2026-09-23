@@ -70,7 +70,7 @@ Foundation §10 und Spec §11 fordern Interstitium, Filterung und Rauschen. ExtH
 
 Zusätzlich: Foundation §10 nennt eine physiologische Verzögerung von *„~5–10 min"* (ISPAD). ExtHovorka setzt `tsub = 15 min`. Direkter Zahlenwiderspruch.
 
-**Korrektur:** `tsub = 15 min` bleibt als Quellwert stehen und wird als solcher gekennzeichnet. Die gesamte Sensorschicht (Filter, Rauschen, Abtastung alle 5 min) ist **Nebel-Eigenleistung** und wird explizit als Nebel-Annahme markiert — nicht als Physiologie.
+**Korrektur, erweitert am 23.09.2026:** Zwei Werte, getrennt geführt. Die Engine behält 15 min als Quellwert, damit der Orakelabgleich aussagekräftig bleibt. Die Anwendung kalibriert auf **5 min**, gestützt auf die ISPAD-Angabe von 5–10 min — die Kalibrierung ist also besser belegt als der Quellwert. Zulässig, weil `tsub` ausschließlich in die Beobachtungsschicht fällt: `IG` wird von keinem anderen Zustand gelesen, die Physiologie bleibt unberührt. Die übrige Sensorschicht (Filter, Rauschen, Abtastung) bleibt Nebel-Eigenleistung und ist als Annahme markiert.
 
 ### W10 — MDI vs. CSII
 Alle drei Dokumente sprechen generisch von „subkutanem Insulin" und „Basal + Bolus". Beschlossen ist Pumpentherapie (CSII).

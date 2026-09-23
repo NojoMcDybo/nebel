@@ -909,7 +909,10 @@ const col = n => getComputedStyle(document.documentElement).getPropertyValue(n).
 const lerp = (a,b,k) => a + (b-a)*k;
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 
-const LAG_TXT = P.tau_sens >= 13 ? "einer Viertelstunde" : Math.round(P.tau_sens) + " Minuten";
+/* Ausgeschrieben, weil die Zahl im Fliesstext steht. */
+const LAG_WORDS = {3:"drei",5:"fünf",7:"sieben",10:"zehn",12:"zwölf",15:"fünfzehn",20:"zwanzig"};
+const LAG_MIN = Math.round(P.tau_sens);
+const LAG_TXT = (LAG_WORDS[LAG_MIN] ?? LAG_MIN) + " Minuten";
 const eng = new Engine();
 
 /* Die Therapiewerte stammen aus dem publizierten Subjekt, nicht aus einer

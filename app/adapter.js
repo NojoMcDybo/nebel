@@ -21,6 +21,19 @@
 
 const N = window.Nebel;
 const MGDL = N.MGDL_PER_MMOLL;
+
+/* ── Nebel-Kalibrierung der Beobachtungsschicht ─────────────────────
+   tsub ist die Zeitkonstante zwischen Plasma und Interstitium und damit
+   die sichtbare Sensorverzoegerung. ExtHovorka fuehrt 15 min; ISPAD gibt
+   fuer die physiologische Verzoegerung 5 bis 10 min an. Nebel nimmt 5 min.
+
+   Das ist zulaessig, weil tsub ausschliesslich in die Beobachtungsschicht
+   faellt: IG wird von keinem anderen Zustand gelesen, die Physiologie
+   bleibt unberuehrt. Der Quellwert bleibt in der Engine stehen und wird
+   fuer den Orakelabgleich verwendet — ueberschrieben wird nur hier, fuer
+   die Anzeige, klar gekennzeichnet.
+   Siehe docs/20_Parameter_Registry.md und Widerspruchspruefung W9. */
+const NEBEL_TSUB_MIN = 5;
 const toMgdl = (mmol) => mmol * MGDL;
 
 /* Mahlzeitentypen. tau trifft die Absorptionskonstanten der Engine
@@ -61,14 +74,15 @@ const KOMBIS = {};
    gesamte Anzeige friert ein. */
 const P = {
   tau_i:    N.POPULATION_CONSTANTS.tmaxG,
-  tau_sens: N.POPULATION_CONSTANTS.tsub,
+  tau_sens: NEBEL_TSUB_MIN,
 };
 
 class Engine {
   constructor(seed = 20260812, subjectIndex = 0){
     const sub = window.SUBJECTS[subjectIndex];
     this.subjectId = sub.id;
-    this.p = N.withPopulationConstants(sub.subject);
+    /* Quellparameter, danach die eine bewusste Nebel-Kalibrierung. */
+    this.p = { ...N.withPopulationConstants(sub.subject), tsub: NEBEL_TSUB_MIN };
     this.therapy = sub.therapy;
     this.seed = seed;
     this.tick = 0;
