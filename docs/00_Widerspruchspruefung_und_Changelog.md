@@ -276,3 +276,12 @@ Gegen Wiederholung: `build-viewer.mjs` prüft jetzt die Syntax aller Inline-Skri
 - **Kennzahlen der Auswertung kompakt:** eine Karte mit zwei Spalten statt acht Kacheln, gut halb so hoch.
 - Die Vorhersagekurve beginnt nicht vor dem Start der Sitzung.
 
+---
+
+## 14. Nachtrag 26.09.2026 — Dexcom-Pfeile, Differenz, kompakte Regeln, Recherche Fett/Eiweiß
+
+- **Trendpfeil:** fünf feste Stufen wie in der Dexcom-App — Doppelpfeil hoch, Pfeil hoch, waagerecht, Pfeil runter, Doppelpfeil runter — statt stufenloser Neigung. Grenzen nach der Dexcom-G6-Pfeiltabelle: stabil bis 1,8 mmol/L in 30 min (~1 mg/dL pro Minute), Doppelpfeil ab 5,0 mmol/L in 30 min (~3 mg/dL pro Minute). Die Schrägpfeile der Vorlage (1–2 mg/dL pro Minute) zählen hier zum einfachen Pfeil. Quelle: Dexcom Canada, „Using Dexcom G6 Trend Arrows", https://s3-us-west-2.amazonaws.com/dexcommisc/Canada+HCP/Using+the+Trend+Arrows_with+ranges_ENGLISH.pdf
+- **Differenz zum vorigen Messwert** hinter dem Pfeil, z. B. „+15".
+- **Fünf Regeln** als nummerierte Liste in einer Karte, eingeklappt etwa ein Drittel niedriger.
+- **Recherche Fett und Eiweiß:** `11_Fett_und_Eiweiss.md`. Ergebnis: Eiweiß und die verzögernde Wirkung von Fett lassen sich über den Kohlenhydrat-Eingabeverlauf abbilden, die fettbedingte Insulinresistenz nicht. Entscheidung offen.
+

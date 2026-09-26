@@ -162,6 +162,19 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
   transition:transform .42s var(--spring);
 }
 .fact[aria-expanded="true"] .mark{transform:rotate(45deg)}
+/* Die fuenf Regeln als eine Liste in einer Karte statt fuenf einzelner Karten */
+#facts{gap:0; background:var(--card); border-radius:18px; box-shadow:var(--sh); overflow:hidden; counter-reset:rule;
+  transition:background-color .5s var(--spring)}
+#facts .fact{border-radius:0; box-shadow:none; background:transparent; padding:12px 16px; gap:10px;
+  border-top:1px solid var(--hair); transition:background-color .3s var(--spring)}
+#facts .fact:first-child{border-top:0}
+#facts .fact:active{transform:none; background:rgba(var(--rgb-ink),.04)}
+#facts .fact[aria-expanded="true"]{box-shadow:none; background:rgba(var(--rgb-ink),.03)}
+#facts .fact h3{font-size:14.5px}
+#facts .fact h3::before{counter-increment:rule; content:counter(rule); display:inline-block; width:18px;
+  font-family:var(--mono); font-size:11px; font-weight:500; color:var(--ink3)}
+#facts .fact .body p{margin-top:6px; padding-left:18px; font-size:13.5px}
+#facts .fact .mark{width:22px; height:22px}
 /* Eigene Ebene: sonst rastet die Drehung auf ganze Pixel und das Kreuz zittert. */
 .fact .mark{will-change:transform; backface-visibility:hidden}
 .fact .mark svg{display:block}
@@ -301,6 +314,8 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 }
 .arw.two{width:0; opacity:0; margin-left:0}
 .arrowbox.dbl .arw.two{width:26px; opacity:1; margin-left:-4px}
+.delta{font-family:var(--mono); font-size:17px; font-weight:500; color:var(--ink2); font-variant-numeric:tabular-nums;
+  min-width:3ch; text-align:left; margin-left:-4px}
 .unit{font-family:var(--mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink3); margin-top:13px}
 .behind{font-size:12.5px; color:var(--ink3); margin-top:5px}
 
@@ -734,6 +749,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
             <path d="M16 26V7M16 7l-6.5 6.5M16 7l6.5 6.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </span>
+        <span class="delta" id="bgDelta" title="Differenz zum vorigen Messwert"></span>
       </div>
       <div class="unit">mg/dL · Sensor</div>
       <div class="behind" id="behind">dein Körper vor etwa einer Weile</div>
@@ -1539,6 +1555,8 @@ function drawChart(cv, pts, hours, tNow, opts={}){
 }
 
 /* ─── Anzeige ─────────────────────────────────────────────────── */
+/* Trendstufe aus der Steigung [mg/dL pro Minute]: −2 … +2 */
+const trendClass = r => r >= 3 ? 2 : r >= 1 ? 1 : r > -1 ? 0 : r > -3 ? -1 : -2;
 const fmtT = t => String(Math.floor((t/60)%24)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");
 
 function paint(tNow){
@@ -1551,18 +1569,22 @@ function paint(tNow){
   }
   const tone = v < 70 ? C.low : v > 180 ? C.high : C.ink;
   el.style.color = tone;
-  // Der Pfeil zeigt nach oben bei Anstieg, nach unten bei Abfall und
-  // waagerecht bei stabilem Verlauf -- so wie es jedes CGM handhabt.
-  // Das SVG zeigt nach oben, deshalb der Versatz von 90 Grad.
-  // Waagerecht bei stabilem Verlauf, senkrecht bei starker Änderung.
-  // Ab 3 mg/dL pro Minute kommt ein zweiter Pfeil dazu -- CGM-Konvention.
-  const rate = eng.trend();
-  const deg = 90 - clamp(rate*30, -90, 90);
+  /* Fuenf feste Pfeile wie in der Dexcom-App, keine stufenlose Neigung.
+     Grenzen nach der Dexcom-G6-Pfeiltabelle: stabil bis 1,8 mmol/L in 30 min
+     (~1 mg/dL pro Minute), Doppelpfeil ab 5,0 mmol/L in 30 min (~3 mg/dL
+     pro Minute). Die schraegen Pfeile der Vorlage (1–2 mg/dL pro Minute)
+     gibt es hier nicht — sie zaehlen zum einfachen Pfeil. */
+  const tcl = trendClass(eng.trend());
+  const deg = tcl > 0 ? 0 : tcl < 0 ? 180 : 90;       // das SVG zeigt nach oben
   document.querySelectorAll(".arw").forEach(a => {
     a.style.transform = `rotate(${deg}deg)`;
     a.style.color = tone;
   });
-  $("arrowbox").classList.toggle("dbl", Math.abs(rate) >= 3);
+  $("arrowbox").classList.toggle("dbl", Math.abs(tcl) === 2);
+  /* Differenz zum vorigen Messwert, fuenf Minuten zuvor */
+  const trc = eng.trace, nn = trc.length;
+  const dlt = nn >= 2 ? trc[nn-1].sensor - trc[nn-2].sensor : null;
+  $("bgDelta").textContent = dlt == null ? "" : (dlt > 0 ? "+" : dlt < 0 ? "−" : "±") + Math.abs(dlt);
 
   const mins = Math.floor(tNow) % 1440, day = Math.floor(tNow/1440)+1;
   const hhmm = String(Math.floor(mins/60)).padStart(2,"0")+":"+String(mins%60).padStart(2,"0");

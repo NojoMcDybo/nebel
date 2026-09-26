@@ -9,8 +9,9 @@
 5. `08_Beduerfnisse_und_Hunger.md` — warum Hunger simuliert wird und warum er nicht in die Engine gehört
 6. `09_Personen.md` — die zehn wählbaren Personen: was echt ist, was erfunden, warum kein eigenes Profil
 7. `10_Engine_Spec_V2_ExtHovorka.md` — die gültige technische Spezifikation der Engine
-8. `20_Parameter_Registry.md` — alle 35 Parameter mit Einheiten, Werten, Ranges und Kalibrierstatus
-9. `30_Rechtliche_Einordnung.md` — Medizinprodukterecht, Produkthaftung, GPL-Abgrenzung, Bedingungen für eine Veröffentlichung
+8. `11_Fett_und_Eiweiss.md` — Recherche: lässt sich Fett und Eiweiß über Kohlenhydrate abbilden?
+9. `20_Parameter_Registry.md` — alle 35 Parameter mit Einheiten, Werten, Ranges und Kalibrierstatus
+10. `30_Rechtliche_Einordnung.md` — Medizinprodukterecht, Produkthaftung, GPL-Abgrenzung, Bedingungen für eine Veröffentlichung
 
 ## Status der Altdokumente
 
