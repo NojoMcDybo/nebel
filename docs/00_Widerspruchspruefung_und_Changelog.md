@@ -249,7 +249,7 @@ Zehn wählbare Personen statt eines festen Subjekts, mit Avataren; Details in `0
 
 Nicht der Transport `x1·Q1` als Insulinwirkung: Er verschiebt Zucker nur zwischen Blut und Gewebe, ein Teil kommt zurück; als Wirkung gezeigt wäre er dreimal so groß wie der tatsächliche Verbrauch. Ein erster Versuch mit Differenzen „mit minus ohne Entscheidung" wurde verworfen: Ohne Bolus bleibt der Wert stundenlang hoch, die Insulinwirkung sah dann noch nach acht Stunden riesig aus, obwohl das Insulin längst weg war.
 
-**Fett und Eiweiß** kann die Aufteilung nicht zeigen, weil ExtHovorka sie nicht rechnet — gestrichen seit dem Umbau („V1 bleibt schlank"). Fettiges Essen läuft als langsame Kohlenhydrate; die App sagt das unter der Aufteilung. Eine echte Fett-/Eiweißwirkung bräuchte eine belegte Modellerweiterung und wäre eine Umkehr der damaligen Entscheidung.
+**Fett und Eiweiß** kann die Aufteilung nicht zeigen, weil ExtHovorka sie nicht rechnet — gestrichen seit dem Umbau („V1 bleibt schlank"). Fettiges Essen läuft als langsame Kohlenhydrate; die App sagt das unter der Aufteilung. Eine echte Fett-/Eiweißwirkung bräuchte eine belegte Modellerweiterung und wäre eine Umkehr der damaligen Entscheidung. *(Überholt durch Nachtrag 15: Die Erweiterung ist gebaut, die Aufteilung zeigt jetzt auch Eiweiß und Fett.)*
 
 Dafür im Adapter: Zustands-Schnappschuss alle 30 min (gut 24 h, mitgespeichert), Basaländerungen als Engine-Ereignis in der Eingabeliste statt als neues Pumpenprogramm (sonst ist die Basalgeschichte nicht nachrechenbar), gemeinsame Eingabefunktion für Lauf und Vorhersage. Geprüft: Die nachgerechnete Vergangenheit trifft den gelaufenen Wert auf 1e-6 mg/dL, die Vorhersage beginnt exakt beim aktuellen Blutzucker, Insulinwirkung hat ihr Maximum 1–3 h nach dem Bolus und ist nach 6 h auf 3 % abgeklungen, schnelle Kohlenhydrate wirken vor langsamen, ein geplantes, noch nicht begonnenes Training ändert die Vorhersage nicht, nach Neuladen ist sie identisch.
 
@@ -280,8 +280,54 @@ Gegen Wiederholung: `build-viewer.mjs` prüft jetzt die Syntax aller Inline-Skri
 
 ## 14. Nachtrag 26.09.2026 — Dexcom-Pfeile, Differenz, kompakte Regeln, Recherche Fett/Eiweiß
 
-- **Trendpfeil:** fünf feste Stufen wie in der Dexcom-App — Doppelpfeil hoch, Pfeil hoch, waagerecht, Pfeil runter, Doppelpfeil runter — statt stufenloser Neigung. Grenzen nach der Dexcom-G6-Pfeiltabelle: stabil bis 1,8 mmol/L in 30 min (~1 mg/dL pro Minute), Doppelpfeil ab 5,0 mmol/L in 30 min (~3 mg/dL pro Minute). Die Schrägpfeile der Vorlage (1–2 mg/dL pro Minute) zählen hier zum einfachen Pfeil. Quelle: Dexcom Canada, „Using Dexcom G6 Trend Arrows", https://s3-us-west-2.amazonaws.com/dexcommisc/Canada+HCP/Using+the+Trend+Arrows_with+ranges_ENGLISH.pdf
+- **Trendpfeil:** fünf feste Stufen wie in der Dexcom-App — Doppelpfeil hoch, Pfeil hoch, waagerecht, Pfeil runter, Doppelpfeil runter — statt stufenloser Neigung. Grenzen nach der Dexcom-G6-Pfeiltabelle: stabil bis 1,8 mmol/L in 30 min (~1 mg/dL pro Minute), Doppelpfeil ab 5,0 mmol/L in 30 min (~3 mg/dL pro Minute). Die Schrägpfeile der Vorlage (1–2 mg/dL pro Minute) zählen hier zum einfachen Pfeil. *(Überholt durch Nachtrag 15: sieben Stufen mit Schrägpfeilen.)* Quelle: Dexcom Canada, „Using Dexcom G6 Trend Arrows", https://s3-us-west-2.amazonaws.com/dexcommisc/Canada+HCP/Using+the+Trend+Arrows_with+ranges_ENGLISH.pdf
 - **Differenz zum vorigen Messwert** hinter dem Pfeil, z. B. „+15".
 - **Fünf Regeln** als nummerierte Liste in einer Karte, eingeklappt etwa ein Drittel niedriger.
-- **Recherche Fett und Eiweiß:** `11_Fett_und_Eiweiss.md`. Ergebnis: Eiweiß und die verzögernde Wirkung von Fett lassen sich über den Kohlenhydrat-Eingabeverlauf abbilden, die fettbedingte Insulinresistenz nicht. Entscheidung offen.
+- **Recherche Fett und Eiweiß:** `11_Fett_und_Eiweiss.md`. Ergebnis: Eiweiß und die verzögernde Wirkung von Fett lassen sich über den Kohlenhydrat-Eingabeverlauf abbilden, die fettbedingte Insulinresistenz nicht. Entscheidung offen. *(Entschieden in Nachtrag 15: gebaut.)*
 
+## 15. Nachtrag 26.09.2026 — Schrägpfeile, Fett und Eiweiß in der Engine
+
+**Trendpfeil: sieben Stufen.** Wie die Dexcom-App, jetzt mit Schrägpfeilen. Grenzen nach derselben G6-Tabelle wie in Nachtrag 14, pro 30 min:
+
+| Stufe | Steigung | Pfeil |
+|---|---|---|
+| ±3 | ab 3 mg/dL pro min (ab 5,0 mmol/L) | Doppelpfeil |
+| ±2 | 2–3 (3,4–5,0) | gerade hoch/runter |
+| ±1 | 1–2 (1,8–3,4) | schräg 45° |
+| 0 | unter 1 (unter 1,8) | waagerecht |
+
+- Die Differenz zum vorigen Messwert zeigt bei Gleichstand „0“ statt „±0“.
+- Quelle: Dexcom Canada, „Using Dexcom G6 Trend Arrows“ (Link in Nachtrag 14).
+
+**Fett und Eiweiß in der Engine.** Nojo hat entschieden, beide Stufen aus `11_Fett_und_Eiweiss.md` zu bauen. `engine/src/nutrition.ts` rechnet drei Wirkungen als Eingänge, ohne neuen Zustand:
+- Fett verzögert die Magenentleerung.
+- Fett senkt über Stunden die Insulinsensitivität: `siFactor` auf `kb1`–`kb3`, Gipfel nach 5,5 h.
+- Eiweiß liefert späte Glukose aus der Leber: `uProteinGlucose` in `dQ1/dt`.
+
+Kalibriert an Wolpert 2013 (Fett) und Paterson 2016 (Eiweiß), im Mittel der 20 Subjekte. Gegenproben an Smart 2013 und O'Connell 2021. Tabelle, Operationalisierung und Grenzen: Doc 11, Parameter: Registry §8.
+
+**Neu gelesene Quellen:**
+- O'Connell 2021 (*Pediatr Diabetes*): Fett allein, Dosis-Wirkung.
+- Paterson 2015 (*Curr Diab Rep*): Review mit den Zahlen aus Smart 2013.
+- Lupoli 2019 (*Nutrients*): Magenentleerung.
+- Paterson 2016, nur als Zusammenfassung auf diabetesincontrol.com.
+
+**Nicht lesbar** und in Doc 11 als ungelesen markiert: Smart 2013 im Original, der Wolpert-Methodenteil, Bell 2015, Lodefalk 2008 und ein systematisches Review zu Eiweiß (PubMed 31454430). Gründe: Europe PMC Rate-Limit (429), PubMed/PMC Captcha, Wiley und diabetesjournals 403.
+
+**Widersprüche, gefunden und aufgelöst:**
+- **„Dauer der Mahlzeit“ hatte keine Wirkung.** Der Regler im Essen-Blatt ging nie in die Engine. Das Protokoll zeigte statt der Essdauer die Absorptionskonstante des Typs (20/40/75) als „min“. Jetzt wird die Mahlzeit über die Essdauer verteilt geliefert, und das Protokoll zeigt die Essdauer.
+- **„Fettig“ war als Vereinfachung gekennzeichnet** (`vereinfacht:true`, 100 % langsame KH). Das ist entfallen: Die Verzögerung kommt jetzt aus dem Fett, der KH-Anteil ist wie bei „gemischt“.
+- **Adapter-Kommentar:** „Fett- und Proteinwelle“ stand als gestrichen. Jetzt steht dort, dass beide belegt zurück sind.
+- **Seite 3, Hinweistext:** „Fett und Eiweiß rechnet das Modell nicht“. Ersetzt.
+- **Spec §13:** „Keine Fett-/Proteinmetabolik“ ist teilweise aufgehoben und dort vermerkt.
+- **Validierungsblock am Ende von `app/template.html`:** Er trug die Überschrift „Referenzwerte der kalibrierten Engine“, stammt aber aus der alten Prototyp-Engine mit Faktorsystem. Er ist jetzt als VERALTET markiert, mit Verweis auf die gültigen Referenzen. Die Zahlen bleiben als Geschichte stehen.
+
+**Designentscheidung mit Folgen, bitte prüfen:** Die Fettresistenz zählt erst ab 20 g Fett pro Mahlzeit. Ohne diese Schwelle steigt Lenas Tagesmittel mit drei gewöhnlichen „gemischten“ Mahlzeiten von 194 auf 295 mg/dL. Eiweiß hat keine Schwelle, gewöhnliche Mengen heben Lenas Tag um etwa 15 mg/dL. Ob Eiweiß denselben Bezugspunkt bekommt, ist offen (Doc 11, „Offene Entscheidungen“).
+
+**Tests:** 133 (vorher 120), `check:adapter` 59 Prüfungen. Neu dazu:
+- Neutralität ohne Fett und Eiweiß
+- Mengenerhalt bei Verzögerung
+- Paterson in allen vier Konfidenzintervallen
+- Wolpert-Faktor 1,37–1,47
+- Richtung gegen Smart und O'Connell
+- im Adapter: Fett hält Kohlenhydrate im Magen, spät höher, Summen stimmen

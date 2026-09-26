@@ -12,10 +12,11 @@
    mmol/L. Umgerechnet wird ausschliesslich hier.
 
    Was es im Vergleich zum alten Prototyp NICHT mehr gibt: Stress,
-   Schlafmangel, Krankheit, Alkohol, Fett- und Proteinwelle,
-   Hypo-Gedaechtnis und die daraus gebildeten Kombinationen. Alles
-   unbelegte Multiplikatoren, siehe docs/10_Engine_Spec_V2_ExtHovorka.md
-   Abschnitt 13. Sie fehlen sichtbar statt heimlich weiterzulaufen.
+   Schlafmangel, Krankheit, Alkohol, Hypo-Gedaechtnis und die daraus
+   gebildeten Kombinationen. Alles unbelegte Multiplikatoren, siehe
+   docs/10_Engine_Spec_V2_ExtHovorka.md Abschnitt 13. Sie fehlen sichtbar
+   statt heimlich weiterzulaufen. Fett und Eiweiss sind zurueck — diesmal
+   an Studien kalibriert, in der Engine (docs/11_Fett_und_Eiweiss.md).
    Sensoralterung und Druck auf den Sensor sind zurueck — diesmal
    belegt, im Sensormodell V2 (docs/20_Parameter_Registry.md, Abschnitt 5).
    ══════════════════════════════════════════════════════════════════ */
@@ -30,14 +31,20 @@ const MGDL = N.MGDL_PER_MMOLL;
    (58–131 -> 50 min). Beleg und Begruendung stehen dort. */
 const toMgdl = (mmol) => mmol * MGDL;
 
-/* Mahlzeitentypen. tau trifft die Absorptionskonstanten der Engine
-   exakt: 20 min schnell, 40 min langsam. Fettig hat in ExtHovorka kein
-   Gegenstueck — es laeuft als langsam und ist als Vereinfachung
-   gekennzeichnet, keine Fettmodellierung. */
+/* Mahlzeitentypen. slow ist der Anteil langsamer Kohlenhydrate; er trifft
+   die Absorptionskonstanten der Engine (20 min schnell, 40 min langsam).
+   fat und protein sind die Voreinstellung fuer Fett und Eiweiss in Gramm pro
+   Gramm Kohlenhydrate — die Nutzerin kann sie im Blatt aendern. Grobe
+   Richtwerte fuer typische Gerichte, keine Naehrwerttabelle:
+     schnell   Traubenzucker, Saft, Gummibaerchen — kein Fett, kein Eiweiss
+     gemischt  Brot mit Belag, Nudeln mit Tomatensosse — 0,25 g Fett, 0,3 g Eiweiss
+     fettig    Pizza, Burger mit Pommes — 0,45 g Fett, 0,4 g Eiweiss
+   Was Fett und Eiweiss im Koerper tun, rechnet die Engine
+   (engine/src/nutrition.ts, docs/11_Fett_und_Eiweiss.md). */
 const MEAL_TYPES = {
-  fast:  { tau:20, label:"schnell",  cv:0.15, slow:0 },
-  mixed: { tau:40, label:"gemischt", cv:0.25, slow:0.65 },
-  fatty: { tau:75, label:"fettig",   cv:0.36, slow:1, vereinfacht:true },
+  fast:  { label:"schnell",  cv:0.15, slow:0,    fat:0,    protein:0   },
+  mixed: { label:"gemischt", cv:0.25, slow:0.65, fat:0.25, protein:0.3 },
+  fatty: { label:"fettig",   cv:0.36, slow:0.65, fat:0.45, protein:0.4 },
 };
 
 const ALLTAG = [
@@ -160,18 +167,24 @@ class Engine {
   }
 
   /* ── Eingaben der Nutzerin ── */
-  logMeal(gEst, type = "fast", dur = 0){
+  /* fatEst/protEst: geschaetztes Fett und Eiweiss [g]. Fehlen sie, gilt die
+     Voreinstellung des Mahlzeitentyps. Der Schaetzfehler trifft alles gleich:
+     eine groessere Portion hat von allem mehr. */
+  logMeal(gEst, type = "fast", dur = 0, fatEst, protEst){
     const mt = MEAL_TYPES[type] ?? MEAL_TYPES.fast;
     /* Die geschaetzte Menge ist nicht die gegessene. Genau darum geht es. */
-    const err = 1 + mt.cv * N.normalAt(this.seed + 31, this.tick);
-    const gReal = Math.max(0, gEst * err);
+    const err = Math.max(0, 1 + mt.cv * N.normalAt(this.seed + 31, this.tick));
+    const fEst = fatEst ?? gEst * mt.fat, pEst = protEst ?? gEst * mt.protein;
+    const gReal = gEst * err, fReal = fEst * err, pReal = pEst * err;
     const slowG = gReal * mt.slow, fastG = gReal - slowG;
-    const t = this.s.t;
-    this.input.push({ kind:"meal", t, fastCarbsG: fastG, slowCarbsG: slowG });
+    const t = this.s.t, eat = Math.max(1, Math.round(dur) || 1);
+    this.input.push({ kind:"meal", t, fastCarbsG: fastG, slowCarbsG: slowG,
+                      fatG: fReal, proteinG: pReal, durationMin: eat });
     /* truth ist die tatsaechlich gegessene Menge. Der Rueckblick stellt sie
        der Schaetzung gegenueber — das ist die Lehre der Mahlzeit. */
     this.events.push({ kind:"meal", t, est: Math.round(gEst), truth: gReal,
-                       type, dur: Math.round(mt.tau) });
+                       fat: Math.round(fEst), protein: Math.round(pEst),
+                       fatTruth: fReal, proteinTruth: pReal, type, dur: eat });
     this.meals.push({ t, gEst, gReal, type, label: mt.label });
     return gReal;
   }
@@ -321,19 +334,13 @@ class Engine {
      Dieselbe Funktion fuer den Lauf und fuer die Vorhersage — sonst rechnet
      die Vorhersage eine andere Vergangenheit nach, als gelaufen ist. */
   _u(t, ev){
-    const u = {
-      uFastCarbs: 0, uSlowCarbs: 0,
+    const m = N.mealInputsAt(t, 1, ev);
+    return {
+      uFastCarbs: m.uFastCarbs, uSlowCarbs: m.uSlowCarbs,
+      uProteinGlucose: m.uProteinGlucose, siFactor: m.siFactor,
       uHR: N.heartRateAt(t, ev, this.p.HRrest),
       uInsulin: N.insulinInputAt(t, 1, this.pump, ev),
     };
-    for (const e of ev){
-      if (e.kind !== "meal") continue;
-      const overlap = Math.min(t+1, e.t+1) - Math.max(t, e.t);
-      if (overlap <= 0) continue;
-      u.uFastCarbs += N.gCarbsToMmol(e.fastCarbsG) * overlap;
-      u.uSlowCarbs += N.gCarbsToMmol(e.slowCarbsG) * overlap;
-    }
-    return u;
   }
 
   step(){
@@ -435,6 +442,10 @@ class Engine {
              Gewertet: Verbrauch im Gewebe (x2·Q2) und gebremste Leber
              (EGP0·x3). Nicht der Transport x1·Q1 — der verschiebt Zucker
              nur zwischen Blut und Gewebe, ein Teil kommt zurueck.
+       protein — Glukose aus Eiweiss, die die Leber spaet nachliefert.
+       fat  — Zucker, den das Insulin wegen der fettbedingten Resistenz
+             NICHT herausnimmt (Wirkung ohne minus mit Resistenz).
+       food ist die Summe aus fast, slow, protein und fat.
      Beide Raten sind Bruttofluesse: Essen bringt, Insulin nimmt. Der
      Blutzucker bewegt sich nur um die Differenz (plus Leber, Niere,
      Grundverbrauch).
@@ -469,23 +480,37 @@ class Engine {
       return d.map((v,i) => v + (k1[i] + 2*k2[i] + 2*k3[i] + k4[i])/6);
     };
 
-    const full = [], insulin = [], food = [], fast = [], slow = [];
+    const full = [], insulin = [], food = [], fast = [], slow = [], protein = [], fat = [];
     let z = Float64Array.from(snap.z), d = [0,0,0,0,0];
+    /* Fett: die Insulinwirkung, die wegen der fettbedingten Resistenz fehlt.
+       Gerechnet wird direkt die Luecke dx = x(ohne Resistenz) − x(echt) fuer
+       x2 und x3. Sie gehorcht dx' = kb·si·I·(1 − siFactor) − ka·dx, getrieben
+       vom tatsaechlichen Plasmainsulin — ohne Fett bleibt sie exakt null.
+       Start aus dem Snapshot: dx = x·(1/siFactor − 1), im Gleichgewicht exakt,
+       sonst klingt der Fehler mit 1/ka2 und 1/ka3 in unter einer Stunde ab. */
+    const sf0 = N.mealInputsAt(snap.t, 1, ev).siFactor;
+    let dx2 = N.get(z, "x2") * (1/sf0 - 1), dx3 = N.get(z, "x3") * (1/sf0 - 1);
+    const e2 = Math.exp(-p.ka2), e3 = Math.exp(-p.ka3);
     for (let t = snap.t; ; t++){
+      const u = this._u(t, ev);
+      const G = N.glucoseFrom(N.get(z, "Q1"), p.VG), Q2 = N.get(z, "Q2");
       if ((t - snap.t) % stride === 0){
-        const G = N.glucoseFrom(N.get(z, "Q1"), p.VG);
         full.push(toMgdl(G));
         const f = N.get(z, "D2Fast")/p.tmaxGFast * perH, sl = N.get(z, "D2Slow")/p.tmaxG * perH;
-        fast.push(f); slow.push(sl); food.push(f + sl);
-        insulin.push((d[3]*N.get(z, "Q2") + p.EGP0*d[4]) * perH);
+        const pr = u.uProteinGlucose * perH;
+        const ft = Math.max(0, (dx2*Q2 + p.EGP0*dx3) * perH);
+        fast.push(f); slow.push(sl); protein.push(pr); fat.push(ft); food.push(f + sl + pr + ft);
+        insulin.push((d[3]*Q2 + p.EGP0*d[4]) * perH);
       }
       if (t >= end) break;
-      const u = this._u(t, ev);
-      const si = N.sensitivityFactor(N.glucoseFrom(N.get(z, "Q1"), p.VG), p);
-      d = rk(d, u.uInsulin - basalMU, si);
+      const si = N.sensitivityFactor(G, p), I = N.get(z, "I");
+      d = rk(d, u.uInsulin - basalMU, si * u.siFactor);
+      const gap = si * I * (1 - u.siFactor);
+      dx2 = dx2*e2 + p.kb2*gap/p.ka2*(1 - e2);
+      dx3 = dx3*e3 + p.kb3*gap/p.ka3*(1 - e3);
       z = N.rk4Step(N.derivatives, z, t, 1, p, u);
     }
-    return { from: snap.t, now, end, stride, blood, full, insulin, food, fast, slow };
+    return { from: snap.t, now, end, stride, blood, full, insulin, food, fast, slow, protein, fat };
   }
 
   /* ── Anzeigezustaende ── */
@@ -516,10 +541,12 @@ class Engine {
   }
 
   iob(){ return N.insulinOnBoardUnits(this.s.t, this.input); }
+  /* Kohlenhydrate aktiv: im Darm (D1, D2) plus, was nach fettem Essen noch
+     im Magen liegt. Eiweiss zaehlt nicht mit — es ist kein Kohlenhydrat. */
   cob(){
     const mmol = N.get(this.z,"D1Slow") + N.get(this.z,"D2Slow")
                + N.get(this.z,"D1Fast") + N.get(this.z,"D2Fast");
-    return Math.max(0, N.mmolToGCarbs(mmol));
+    return Math.max(0, N.mmolToGCarbs(mmol) + N.carbsInStomachG(this.s.t, this.input));
   }
   trend(){ const n=this.trace.length; return n<4?0:(this.trace[n-1].sensor-this.trace[n-4].sensor)/15; }
   tir(){ if(!this.trace.length) return null;

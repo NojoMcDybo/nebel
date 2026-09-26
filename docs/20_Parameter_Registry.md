@@ -1,6 +1,6 @@
 # Nebel — Parameter Registry V1 (ExtHovorka)
 
-Stand: 2026-09-24
+Stand: 2026-09-26 (Abschnitt 8 Fett und Eiweiß neu)
 Quelle aller Werte: ExtHovorka / py-mgipsim, 20 virtuelle Patienten (`Patient_1..20.json`)
 Ranges sind **beobachtete Werte über diese 20 Subjekte**, keine publizierten Populationsverteilungen. Das ist ein Unterschied und wird nicht verwischt.
 
@@ -242,7 +242,8 @@ Lesart:
 | Korrekturfaktor und KE-Faktor der App-Kacheln | Therapie | Q, aber ungeprüft | Stammen aus `demographic_info` des Datensatzes, nicht aus dem Modell. Prüfung 26.09. (1 U, 2 h nach 60 g ohne Bolus, größte Differenz zum Lauf ohne Korrektur): mit Quell-`tmaxI` Modell / Datensatz im Median 0,75, Spanne 0,27–1,41; mit `tmaxI` = 50 min im Median 0,93, Spanne 0,37–1,58. Patient 1 passt (33 gegen 28 mg/dL pro U), Patient 7 nicht (24 gegen 64). KE-Faktor noch nicht geprüft |
 | Weitere Sensorereignisse | Beobachtung | offen | z. B. Störsubstanzen wie hochdosiertes Vitamin C (herstellerabhängig), frühestens an späteren Tagen |
 | Abtastrate | Beobachtung | N | 5 min, Gerätekonvention |
-| KH-Split schnell/langsam | Mahlzeit | N | Zuordnungsregel realer Mahlzeiten auf `uFastCarbs`/`uSlowCarbs` — braucht eine begründete Heuristik, keine Bauchzahl |
+| KH-Split schnell/langsam | Mahlzeit | N | Zuordnungsregel realer Mahlzeiten auf `uFastCarbs`/`uSlowCarbs` — braucht eine begründete Heuristik, keine Bauchzahl. Derzeit Voreinstellungen je Mahlzeitentyp (Abschnitt 8.3) |
+| Fett- und Eiweiß-Voreinstellungen | Mahlzeit | N | g pro g KH je Mahlzeitentyp (Abschnitt 8.3) — grobe Richtwerte, gegen eine Nährwerttabelle prüfen |
 | Bolusdauer | Pumpe | N | Modellierung als Impuls über 1 min |
 | `drainPerMin` | Reserven | N | Grundverbrauch, vorläufig 1/600 pro min (voll → leer in ~10 h) |
 | `exerciseDrainPerMin` | Reserven | N | Zusatzverbrauch bei voller Belastung, vorläufig 3/600 |
@@ -270,3 +271,50 @@ Wo ein Quellwert nachweislich nicht zur Wirklichkeit passt, wird er an genau ein
 
 Abgesichert durch `tests/calibration.test.ts`: Die Kalibrierung verändert das Basalgleichgewicht nicht, legt die Wirkung von 1 U in die Grenzen der Fachinformation, und die Gegenprobe mit Quellwerten liegt außerhalb.
 
+
+## 8. Fett und Eiweiß (`engine/src/nutrition.ts`, seit 26.09.2026)
+
+Drei Wirkungen als Eingänge, kein neuer Zustand. Herleitung, Studien und Grenzen: `11_Fett_und_Eiweiss.md`. Ohne Fett, Eiweiß und Essdauer ist die Engine exakt die Quelle.
+
+### 8.1 Parameter
+
+| Parameter | Wert | Einheit | Status | Beleg |
+|---|---|---|---|---|
+| `fatGastricDelayMinPerG` | 1,0 | min/g | N | Richtung: Smart 2013, Lupoli 2019, Faggionato 2026. Größe angenommen, Lodefalk 2008 ungelesen |
+| `fatGastricDelayMaxMin` | 120 | min | N | Obergrenze, Annahme |
+| `fatResistancePerG` | 0,020 | 1/g | N, an Q kalibriert | Wolpert 2013: Insulinfaktor 1,42 für +50 g Fett, im Mittel der 20 Subjekte getroffen (1,43) |
+| `fatResistanceThresholdG` | 20 | g pro Mahlzeit | N | Bezugspunkt „gewöhnliches Essen“, keine Physiologie (O'Connell 2021 findet keine Schwelle). Begründung und Nachrechnung in Doc 11 |
+| `fatResistanceTauMin` | 110 | min | N | Gipfel 3τ = 5,5 h: Wolpert (Mehrbedarf 5–10 h), O'Connell (4–8 h) |
+| `proteinGlucoseYield` | 0,19 | g Glukose / g Eiweiß | N, an Q kalibriert | Paterson 2016, kleinste Quadrate auf vier Punkte, alle in den 95-%-KI |
+| `proteinTauMin` | 90 | min | N | Erlang-3, Gipfel der Rate 3 h. Von den Daten nicht bestimmt; nach Reviews 3–5 h (Paterson 2015, Margaritis 2025) |
+| Essdauer `durationMin` | Eingabe | min | – | Gleichverteilte Lieferung; ohne Angabe 1 min wie bisher |
+
+### 8.2 Gleichungen
+
+```
+Magen:     τ_M = min(120, 1,0 · Fett)          Lieferung = Faltung Gleichverteilung(Essdauer) * Exp(τ_M)
+Fett:      R = Σ 0,020 · max(0, Fett − 20) · (s/330)³ · e^(3 − s/110)
+           siFactor = 1 / (1 + R)              wirkt auf kb1, kb2, kb3
+Eiweiß:    uProteinGlucose = Σ 0,19 · Eiweiß/0,180156 · d/dt Erlang₃(s; 90)   [mmol/min] → dQ1/dt
+```
+
+### 8.3 Voreinstellungen der App (g pro g Kohlenhydrate)
+
+| Typ | Anteil langsam | Fett | Eiweiß | Schätzfehler (cv) |
+|---|---|---|---|---|
+| schnell | 0 | 0 | 0 | 0,15 |
+| gemischt | 0,65 | 0,25 | 0,3 | 0,25 |
+| fettig | 0,65 | 0,45 | 0,4 | 0,36 |
+
+„Fettig“ lief bis 26.09. als 100 % langsame Kohlenhydrate. Die Verzögerung kommt jetzt aus dem Fett selbst.
+
+### 8.4 Nachrechnung (Mittel der 20 Subjekte, mmol/L)
+
+| Studie | Studie | Nebel | Rolle |
+|---|---|---|---|
+| Wolpert 2013, Insulinfaktor +50 g Fett | 1,42 | 1,43 | Kalibrierung |
+| Paterson 2016, 75 g / 100 g Eiweiß, 240–300 min | 0,93–2,36 / 1,04–2,41 | 1,26 / 1,69 | Kalibrierung |
+| Smart 2013 (Kinder), +35 g Fett / +40 g Eiweiß / beides, 5 h | 2,3 / 2,4 / 5,4 | 1,54 / 0,63 / 2,24 | Gegenprobe, Nebel darunter |
+| O'Connell 2021 (Kinder, reines Fett), 26 g / 51 g, ab 330 min | 0,70 / 1,40 | 0,96 / 4,26 | Gegenprobe, Nebel darüber |
+
+Abgesichert durch `tests/nutrition.test.ts` (Neutralität, Mengenerhalt, Zeitverlauf, Kalibrierung gegen Paterson und Wolpert, Richtung gegen Smart und O'Connell) und `scripts/check-adapter.cjs` (Adapter, Vorhersage, KH aktiv).

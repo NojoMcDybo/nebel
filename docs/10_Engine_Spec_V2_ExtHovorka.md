@@ -87,6 +87,10 @@ Abgeleitet: `G = Q1 / VG` [mmol/L].
 | `uSlowCarbs` | mmol/min | Langsam resorbierbare Kohlenhydrate |
 | `uHR` | bpm | Herzfrequenz — der Bewegungstreiber |
 | `uInsulin` | mU/min | Basalrate + Bolus, kombiniert |
+| `uProteinGlucose` | mmol/min | *Nebel-Erweiterung, optional, Standard 0.* Glukose aus Eiweiß, direkt ins Plasma. `engine/src/nutrition.ts` |
+| `siFactor` | – | *Nebel-Erweiterung, optional, Standard 1.* Faktor auf die Insulinsensitivität aller drei Pfade, nach fettreichen Mahlzeiten < 1 |
+
+Die beiden Erweiterungen (26.09.2026) kommen aus der Mahlzeit, nicht aus einem Zustand: `mealInputsAt(t, dt, events)` rechnet aus Kohlenhydraten, Fett, Eiweiß und Essdauer die vier Nahrungseingänge. Fehlen Fett, Eiweiß und Essdauer, ist alles exakt wie in der Quelle — der Orakelabgleich bleibt unberührt. Herleitung, Kalibrierung und Grenzen: `11_Fett_und_Eiweiss.md`, Parameter: Registry Abschnitt 8.
 
 ## 6. Gleichungen
 
@@ -106,6 +110,7 @@ kb1' = kb1 · SIhypo · SIhyper
 kb2' = kb2 · SIhypo · SIhyper
 kb3' = kb3 · SIhypo · SIhyper
 ```
+Nebel-Erweiterung: alle drei zusätzlich `· siFactor` (Standard 1, siehe §5).
 Normiert auf `G = 5 mmol/L`. Bedeutung: Insulinsensitivität steigt im Hypobereich und sinkt im Hyperbereich. Dies ist **keine** Tageszeitabhängigkeit und darf im UI nicht als solche erklärt werden.
 
 ### 6.3 Insulinwirkung
@@ -145,7 +150,7 @@ Bewegung erhöht die Leberfreisetzung; hochintensive Belastung stärker (`p2 > p
 
 ### 6.8 Glukosekompartimente
 ```
-dQ1/dt = − x1 · Q1 + k12 · Q2 − F01n − FR + UGe + EGP − p3 · EEfast
+dQ1/dt = − x1 · Q1 + k12 · Q2 − F01n − FR + UGe + EGP − p3 · EEfast   [+ uProteinGlucose, Nebel-Erweiterung]
 dQ2/dt =   x1 · Q1 − k12 · Q2 − x2 · Q2 + p3 · EEfast − p4 · EEfast − p5 · x2 · EElong
 ```
 `p3` verschiebt Glukose bewegungsgetrieben ins periphere Kompartiment, `p4` beschreibt den Verbrauch dort, `p5` den verlängerten insulinsensitivierenden Nacheffekt.
@@ -277,7 +282,7 @@ Testfälle vor der Implementierung:
 
 - Kein UVA/Padova-Klon
 - Kein Glukagon-/Gegenregulationsmodell
-- Keine Fett-/Proteinmetabolik (der Schnell/Langsam-Split ist ein Absorptionsmodell, kein Makronährstoffmodell)
+- Keine Fett-/Proteinmetabolik (der Schnell/Langsam-Split ist ein Absorptionsmodell, kein Makronährstoffmodell). **Seit 26.09.2026 teilweise aufgehoben:** Fett und Eiweiß wirken über drei Eingänge — Magenverzögerung, gesenkte Insulinsensitivität, späte Glukose aus der Leber —, weiterhin ohne Stoffwechselzustand. Siehe `11_Fett_und_Eiweiss.md`
 - Keine Stress-, Krankheits- oder Schlafmultiplikatoren
 - Kein Circadian-Term, kein Dawn-Phänomen
 - Keine Sensoralterung, kein Drift-/Druckartefaktmodell

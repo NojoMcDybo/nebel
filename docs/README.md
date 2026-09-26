@@ -9,8 +9,8 @@
 5. `08_Beduerfnisse_und_Hunger.md` — warum Hunger simuliert wird und warum er nicht in die Engine gehört
 6. `09_Personen.md` — die zehn wählbaren Personen: was echt ist, was erfunden, warum kein eigenes Profil
 7. `10_Engine_Spec_V2_ExtHovorka.md` — die gültige technische Spezifikation der Engine
-8. `11_Fett_und_Eiweiss.md` — Recherche: lässt sich Fett und Eiweiß über Kohlenhydrate abbilden?
-9. `20_Parameter_Registry.md` — alle 35 Parameter mit Einheiten, Werten, Ranges und Kalibrierstatus
+8. `11_Fett_und_Eiweiss.md` — Fett und Eiweiß: Recherche, Umsetzung in der Engine, Kalibrierung an Studien, Grenzen
+9. `20_Parameter_Registry.md` — alle 35 Modellparameter mit Einheiten, Werten, Ranges und Kalibrierstatus, dazu Sensormodell, Nebel-Kalibrierung und Fett/Eiweiß
 10. `30_Rechtliche_Einordnung.md` — Medizinprodukterecht, Produkthaftung, GPL-Abgrenzung, Bedingungen für eine Veröffentlichung
 
 ## Status der Altdokumente
@@ -42,3 +42,5 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 | Personen | Zehn erfundene Figuren auf zehn veröffentlichten Körpern, wählbar auf der Startseite; Standard Lena (Subjekt 10) | 26.09.2026 |
 | Eigenes Profil | Keine Werteingabe (Zweckbestimmung, DSGVO). Später Ähnlichkeits-Fragen ohne Zahlen | 26.09.2026 |
 | Nebel-Kalibrierung | `tsub` 5 min, `tmaxI` 50 min, zentral in `engine/src/calibration.ts` | 26.09.2026 |
+| Fett und Eiweiß | In der Engine, ohne neuen Zustand: Magenverzögerung, Fett-Insulinresistenz ab 20 g pro Mahlzeit, späte Glukose aus Eiweiß. Kalibriert an Wolpert 2013 und Paterson 2016 | 26.09.2026 |
+| Trendpfeil | Sieben feste Stufen wie Dexcom G6, mit Schrägpfeilen; dahinter die Differenz zum vorigen Wert | 26.09.2026 |

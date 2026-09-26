@@ -8,6 +8,12 @@ export interface MealEvent {
   t: number;          // [min]
   fastCarbsG: number; // schnell resorbierbare KH [g]
   slowCarbsG: number; // langsam resorbierbare KH [g]
+  /** Fett [g]: verzoegert die KH derselben Mahlzeit, senkt ueber Stunden die Insulinsensitivitaet. */
+  fatG?: number;
+  /** Eiweiss [g]: liefert spaet zusaetzliche Glukose aus der Leber. */
+  proteinG?: number;
+  /** Essdauer [min]; die KH kommen gleichmaessig verteilt an. Standard 1 min. */
+  durationMin?: number;
   label?: string;
 }
 
@@ -55,6 +61,10 @@ export const validateEvents = (events: readonly SimEvent[]): void => {
     if (!Number.isFinite(e.t) || e.t < 0) throw new RangeError(`Event mit ungueltigem t: ${e.t}`);
     if (e.kind === "meal" && (e.fastCarbsG < 0 || e.slowCarbsG < 0))
       throw new RangeError("Mahlzeit mit negativen Kohlenhydraten");
+    if (e.kind === "meal" && ((e.fatG ?? 0) < 0 || (e.proteinG ?? 0) < 0))
+      throw new RangeError("Mahlzeit mit negativem Fett oder Eiweiss");
+    if (e.kind === "meal" && e.durationMin !== undefined && !(e.durationMin >= 0 && Number.isFinite(e.durationMin)))
+      throw new RangeError("Mahlzeit mit ungueltiger Essdauer");
     if (e.kind === "bolus" && e.units < 0) throw new RangeError("Negativer Bolus");
     if (e.kind === "tempBasal" && e.factor < 0) throw new RangeError("Negativer Temp-Basal-Faktor");
     if (e.kind === "heartRate" && e.bpm <= 0) throw new RangeError("Herzfrequenz <= 0");

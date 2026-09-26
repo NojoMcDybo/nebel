@@ -16,6 +16,17 @@ export interface ModelInputs {
   uSlowCarbs: number; // [mmol/min]
   uHR: number;        // [bpm]
   uInsulin: number;   // [mU/min]
+  /**
+   * Zusaetzliche Glukose aus Eiweiss [mmol/min], direkt ins Plasma (Q1) —
+   * sie entsteht in der Leber, nicht im Darm. Fehlt = 0. Nebel-Erweiterung,
+   * siehe nutrition.ts.
+   */
+  uProteinGlucose?: number;
+  /**
+   * Faktor auf die Insulinsensitivitaet aller drei Insulinpfade, z. B. nach
+   * fettreichen Mahlzeiten. Fehlt = 1. Nebel-Erweiterung, siehe nutrition.ts.
+   */
+  siFactor?: number;
 }
 
 export const NOT_IMPLEMENTED = "NICHT IMPLEMENTIERT";
@@ -67,7 +78,7 @@ export const derivatives = (
 
   const G = glucoseFrom(Q1raw, p.VG);
   const Q1 = G * p.VG;
-  const si = sensitivityFactor(G, p);
+  const si = sensitivityFactor(G, p) * (u.siFactor ?? 1);
 
   const d = new Float64Array(STATE_COUNT);
 
@@ -90,7 +101,7 @@ export const derivatives = (
   const UGe = D2Slow / p.tmaxG + D2Fast / p.tmaxGFast;
   const EGP = Math.max(0, p.EGP0 * (1 - x3) * (1 + p.p1 * EEfast + p.p2 * EEhigh));
 
-  d[6] = -x1 * Q1 + p.k12 * Q2 - F01n - FR + UGe + EGP - p.p3 * EEfast;
+  d[6] = -x1 * Q1 + p.k12 * Q2 - F01n - FR + UGe + EGP - p.p3 * EEfast + (u.uProteinGlucose ?? 0);
   d[7] = x1 * Q1 - p.k12 * Q2 - x2 * Q2 + p.p3 * EEfast - p.p4 * EEfast - p.p5 * x2 * EElong;
 
   // Interstitium

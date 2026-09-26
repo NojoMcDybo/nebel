@@ -161,6 +161,35 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   ok("Alle starten im Gleichgewicht", g.every(v => Math.abs(v - 108) < 1), g.map(v => v.toFixed(0)).join(" "));
 }
 
+/* ── Fett und Eiweiss ── */
+{
+  const mk = () => { const e = new Engine(20260812, 9); e.acts = []; for (let i = 0; i < 95; i++) e.step(); return e; };
+  const a = mk(), b = mk(), t0 = a.s.t;
+  a.logMeal(80, "fatty", 20);            // Voreinstellung: 36 g Fett, 32 g Eiweiss
+  b.logMeal(80, "fatty", 20, 0, 0);      // dieselben Kohlenhydrate ohne Fett und Eiweiss
+  a.injectBolus(8, 1, 0); b.injectBolus(8, 1, 0);
+  const ma = a.events.find(e => e.kind === "meal");
+  ok("Fettig setzt Fett und Eiweiss voraus", ma.fat === 36 && ma.protein === 32, `${ma.fat} g Fett, ${ma.protein} g Eiweiss`);
+  for (let i = 0; i < 30; i++){ a.step(); b.step(); }
+  ok("Fett haelt Kohlenhydrate im Magen: KH aktiv hoeher", a.cob() > b.cob() + 3, `${a.cob().toFixed(0)} / ${b.cob().toFixed(0)} g`);
+  const Fa = a.forecast(360, 720, 5), Fb = b.forecast(360, 720, 5);
+  const im = (t0 - Fa.from) / Fa.stride;
+  const fatPeak = Math.max(...Fa.fat), tFat = (Fa.fat.indexOf(fatPeak) - im) * 5;
+  const protPeak = Math.max(...Fa.protein), tProt = (Fa.protein.indexOf(protPeak) - im) * 5;
+  ok("Fett und Eiweiss erscheinen nur, wenn gegessen", fatPeak > 1 && protPeak > 1 && Math.max(...Fb.fat) < 1e-9 && Math.max(...Fb.protein) < 1e-9,
+     `Fett bis ${fatPeak.toFixed(0)}, Eiweiss bis ${protPeak.toFixed(0)} mg/dL pro h`);
+  let sMin = 1, tS = 0;
+  for (let m = 0; m < 720; m++){ const sf = window.Nebel.mealInputsAt(t0 + m, 1, a.input).siFactor; if (sf < sMin){ sMin = sf; tS = m; } }
+  ok("Fettresistenz am staerksten 4–7 h nach dem Essen", tS >= 240 && tS <= 420, `nach ${(tS / 60).toFixed(1)} h, Insulin wirkt zu ${(sMin * 100).toFixed(0)} %`);
+  const insPk = Fa.insulin.indexOf(Math.max(...Fa.insulin)) - im;
+  ok("Fehlende Insulinwirkung gipfelt nach der Insulinwirkung", tFat > insPk * 5, `Fett nach ${(tFat / 60).toFixed(1)} h, Insulin nach ${(insPk * 5 / 60).toFixed(1)} h`);
+  ok("Eiweisswirkung: Maximum 2–4 h nach dem Essen", tProt >= 120 && tProt <= 240, `nach ${(tProt / 60).toFixed(1)} h`);
+  const at = (F, min) => F.full[im + min / 5];
+  ok("Mit Fett erst tiefer, spaeter hoeher", at(Fa, 60) < at(Fb, 60) && at(Fa, 360) > at(Fb, 360) + 20,
+     `1 h ${at(Fa, 60).toFixed(0)} / ${at(Fb, 60).toFixed(0)} · 6 h ${at(Fa, 360).toFixed(0)} / ${at(Fb, 360).toFixed(0)} mg/dL`);
+  ok("Summe stimmt auch mit Fett", Fa.food.every((v, j) => Math.abs(v - Fa.fast[j] - Fa.slow[j] - Fa.protein[j] - Fa.fat[j]) < 1e-9));
+}
+
 /* ── Vorhersage ── */
 {
   const f = new Engine(20260812, 9);                   // Patient_10
@@ -181,7 +210,10 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   ok("… nach 6 h fast vorbei", F.insulin[ib + 72] < 0.15 * insPeak, `${(F.insulin[ib + 72] / insPeak * 100).toFixed(0)} % des Maximums`);
   const foodPeak = Math.max(...F.food);
   ok("Essen hebt", foodPeak > 10, `bis ${foodPeak.toFixed(0)} mg/dL pro h`);
-  ok("Schnell + langsam ergibt genau das ganze Essen", F.food.every((v, j) => Math.abs(v - F.fast[j] - F.slow[j]) < 1e-9));
+  ok("Schnell + langsam + Eiweiss + Fett ergibt genau das ganze Essen",
+     F.food.every((v, j) => Math.abs(v - F.fast[j] - F.slow[j] - F.protein[j] - F.fat[j]) < 1e-9));
+  ok("Gewoehnliches Fett (unter der Schwelle) bremst das Insulin nicht", F.fat.every(v => v < 1e-9),
+     `${f.events.find(e => e.kind === "meal").fat} g Fett`);
   const tf = F.fast.indexOf(Math.max(...F.fast)), ts = F.slow.indexOf(Math.max(...F.slow));
   ok("Schnelle Kohlenhydrate wirken vor langsamen", tf < ts, `Maximum nach ${((tf - ib) * 5)} / ${((ts - ib) * 5)} min`);
   /* Keine kuenftigen Entscheidungen: ein geplantes Training aendert nichts */

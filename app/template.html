@@ -557,6 +557,8 @@ canvas{width:100%; height:206px; display:block; touch-action:pan-y}
 .grab{width:38px; height:4px; border-radius:99px; background:var(--ink3); opacity:.5; margin:0 auto 16px}
 .panel h3{font-size:22px; font-weight:800; letter-spacing:-.03em; margin:0 0 20px}
 .field{margin-bottom:20px}
+.field.macro{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:8px}
+.field.macro label b{font-size:19px}
 .field label{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px}
 .field label span{font-family:var(--mono); font-size:11px; letter-spacing:.05em; color:var(--ink3); text-transform:uppercase}
 .field label b{font-size:26px; font-weight:800; letter-spacing:-.03em; font-variant-numeric:tabular-nums}
@@ -853,6 +855,8 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     <div class="fxsplit" id="fxSplit" hidden>
       <span><i style="background:var(--high)"></i>schnelle Kohlenhydrate</span>
       <span><i style="background:repeating-linear-gradient(90deg, var(--high) 0 5px, transparent 5px 8px)"></i>langsame Kohlenhydrate</span>
+      <span><i style="background:repeating-linear-gradient(90deg, var(--high) 0 2px, transparent 2px 5px)"></i>Eiweiß — spät aus der Leber</span>
+      <span><i style="background:repeating-linear-gradient(90deg, var(--ins) 0 5px, transparent 5px 8px)"></i>Fett — Insulin wirkt schwächer</span>
     </div>
     <p class="fxnote" id="fxNote"></p>
   </div>
@@ -935,6 +939,17 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
       <button data-t="fatty">Fettig</button>
     </div>
   </div>
+  <div class="field macro">
+    <div>
+      <label><span>Fett</span><b><span id="mF">0</span> g</b></label>
+      <input type="range" id="mealF" min="0" max="80" step="5" value="0" aria-label="Fett, geschätzt">
+    </div>
+    <div>
+      <label><span>Eiweiß</span><b><span id="mP">0</span> g</b></label>
+      <input type="range" id="mealP" min="0" max="80" step="5" value="0" aria-label="Eiweiß, geschätzt">
+    </div>
+  </div>
+  <p class="hint" id="macroHint"></p>
   <div class="field">
     <label><span>Dauer der Mahlzeit</span><b><span id="mD">15</span> min</b></label>
     <input type="range" id="mealD" min="5" max="120" step="5" value="15">
@@ -1309,8 +1324,25 @@ $("realityYes").onclick = () => {
   closeSheets(); renderLog(); lastCount = -1;
   toast("move", `Reality — Uhr auf ${fmtT(eng.s.t)} gestellt`, $("moveCard"));
 };
-let mealType = "fast";
-wireSeg($("mealType"), b => mealType = b.dataset.t);
+/* Fett und Eiweiss: der Mahlzeitentyp setzt eine Voreinstellung pro Gramm
+   Kohlenhydrate (MEAL_TYPES im Adapter). Wer die Regler selbst bewegt,
+   behaelt seine Werte, bis er den Typ wechselt oder das Blatt neu oeffnet. */
+let mealType = "fast", macroTouched = false;
+function syncMacros(){
+  const mt = MEAL_TYPES[mealType], g = +$("mealG").value;
+  const r5 = x => Math.min(80, Math.round(x/5)*5);
+  if (!macroTouched){ $("mealF").value = r5(g*mt.fat); $("mealP").value = r5(g*mt.protein); }
+  const f = +$("mealF").value, pr = +$("mealP").value;
+  $("mF").textContent = f; $("mP").textContent = pr;
+  $("macroHint").textContent =
+      f > 20 && pr >= 40 ? "Viel Fett und viel Eiweiß: Die Kohlenhydrate kommen später an, das Insulin wirkt über Stunden schwächer, und die Leber macht aus einem Teil des Eiweißes spät Zucker."
+    : f > 20            ? "Viel Fett: Die Kohlenhydrate kommen später an, und das Insulin wirkt über Stunden schwächer. Der Anstieg kommt oft erst nach vier bis acht Stunden."
+    : pr >= 40          ? "Viel Eiweiß: Die Leber macht aus einem Teil davon Stunden später Zucker — langsam und flach."
+    :                     "Fett bremst, Eiweiß kommt spät. Beides zeigt sich erst nach Stunden, nicht nach Minuten.";
+}
+wireSeg($("mealType"), b => { mealType = b.dataset.t; macroTouched = false; syncMacros(); });
+$("mealF").addEventListener("input", () => { macroTouched = true; syncMacros(); });
+$("mealP").addEventListener("input", () => { macroTouched = true; syncMacros(); });
 
 /* ─── Personenwahl ────────────────────────────────────────────────
    Erst die objektiven Merkmale, aufgeklappt die Folgen im Vergleich zu den
@@ -1555,8 +1587,11 @@ function drawChart(cv, pts, hours, tNow, opts={}){
 }
 
 /* ─── Anzeige ─────────────────────────────────────────────────── */
-/* Trendstufe aus der Steigung [mg/dL pro Minute]: −2 … +2 */
-const trendClass = r => r >= 3 ? 2 : r >= 1 ? 1 : r > -1 ? 0 : r > -3 ? -1 : -2;
+/* Trendstufe aus der Steigung [mg/dL pro Minute]: −3 … +3, sieben Zustaende
+   wie die Dexcom-G6-Pfeiltabelle: ±3 Doppelpfeil (≥3), ±2 gerade (2–3),
+   ±1 schraeg 45° (1–2), 0 waagerecht (unter 1). */
+const trendClass = r => r >= 3 ? 3 : r >= 2 ? 2 : r >= 1 ? 1 : r > -1 ? 0 : r > -2 ? -1 : r > -3 ? -2 : -3;
+const TREND_DEG = { 3:0, 2:0, 1:45, 0:90, [-1]:135, [-2]:180, [-3]:180 };   // das SVG zeigt nach oben
 const fmtT = t => String(Math.floor((t/60)%24)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");
 
 function paint(tNow){
@@ -1569,22 +1604,21 @@ function paint(tNow){
   }
   const tone = v < 70 ? C.low : v > 180 ? C.high : C.ink;
   el.style.color = tone;
-  /* Fuenf feste Pfeile wie in der Dexcom-App, keine stufenlose Neigung.
-     Grenzen nach der Dexcom-G6-Pfeiltabelle: stabil bis 1,8 mmol/L in 30 min
-     (~1 mg/dL pro Minute), Doppelpfeil ab 5,0 mmol/L in 30 min (~3 mg/dL
-     pro Minute). Die schraegen Pfeile der Vorlage (1–2 mg/dL pro Minute)
-     gibt es hier nicht — sie zaehlen zum einfachen Pfeil. */
+  /* Sieben feste Pfeile wie in der Dexcom-App, keine stufenlose Neigung.
+     Grenzen nach der Dexcom-G6-Pfeiltabelle (pro 30 min): stabil bis
+     1,8 mmol/L (~1 mg/dL pro Minute), schraeg 1,8–3,4 (1–2), gerade
+     3,4–5,0 (2–3), Doppelpfeil ab 5,0 (ab 3). */
   const tcl = trendClass(eng.trend());
-  const deg = tcl > 0 ? 0 : tcl < 0 ? 180 : 90;       // das SVG zeigt nach oben
+  const deg = TREND_DEG[tcl];
   document.querySelectorAll(".arw").forEach(a => {
     a.style.transform = `rotate(${deg}deg)`;
     a.style.color = tone;
   });
-  $("arrowbox").classList.toggle("dbl", Math.abs(tcl) === 2);
+  $("arrowbox").classList.toggle("dbl", Math.abs(tcl) === 3);
   /* Differenz zum vorigen Messwert, fuenf Minuten zuvor */
   const trc = eng.trace, nn = trc.length;
   const dlt = nn >= 2 ? trc[nn-1].sensor - trc[nn-2].sensor : null;
-  $("bgDelta").textContent = dlt == null ? "" : (dlt > 0 ? "+" : dlt < 0 ? "−" : "±") + Math.abs(dlt);
+  $("bgDelta").textContent = dlt == null ? "" : dlt === 0 ? "0" : (dlt > 0 ? "+" : "−") + Math.abs(dlt);
 
   const mins = Math.floor(tNow) % 1440, day = Math.floor(tNow/1440)+1;
   const hhmm = String(Math.floor(mins/60)).padStart(2,"0")+":"+String(mins%60).padStart(2,"0");
@@ -1732,7 +1766,8 @@ function paintMove(){
 }
 function renderLog(){
   const line = e => {
-    if (e.kind === "meal") return `${e.est} g ${MEAL_TYPES[e.type].label} · ${e.dur} min`;
+    if (e.kind === "meal") return `${e.est} g ${MEAL_TYPES[e.type].label}` +
+      (e.fat || e.protein ? ` + ${e.fat || 0} g Fett, ${e.protein || 0} g Eiweiß` : "") + ` · ${e.dur} min`;
     if (e.kind === "bolus") return e.share >= 1
       ? `${e.units.toFixed(1)} U gespritzt`
       : `${e.units.toFixed(1)} U · ${Math.round(e.share*100)} % sofort, Rest über ${e.over} min`;
@@ -1804,6 +1839,7 @@ document.querySelectorAll(".sheet").forEach(s => s.onclick = e => { if (e.target
 const guarded = fn => () => { const d = uiFade*700; d > 40 ? setTimeout(fn, d) : fn(); };
 
 $("btnMeal").onclick = guarded(() => {
+  macroTouched = false; syncMacros();
   $("sheetMeal").classList.add("on");
   requestAnimationFrame(() => moveKnob($("mealType")));
 });
@@ -1812,7 +1848,7 @@ $("btnBolus").onclick = guarded(() => {
   hint.className = "hint" + (i > 1.2 ? " warn" : "");
   hint.textContent = i > 1.2
     ? `${i.toFixed(1)} U wirken noch. Was du jetzt spritzt, kommt oben drauf.`
-    : "Wirkbeginn nach zehn bis zwanzig Minuten, am stärksten nach etwa einer Stunde, vorbei nach drei bis vier. Bei fettigem Essen kommen die Kohlenhydrate später — dann lohnt sich eine Aufteilung.";
+    : "Wirkbeginn nach zehn bis zwanzig Minuten, am stärksten nach etwa einer Stunde, vorbei nach drei bis vier. Bei fettigem Essen kommen die Kohlenhydrate später, und das Insulin wirkt über Stunden schwächer — dann lohnt sich eine Aufteilung.";
   paintBolusSheet();
   $("sheetBolus").classList.add("on");
   requestAnimationFrame(() => moveKnob($("bolusSplit")));
@@ -1847,13 +1883,13 @@ $("btnRescue").onclick = guarded(() => {
   eng.logMeal(15,"fast",5); closeSheets(); renderLog();
   toast("meal", "15 g Traubenzucker", $("cob").parentElement);
 });
-$("mealG").oninput = e => $("mG").textContent = e.target.value;
+$("mealG").oninput = e => { $("mG").textContent = e.target.value; syncMacros(); };
 $("mealD").oninput = e => $("mD").textContent = e.target.value;
 $("mealOK").onclick = () => {
-  const g = +$("mealG").value;
-  eng.logMeal(g, mealType, +$("mealD").value);
+  const g = +$("mealG").value, f = +$("mealF").value, pr = +$("mealP").value;
+  eng.logMeal(g, mealType, +$("mealD").value, f, pr);
   closeSheets(); renderLog();
-  toast("meal", `${g} g eingetragen`, $("cob").parentElement);
+  toast("meal", f || pr ? `${g} g KH · ${f} g Fett · ${pr} g Eiweiß` : `${g} g eingetragen`, $("cob").parentElement);
 };
 function paintBasalSheet(){
   const r = +$("basalR").value, eff = eng.s.basalEff;
@@ -2205,7 +2241,8 @@ function drawEffects(cv, F, pastMin){
   /* Oben, was Essen gerade ins Blut bringt; unten, was Insulin gerade
      herausnimmt. Beides in mg/dL pro Stunde, eine gemeinsame Skala. */
   const up = fxSplit
-    ? [{ v:F.fast, col:C.high, dash:[] }, { v:F.slow, col:C.high, dash:[5,4] }]
+    ? [{ v:F.fast, col:C.high, dash:[] }, { v:F.slow, col:C.high, dash:[5,4] },
+       { v:F.protein, col:C.high, dash:[1.5,3], tag:"Eiweiß" }, { v:F.fat, col:C.ins, dash:[5,4], tag:"Fett" }]
     : [{ v:F.food, col:C.high, dash:[] }];
   const down = [{ v:F.insulin, col:C.ins, dash:[] }];
   const idx0 = Math.max(0, Math.floor((f.t0 - F.from)/F.stride));
@@ -2231,6 +2268,22 @@ function drawEffects(cv, F, pastMin){
     c.beginPath(); pts.forEach(([x,y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); c.setLineDash([]);
   };
   up.forEach(s => plot(s, 1)); down.forEach(s => plot(s, -1));
+  /* Fett und Eiweiss sind flach, aber lang — neben den steilen Kohlenhydraten
+     gingen sie sonst unter. Beschriftet am eigenen Gipfel, nicht vergroessert:
+     eine zweite Skala wuerde ihre Groesse falsch erzaehlen. */
+  c.font = "600 9px 'DM Mono',monospace"; c.textAlign = "center";
+  const placed = [];
+  for (const s of up){
+    if (!s.tag) continue;
+    let mi = -1;
+    for (let i = idx0; i < s.v.length; i++) if (F.from + i*F.stride >= f.t0 && (mi < 0 || s.v[i] > s.v[mi])) mi = i;
+    if (mi < 0 || s.v[mi] < 1) continue;
+    const x = clamp(X(F.from + mi*F.stride), padL + 16, w - padR - 16);
+    let y = Y(s.v[mi]) - 5;
+    while (placed.some(q => Math.abs(q.x - x) < 42 && Math.abs(q.y - y) < 11)) y -= 11;
+    placed.push({ x, y });
+    c.fillStyle = s.col; c.fillText(s.tag, x, y);
+  }
   c.fillStyle = `rgba(${C.rgbInk},.5)`; c.font = "500 9px 'DM Mono',monospace"; c.textAlign = "right";
   c.fillText("bringt Zucker ins Blut", w - padR - 4, padT + 8);
   c.fillText("nimmt Zucker heraus", w - padR - 4, h - padB - 4);
@@ -2246,9 +2299,17 @@ function paintForecastText(F){
     : ` Tiefster Wert ${Math.round(B[mi])} um ${at(mi)}, höchster ${Math.round(B[ma])} um ${at(ma)}.`;
   $("fcSum").innerHTML = `Wenn du nichts mehr tust: in zwölf Stunden etwa <b>${end} mg/dL</b>.${low}` +
     `<span class="hint">Diese Kurve kennt nur die Simulation. Im echten Leben sieht niemand voraus — dort gibt es nur den Sensor von eben.</span>`;
+  /* Flach, aber lang: die Raten ueber das Fenster aufsummiert [mg/dL]. */
+  const sum = a => a ? Math.round(a.reduce((x, v) => x + v, 0) * F.stride/60) : 0;
+  const sF = sum(F.fat), sP = sum(F.protein);
+  const lang = sF >= 5 || sP >= 5
+    ? " Klein, aber lang: Über das ganze Fenster zusammengerechnet " +
+      [sF >= 5 ? `hält Fett etwa ${sF} mg/dL im Blut, die das Insulin sonst herausgenommen hätte` : "",
+       sP >= 5 ? `bringt Eiweiß etwa ${sP} mg/dL` : ""].filter(Boolean).join(", ") + "."
+    : "";
   $("fxNote").textContent = fxSplit
-    ? "Schnelle Kohlenhydrate (Traubenzucker, Saft) wirken früh und steil, langsame (Brot, Nudeln) später und flacher. Fett und Eiweiß rechnet das Modell nicht — fettiges Essen läuft hier als langsame Kohlenhydrate."
-    : "Wie viel Zucker dein Essen gerade ins Blut bringt und dein Insulin herausnimmt, in mg/dL pro Stunde. Der Wert bewegt sich nur um die Differenz. Tipp auf „Essen“, um es aufzuteilen.";
+    ? "Schnelle Kohlenhydrate wirken früh und steil, langsame später und flacher. Fett bremst den Magen — die Kohlenhydrate kommen später — und macht das Insulin über Stunden schwächer: Die blaue gestrichelte Linie ist Zucker, den das Insulin sonst herausgenommen hätte. Aus Eiweiß macht die Leber spät etwas Zucker. Fett und Eiweiß sind an wenigen Studien kalibriert und streuen von Mensch zu Mensch stark." + lang
+    : "Wie viel Zucker dein Essen gerade ins Blut bringt und dein Insulin herausnimmt, in mg/dL pro Stunde. Der Wert bewegt sich nur um die Differenz. Tipp auf „Essen“, um es in Kohlenhydrate, Fett und Eiweiß aufzuteilen.";
 }
 
 function toggleFxSplit(){
@@ -2264,7 +2325,8 @@ function revItem(e){
   if (e.kind === "meal"){
     const d = Math.round(e.truth - e.est);
     const cl = Math.abs(d) >= 10 ? ' class="miss"' : '';
-    return `<li><b>${fmtT(e.t)}</b><span${cl}>${e.est} g geschätzt · tatsächlich ${Math.round(e.truth)} g (${d>=0?"+":"−"}${Math.abs(d)})</span></li>`;
+    return `<li><b>${fmtT(e.t)}</b><span${cl}>${e.est} g geschätzt · tatsächlich ${Math.round(e.truth)} g (${d>=0?"+":"−"}${Math.abs(d)})` +
+      (e.fatTruth || e.proteinTruth ? ` · dazu ${Math.round(e.fatTruth || 0)} g Fett, ${Math.round(e.proteinTruth || 0)} g Eiweiß` : "") + `</span></li>`;
   }
   if (e.kind === "move")
     return `<li><b>${fmtT(e.t)}</b><span>${e.name} · ${e.dur} min · Belastung ${(e.inten*100).toFixed(0)} %</span></li>`;
@@ -2343,6 +2405,12 @@ setInterval(saveState, 20000);
 requestAnimationFrame(loop);
 
 /* ══════════════════════════════════════════════════════════════════
+   VERALTET — gehoert zur alten Prototyp-Engine (Faktorsystem), nicht zu
+   ExtHovorka. Die Zahlen unten gelten fuer die heutige Engine NICHT.
+   Aktuelle Referenzwerte: engine/tests, docs/20_Parameter_Registry.md
+   (Abschnitt 4 Verhalten, Abschnitt 8 Fett und Eiweiss). Bleibt nur als
+   Beleg der Prototyp-Geschichte stehen.
+
    VALIDIERUNG — Referenzwerte der kalibrierten Engine
    Erzeugt mit identischen Gleichungen in Python, Rauschen deaktiviert,
    Start 110 mg/dL sofern nicht anders angegeben. Diese Tabelle ist der

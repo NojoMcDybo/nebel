@@ -51,6 +51,8 @@ Damit sind auch die Groessenordnungen bestaetigt, nicht nur das qualitative Verh
 | `observation.ts` | fertig — Sensormodell V2 (Standard) und G6-Fehlermodell (Vettoretti 2019) zum Vergleich, zaehlerbasiert, 5-min-Raster |
 | `realtime.ts` | fertig — Nachholintegration, Append-only, Sandbox-Fork |
 | `scenario/needs.ts` | fertig — Reserven und Hunger, Szenarioschicht |
+| `nutrition.ts` | fertig — Fett und Eiweiss als Eingaenge ohne neuen Zustand: Magenverzoegerung, Fett-Insulinresistenz (`siFactor`), spaete Glukose aus Eiweiss (`uProteinGlucose`), Essdauer. Ohne diese Angaben exakt die Quelle. `../docs/11_Fett_und_Eiweiss.md` |
+| `scenario/nutrition-check.ts` | fertig — Studienszenarien Wolpert, Paterson, Smart, O'Connell zur Kalibrierung und Gegenprobe |
 
 ## Bekannte Eigenheiten
 
@@ -69,5 +71,7 @@ Damit sind auch die Groessenordnungen bestaetigt, nicht nur das qualitative Verh
 Der Viewer zeigt physiologische Glukose und Sensorwert als getrennte Kurven, den vollstaendigen 16er-Zustandsvektor am Zeiger und laesst Mahlzeit, Bolus, Belastung, Temp-Basal und Pumpenstopp an der Zeigerposition einsetzen. Er ist das Entwicklerwerkzeug fuer die Engine und die Vorlage fuer den spaeteren Analyse-Screen.
 
 **Sensorkalibrierung:** `node scripts/cgm-calibration.cjs` vergleicht ueber alle 20 Subjekte nur Verzoegerung, G6-Labormodell und Sensormodell V2: MARD im Messbereich 40–400 mg/dL, nach Glukosebereich, und die Schrittweite von Wert zu Wert in ruhigen Nachtphasen.
+
+**Fett und Eiweiss:** `node scripts/nutrition-calibration.cjs` rechnet die vier Studien nach (Referenzperson, Mittel der 20 Subjekte, die zehn Personen der App); mit `--fit` werden `fatResistancePerG` und `proteinGlucoseYield` neu kalibriert. Braucht `dist/engine.cjs` (`npm run check:adapter`) und den Referenzdatensatz.
 
 **Rauchtest:** `npm run smoke` laesst sechs Alltagsszenarien laufen und druckt den Verlauf in mg/dL. Fuer den Augenschein, nicht als Beleg.
