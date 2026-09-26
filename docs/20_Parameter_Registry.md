@@ -100,6 +100,40 @@ Kein Freibrief: Für jeden Parameter **innerhalb** der Physiologie gilt weiterhi
 
 Direkt nutzbar für die Pumpenschicht: Basalrate, KE-Faktor und Korrekturfaktor sind je Subjekt gegeben. Nebel muss keine Therapieparameter erfinden.
 
+Nicht im Datensatz: Alter und Geschlecht. Alle 20 halten mit ihrer Basalrate exakt 108 mg/dL (6,0 mmol/L) — die Raten sind darauf gefittet, echte Tagesschwankung gibt es ohne Eingaben nicht.
+
+Datensatzfehler: Das Feld `total_daily_basal` passt nicht zu `basal` × 24 (Verhältnis 1,02 bis 2,44, bei Patient 1 16,9 gegen 27,3 U). Bedeutung unklar; Nebel nutzt das Feld nicht.
+
+### Verhalten im Nebel-Parametersatz (26.09.2026)
+
+Gerechnet aus dem Gleichgewicht bei 108 mg/dL, ohne Sensorfehler. „60 g" = 24 g schnell + 36 g langsam, Bolus nach KE-Faktor 10 min vorher. „Sport" = 45 min bei 55 % der Herzfrequenzreserve, nüchtern. „Hart" = 20 min bei 90 %.
+
+| P | kg | HbA1c | Basal U/h | 1 U senkt | 60 g + Bolus: Spitze / Tief | 60 g ohne Bolus | Sport moderat | Hart |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 79 | 6,5 | 1,14 | 23 | 131 / 98 | 191 | −8 | +17 |
+| 2 | 74 | 7,6 | 1,45 | 18 | 134 / 105 | 186 | 0 | +35 |
+| 3 | 70 | 6,2 | 1,25 | 31 | 138 / 101 | 201 | −76 | +24 |
+| 4 | 73 | 6,4 | 0,93 | 38 | 159 / 108 | 255 | −82 | +85 |
+| 5 | 64 | 6,9 | 0,77 | 36 | 164 / 108 | 274 | −89 | 0 |
+| 6 | 65 | 6,5 | 0,59 | 37 | 152 / 105 | 271 | −89 | 0 |
+| 7 | 62 | 7,0 | 2,00 | 16 | 142 / 108 | 186 | −25 | +59 |
+| 8 | 68 | 6,9 | 0,73 | 24 | 129 / 92 | 209 | −41 | +26 |
+| 9 | 66 | 6,3 | 0,98 | 25 | 138 / 99 | 216 | −8 | +44 |
+| 10 | 71 | 6,3 | 0,46 | 33 | 163 / 108 | 299 | −31 | +40 |
+| 11 | 84 | 6,2 | 1,77 | 20 | 127 / 99 | 171 | −2 | +38 |
+| 12 | 83 | 5,7 | 1,09 | 23 | 128 / 95 | 186 | −16 | +18 |
+| 13 | 70 | 7,1 | 1,26 | 28 | 186 / 108 | 278 | −89 | +47 |
+| 14 | 77 | 5,8 | 0,51 | 35 | 136 / 90 | 236 | −62 | +9 |
+| 15 | 85 | 5,9 | 1,19 | 21 | 137 / 107 | 194 | −53 | +54 |
+| 16 | 66 | 6,1 | 0,39 | 38 | 145 / 86 | 290 | −36 | +17 |
+| 17 | 81 | 7,2 | 1,50 | 33 | 144 / 105 | 216 | −11 | +23 |
+| 18 | 88 | 6,9 | 1,56 | 31 | 134 / 103 | 190 | −15 | +14 |
+| 19 | 73 | 6,4 | 1,15 | 32 | 168 / 108 | 260 | −20 | +91 |
+| 20 | 75 | 6,7 | 1,00 | 36 | 160 / 108 | 261 | −33 | +81 |
+| **Median** | | | | **31** | **142** | **216** | **−33** | **+35** |
+
+Lesart: Die größte Streuung liegt in der Bewegungsantwort (0 bis −89 mg/dL bei derselben moderaten Einheit), getragen von `p3`. Patient 1, das bisherige Standardsubjekt, ist bei Insulin und moderater Bewegung am schwachen Rand.
+
 Einschränkung: Alle 20 Subjekte sind Erwachsene mit HbA1c zwischen 5.7 und 7.6 %. Kinder, Jugendliche und schlecht eingestellte Verläufe sind **nicht** abgedeckt. Das gehört in den Model Validity Envelope und in die Kommunikation gegenüber Nutzern.
 
 Das trifft die Hauptzielgruppe direkt: Eltern von Kindern mit Typ-1-Diabetes sind die größte und am stärksten belastete Angehörigengruppe — und genau deren Situation bildet die Kohorte nicht ab. Kinderphysiologie (höherer Insulinbedarf pro kg, andere Absorptionszeiten, stärkere Variabilität) ist nicht durch Skalierung der Erwachsenenparameter zu erschlagen. V1 simuliert eine erwachsene Person; das muss im UI stehen, nicht im Kleingedruckten.
