@@ -37,7 +37,7 @@ Lernziel 5 bleibt fest verankert — sowohl wegen der Sportrelevanz als auch, we
 | Folge | Konsequenz |
 |---|---|
 | Lernziel 1 verlangt Zeit, nicht Dramatik | Die Simulation muss über Stunden und Tage laufen, nicht über Einzelszenen. Langzeitstabilität der Numerik ist ein Produktmerkmal, kein Detail |
-| Lernziel 2 verlangt echte Verzögerung | Keine Sofortwirkung an irgendeiner Stelle. `tmaxI` ≈ 110 min ist die zentrale Zahl der ganzen Erfahrung |
+| Lernziel 2 verlangt echte Verzögerung | Keine Sofortwirkung an irgendeiner Stelle. Die Insulinwirkung ist die zentrale Zeitskala der ganzen Erfahrung: Beginn nach 10–20 min, am stärksten nach etwa einer Stunde, vorbei nach drei bis vier. **Korrigiert 26.09.2026:** Hier stand `tmaxI` ≈ 110 min aus den Quellsubjekten. Das ist zu träge, siehe Changelog Nachtrag 9 |
 | Lernziel 3 verlangt die getrennte Beobachtungsschicht | Der Analyse-Screen muss `G` und `Gsensor` gegeneinander zeigen können. Damit wird die Nebel-Eigenleistung CGM-Schicht zum Kern, nicht zur Kür |
 | Lernziel 4 verlangt Determinismus **und** Variabilität | Gleicher Seed = gleicher Verlauf (Sandbox), aber verschiedene Subjekte und verschiedene Tage unterscheiden sich sichtbar |
 | Lernziel 5 verlangt das vollständige Bewegungsmodul | Inklusive `p2`-Pfad für hochintensive Belastung, sonst fehlt der Anstieg beim harten Training |

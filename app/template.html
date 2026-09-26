@@ -545,14 +545,14 @@ input[type=range]::-moz-range-thumb{width:30px;height:30px;border:0;border-radiu
       <div class="fact" tabindex="0" role="button" aria-expanded="false">
         <div>
           <h3>Insulin wirkt später</h3>
-          <div class="body"><div><p>Beginn nach zehn bis zwanzig Minuten, Maximum nach eineinhalb Stunden, Ende nach vier bis fünf. Kohlenhydrate sind schneller. Aus dieser Lücke folgt fast alles — und der häufigste Fehler ist, nachzulegen, weil scheinbar nichts passiert.</p></div></div>
+          <div class="body"><div><p>Beginn nach zehn bis zwanzig Minuten, am stärksten nach etwa einer Stunde, vorbei nach drei bis vier. Kohlenhydrate sind schneller. Aus dieser Lücke folgt fast alles — und der häufigste Fehler ist, nachzulegen, weil scheinbar nichts passiert.</p></div></div>
         </div>
         <div class="mark"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v13M1 7.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
       </div>
       <div class="fact" tabindex="0" role="button" aria-expanded="false">
         <div>
           <h3>Nichts wirkt für sich allein</h3>
-          <div class="body"><div><p>Schlaf, Stress, Krankheit, Alkohol, die Reserven in deiner Leber und wie lange dein Sensor schon klebt — all das verschiebt, wie Insulin und Kohlenhydrate wirken. Manche Kombinationen erzeugen etwas, das keiner der Faktoren allein erzeugt hätte. Training am Nachmittag ist harmlos. Alkohol am Abend ist harmlos. Beides an einem Tag kann dich nachts umwerfen.</p></div></div>
+          <div class="body"><div><p>Bewegung verbraucht nicht nur Zucker, sie macht Insulin für Stunden stärker — oft bis in die Nacht. Wie stark, ist von Mensch zu Mensch verschieden, und über mehrere Trainingstage summiert es sich. Und der Sensor hat seine eigenen Launen: Ein frisch gesetzter rauscht mehr, einer, auf dem du liegst, zeigt einen Abfall, den es nicht gibt.</p></div></div>
         </div>
         <div class="mark"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v13M1 7.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
       </div>
@@ -1479,7 +1479,7 @@ $("btnBolus").onclick = guarded(() => {
   hint.className = "hint" + (i > 1.2 ? " warn" : "");
   hint.textContent = i > 1.2
     ? `${i.toFixed(1)} U wirken noch. Was du jetzt spritzt, kommt oben drauf.`
-    : "Wirkbeginn nach zehn bis zwanzig Minuten, Maximum nach etwa neunzig. Bei fettigem Essen kommen die Kohlenhydrate später — dann lohnt sich eine Aufteilung.";
+    : "Wirkbeginn nach zehn bis zwanzig Minuten, am stärksten nach etwa einer Stunde, vorbei nach drei bis vier. Bei fettigem Essen kommen die Kohlenhydrate später — dann lohnt sich eine Aufteilung.";
   paintBolusSheet();
   $("sheetBolus").classList.add("on");
   requestAnimationFrame(() => moveKnob($("bolusSplit")));

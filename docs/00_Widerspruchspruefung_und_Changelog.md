@@ -204,3 +204,28 @@ Prüfstand: Adapterprüfung auf 33 Punkte (Ereignis mitgeschrieben, Sensor tiefe
 
 Die App zeigt unter „Deine Therapiewerte" den Korrekturfaktor aus dem Datensatz (`demographic_info.correction_bolus`). Er ist nicht aus den Modellparametern abgeleitet. Nachgerechnet für alle 20 Subjekte: 1 U, gegeben 2 h nach 60 g ohne Bolus, größte Absenkung gegenüber dem Lauf ohne diese Einheit. Das Verhältnis Modell zu Datensatz liegt im Median bei 0,75, in der Spanne von 0,27 bis 1,41. Beim Standardsubjekt Patient 1 passt es (25 gegen 28 mg/dL pro U), bei Patient 7 liegt die Kachel um den Faktor 3,8 daneben (64 angezeigt, 17 im Modell). Die Messung hängt vom Ausgangswert ab, weil die Insulinsensitivität im Hyperbereich sinkt (bei 270 mg/dL auf 0,83). Offen: Kachel aus dem Modell ableiten oder die Abweichung als Lerninhalt erklären. Der KE-Faktor ist noch nicht geprüft. Eingetragen in Registry Abschnitt 6.
 
+---
+
+## 9. Nachtrag 26.09.2026 — Insulin zu träge: `tmaxI` in der App auf 50 min
+
+**Auslöser.** Beim Testen wirkte 1 U ohne Essen kaum und ohne erkennbaren Wirkungsverlauf. Nachgerechnet mit den Quellwerten: Beim Standardsubjekt Patient 1 (`tmaxI` 114 min) senkt 1 U nach einer Stunde um 2 mg/dL, am stärksten wirkt sie nach 1,7 h, der Tiefpunkt kommt nach 6,3 h bei −18 mg/dL. Die Plasmainsulinspitze liegt bei 122 min. Über alle 20 Subjekte: stärkster Abfall nach 1,7 h, Tiefpunkt nach 6,1 h (Median).
+
+**Widerspruch.** Die Fachinformation zu Insulin aspart (NovoRapid, Abschnitt 5.1 und 5.2) nennt Wirkbeginn nach 10–20 min, Maximum nach 1–3 h, Wirkdauer 3–5 h und eine Plasmaspitze nach 40 min (IQR 30–40). Die App selbst versprach „Maximum nach eineinhalb Stunden, Ende nach vier bis fünf". Das Modell war langsamer als beides. `05_Zielgruppe_und_Lernziele.md` nannte `tmaxI` ≈ 110 min sogar „die zentrale Zahl der ganzen Erfahrung" — übernommen, ohne gegen eine Fachinformation geprüft zu sein.
+
+**Korrektur.** In der App gilt `tmaxI` = 50 min für alle Subjekte, im Adapter neben `tsub` als Nebel-Kalibrierung gekennzeichnet. Die Engine behält die Quellwerte, der Orakelabgleich bleibt unberührt. Das Basalgleichgewicht hängt nicht von `tmaxI` ab.
+
+| `tmaxI` | Plasmaspitze (P1) | stärkster Abfall | Tiefpunkt | 1 U senkt um (Median) |
+|---|---|---|---|---|
+| Quelle (58–131) | 122 min | 1,7 h | 6,1 h | 29 mg/dL |
+| 40 | 49 min | 0,8 h | 3,0 h | 32 mg/dL |
+| **50** | **59 min** | **1,0 h** (0,8–1,1) | **3,5 h** (3,1–4,2) | **31 mg/dL** |
+| 55 | 64 min | 1,1 h | 3,7 h | 31 mg/dL |
+
+Mit einem einzigen Parameter trifft das Modell Plasmaspitze und Wirkmaximum der Fachinformation nicht gleichzeitig: Bei 40 min Plasmaspitze käme das Wirkmaximum schon nach 0,8 h. Die Wirkung folgt im Modell dem Plasmainsulin schneller als in der Wirklichkeit. Vorrang hat die Wirkung, weil nur sie sichtbar ist. 50 min legt Maximum und Wirkdauer in die Grenzen der Fachinformation und nimmt eine um etwa 20 min späte Plasmaspitze in Kauf.
+
+Nebenwirkungen geprüft: 60 g mit Bolus nach KE-Faktor steigen im Median nur noch auf 142 statt 165 mg/dL, der Tiefstwert danach bleibt bei 105 (niedrigster 86). Der Korrekturfaktor der Kachel passt besser, im Median 0,93 statt 0,75, bei Patient 7 aber weiter um den Faktor 2,7 daneben (Nachtrag 8).
+
+**Texte angepasst.** Startseite und Bolus-Hinweis sagen jetzt „am stärksten nach etwa einer Stunde, vorbei nach drei bis vier". Außerdem hat die Startseitenregel „Nichts wirkt für sich allein" noch Schlaf, Stress, Krankheit, Alkohol und Leberreserven als Einflüsse genannt, die es seit dem Umbau nicht mehr gibt. Sie beschreibt jetzt, was V1 tatsächlich kann: Bewegung macht Insulin für Stunden stärker (nachgerechnet: nach Nachmittagstraining liegt die Nacht bei 13 von 20 Subjekten 3–21 mg/dL tiefer, bei einigen nicht), dazu die Sensorereignisse.
+
+Quelle: Fachinformation NovoRapid PumpCart, Abschnitte 5.1 und 5.2, https://www.medicines.org.uk/emc/product/7922/smpc
+

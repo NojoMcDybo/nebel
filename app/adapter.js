@@ -35,6 +35,26 @@ const MGDL = N.MGDL_PER_MMOLL;
    die Anzeige, klar gekennzeichnet.
    Siehe docs/20_Parameter_Registry.md und Widerspruchspruefung W9. */
 const NEBEL_TSUB_MIN = 5;
+
+/* ── Nebel-Kalibrierung der Insulinaufnahme ──────────────────────────
+   tmaxI ist die Zeitkonstante der Aufnahme aus dem Unterhautgewebe. Die 20
+   Quellsubjekte liegen bei 58 bis 131 min (Patient 1: 114). Damit erreicht
+   1 U ihre staerkste Wirkung erst nach 1,7 h und ist nach 6 h noch nicht
+   vorbei — deutlich traeger als ein Analoginsulin in der Pumpe.
+
+   Fachinformation NovoRapid (Insulin aspart), Abschnitt 5.1/5.2: Wirkbeginn
+   nach 10–20 min, Maximum nach 1–3 h, Wirkdauer 3–5 h; Plasmaspitze nach
+   40 min (IQR 30–40). Mit tmaxI = 50 min liegt die Wirkung im Modell bei
+   Maximum 1,0 h und Tiefpunkt 3,5 h (Median der 20 Subjekte), also in den
+   Grenzen der Fachinformation. Die Plasmaspitze kommt dann nach etwa 59 min,
+   langsamer als die 40 min der Fachinformation. Beides zugleich trifft das
+   Modell mit einem Parameter nicht; Vorrang hat die Wirkung, weil nur sie
+   sichtbar ist.
+
+   Das Basalgleichgewicht haengt nicht von tmaxI ab (S1 = S2 = u·tmaxI,
+   I = u/(VI·ke)). Der Quellwert bleibt in der Engine und im Orakelabgleich.
+   Siehe docs/20_Parameter_Registry.md und Changelog Nachtrag 9. */
+const NEBEL_TMAXI_MIN = 50;
 const toMgdl = (mmol) => mmol * MGDL;
 
 /* Mahlzeitentypen. tau trifft die Absorptionskonstanten der Engine
@@ -90,7 +110,7 @@ class Engine {
     const sub = window.SUBJECTS[subjectIndex];
     this.subjectId = sub.id;
     /* Quellparameter, danach die eine bewusste Nebel-Kalibrierung. */
-    this.p = { ...N.withPopulationConstants(sub.subject), tsub: NEBEL_TSUB_MIN };
+    this.p = { ...N.withPopulationConstants(sub.subject), tsub: NEBEL_TSUB_MIN, tmaxI: NEBEL_TMAXI_MIN };
     this.therapy = sub.therapy;
     this.seed = seed;
     this.tick = 0;

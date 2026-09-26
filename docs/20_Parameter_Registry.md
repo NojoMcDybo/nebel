@@ -21,7 +21,7 @@ Kalibrierstatus-Legende:
 | `kb3` | 1/min pro mU/L | Verstärkung Insulinwirkung EGP-Suppression | 1.898e-4 | 8.254e-4 | 1.710e-3 | Q |
 | `EGP0` | mmol/min | Endogene Glukoseproduktion bei null Insulinwirkung | 0.563 | 1.547 | 2.875 | Q |
 | `F01` | mmol/min/kg | Nicht-insulinabhängige Glukoseaufnahme pro kg | 2.444e-3 | 8.425e-3 | 2.037e-2 | Q |
-| `tmaxI` | min | Zeitkonstante der subkutanen Insulinabsorption | 57.9 | 109.0 | 130.7 | Q |
+| `tmaxI` | min | Zeitkonstante der subkutanen Insulinabsorption | 57.9 | 109.0 | 130.7 | Q — **in der App 50 min für alle (N, an Fachinformation kalibriert, Changelog Nachtrag 9)** |
 | `p3` | mmol/min | Bewegungsgetriebener Glukosefluss ins periphere Kompartiment | 1.886 | 9.699 | 25.72 | Q |
 | `p4` | mmol/min | Bewegungsgetriebener peripherer Verbrauch | 1.598 | 2.851 | 4.844 | Q |
 | `p5` | mmol | Verlängerter Nacheffekt der Belastung (über `x2`) | 0.944 | 3.212 | 5.169 | Q |
@@ -201,7 +201,7 @@ Lesart:
 | Filterzeitkonstante | Beobachtung | N | Im G6-Modell nicht vorgesehen, bleibt 0 |
 | Drift, Zittern, Erster Tag, Bewegung (V2) | Beobachtung | N | Stärken gesetzt (5.2). Gegen echte Sensorspuren prüfen — reale Daten nur lokal und mit ausdrücklicher Zustimmung der Person |
 | Druck auf den Sensor: Dauer, Tiefe | Beobachtung | N | Häufigkeit aus Baysal 2014 abgeleitet; Dauer 30–90 min und Tiefe 15–40 mg/dL noch ohne Beleg |
-| Korrekturfaktor und KE-Faktor der App-Kacheln | Therapie | Q, aber ungeprüft | Stammen aus `demographic_info` des Datensatzes, nicht aus dem Modell. Prüfung 26.09. (1 U, 2 h nach 60 g ohne Bolus, größte Differenz zum Lauf ohne Korrektur): Modell / Datensatz im Median 0,75, Spanne 0,27–1,41. Patient 1 passt (25 gegen 28 mg/dL pro U), Patient 7 nicht (17 gegen 64). KE-Faktor noch nicht geprüft |
+| Korrekturfaktor und KE-Faktor der App-Kacheln | Therapie | Q, aber ungeprüft | Stammen aus `demographic_info` des Datensatzes, nicht aus dem Modell. Prüfung 26.09. (1 U, 2 h nach 60 g ohne Bolus, größte Differenz zum Lauf ohne Korrektur): mit Quell-`tmaxI` Modell / Datensatz im Median 0,75, Spanne 0,27–1,41; mit `tmaxI` = 50 min im Median 0,93, Spanne 0,37–1,58. Patient 1 passt (33 gegen 28 mg/dL pro U), Patient 7 nicht (24 gegen 64). KE-Faktor noch nicht geprüft |
 | Weitere Sensorereignisse | Beobachtung | offen | z. B. Störsubstanzen wie hochdosiertes Vitamin C (herstellerabhängig), frühestens an späteren Tagen |
 | Abtastrate | Beobachtung | N | 5 min, Gerätekonvention |
 | KH-Split schnell/langsam | Mahlzeit | N | Zuordnungsregel realer Mahlzeiten auf `uFastCarbs`/`uSlowCarbs` — braucht eine begründete Heuristik, keine Bauchzahl |
