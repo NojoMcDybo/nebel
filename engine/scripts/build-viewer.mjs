@@ -92,6 +92,12 @@ for (const { tpl, out } of targets) {
     .replace("/*__ENGINE__*/", () => engine)
     .replace("/*__PERSONAS__*/", () => personasSrc + "\n" + profilesJs)
     .replace("/*__SUBJECTS__*/", () => `window.SUBJECTS = ${JSON.stringify(subjects)};`);
+  /* Syntaxpruefung aller Inline-Skripte: ein Tippfehler in der Vorlage
+     soll den Bau abbrechen, nicht still eine tote Seite erzeugen. */
+  for (const m of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) {
+    try { new vm.Script(m[1], { filename: out }); }
+    catch (e) { console.error(`Syntaxfehler in ${out}: ${e.message}`); process.exit(1); }
+  }
   writeFileSync(resolve(root, "dist", out), html, "utf8");
   console.log(`geschrieben: dist/${out}  (${(html.length / 1024).toFixed(0)} KB)`);
 }

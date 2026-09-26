@@ -160,3 +160,49 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   const g = P.map(p => { const e = new Engine(undefined, window.SUBJECTS.findIndex(s => s.id === p.id)); return e.s.G; });
   ok("Alle starten im Gleichgewicht", g.every(v => Math.abs(v - 108) < 1), g.map(v => v.toFixed(0)).join(" "));
 }
+
+/* ── Vorhersage ── */
+{
+  const f = new Engine(20260812, 9);                   // Patient_10
+  f.acts = [];
+  for (let i = 0; i < 95; i++) f.step();               // 08:35
+  f.logMeal(60, "mixed"); f.injectBolus(60 / f.therapy.carbRatioGPerU, 1, 0);
+  for (let i = 0; i < 145; i++) f.step();              // 11:00
+  const F = f.forecast(360, 720, 5);
+  ok("Vorhersage beginnt beim aktuellen Blutzucker", Math.abs(F.blood[0] - f.s.G) < 1e-9, `${F.blood[0].toFixed(1)} mg/dL`);
+  ok("… deckt 12 Stunden ab", F.blood.length === 145 && F.end - F.now === 720);
+  const i = (F.now - F.from) / F.stride;
+  ok("Nachgerechnete Vergangenheit trifft den gelaufenen Wert", Number.isInteger(i) && Math.abs(F.full[i] - f.s.G) < 1e-6,
+     `${F.full[i].toFixed(3)} / ${f.s.G.toFixed(3)} mg/dL`);
+  const ib = (515 - F.from) / F.stride;                // Bolus um 08:35
+  const insPeak = Math.max(...F.insulin), tPeak = F.insulin.indexOf(insPeak);
+  ok("Insulinwirkung: Maximum 1–3 h nach dem Bolus", (tPeak - ib) * 5 >= 60 && (tPeak - ib) * 5 <= 180,
+     `nach ${((tPeak - ib) * 5 / 60).toFixed(1)} h, ${insPeak.toFixed(0)} mg/dL pro h`);
+  ok("… nach 6 h fast vorbei", F.insulin[ib + 72] < 0.15 * insPeak, `${(F.insulin[ib + 72] / insPeak * 100).toFixed(0)} % des Maximums`);
+  const foodPeak = Math.max(...F.food);
+  ok("Essen hebt", foodPeak > 10, `bis ${foodPeak.toFixed(0)} mg/dL pro h`);
+  ok("Schnell + langsam ergibt genau das ganze Essen", F.food.every((v, j) => Math.abs(v - F.fast[j] - F.slow[j]) < 1e-9));
+  const tf = F.fast.indexOf(Math.max(...F.fast)), ts = F.slow.indexOf(Math.max(...F.slow));
+  ok("Schnelle Kohlenhydrate wirken vor langsamen", tf < ts, `Maximum nach ${((tf - ib) * 5)} / ${((ts - ib) * 5)} min`);
+  /* Keine kuenftigen Entscheidungen: ein geplantes Training aendert nichts */
+  const g = new Engine(20260812, 9); g.acts = [];
+  for (let j = 0; j < 95; j++) g.step();
+  const A = g.forecast(360, 720, 5).blood.slice();
+  g.acts.push({ name:"Test", inten:.7, start:g.s.t + 60, dur:45, warn:0 });
+  const B2 = g.forecast(360, 720, 5).blood;
+  ok("Geplantes, noch nicht begonnenes Training bleibt draußen", A.every((v, j) => v === B2[j]));
+  /* Basal halbiert: Vorhersage steigt, Insulinwirkung wird negativ */
+  const h = new Engine(20260812, 9); h.acts = [];
+  for (let j = 0; j < 60; j++) h.step();
+  const base = h.forecast(360, 720, 5).blood;
+  h.setBasal(h.therapy.basalRateUPerH * 0.5);
+  const lower = h.forecast(360, 720, 5);
+  ok("Halbe Basalrate: Vorhersage steigt, Insulin senkt weniger", lower.blood[144] > base[144] + 20 && Math.min(...lower.insulin) < -3,
+     `${base[144].toFixed(0)} → ${lower.blood[144].toFixed(0)} mg/dL nach 12 h`);
+  /* Speichern und Laden: Schnappschuesse und Basalereignis bleiben */
+  const sv = JSON.parse(JSON.stringify({ s:h.s, core:h.snapshot() }));
+  const h2 = new Engine(undefined, 9); Object.assign(h2.s, sv.s); h2.restore(sv.core); h2.acts = [];
+  const R = h2.forecast(360, 720, 5);
+  ok("Vorhersage nach Neuladen identisch", R.blood.every((v, j) => v === lower.blood[j]) && R.insulin.every((v, j) => v === lower.insulin[j]));
+}
+function fmtClock(t){ return String(Math.floor(t/60)%24).padStart(2,"0") + ":" + String(t%60).padStart(2,"0"); }

@@ -25,7 +25,7 @@
   --paper:#EDF1F1; --card:#FFFFFF; --sink:#E3E9E9;
   --ink:#0A0D0D; --ink2:#576262; --ink3:#5F6A6A;
   --hair:rgba(10,13,13,.11);
-  --low:#B8362B; --high:#8E6410;
+  --low:#B8362B; --high:#8E6410; --ins:#2F6690;
   --rgb-ink:10,13,13; --rgb-card:255,255,255; --rgb-paper:237,241,241;
   --sh:0 1px 2px rgba(10,13,13,.05); --shUp:0 6px 22px rgba(10,13,13,.10);
   --shBtn:0 3px 12px rgba(10,13,13,.16); --shPage:-22px 0 54px rgba(10,13,13,.16);
@@ -39,7 +39,7 @@ html[data-theme="dark"]{
   --paper:#0E1213; --card:#191E20; --sink:#262D2F;
   --ink:#E9EFEF; --ink2:#A3AEAE; --ink3:#7E8A8A;
   --hair:rgba(233,239,239,.14);
-  --low:#FF7063; --high:#E8B44A;
+  --low:#FF7063; --high:#E8B44A; --ins:#79B0DB;
   --rgb-ink:233,239,239; --rgb-card:25,30,32; --rgb-paper:14,18,19;
   --sh:0 0 0 1px rgba(233,239,239,.07); --shUp:0 0 0 1px rgba(233,239,239,.14), 0 10px 30px rgba(0,0,0,.5);
   --shBtn:0 4px 16px rgba(0,0,0,.5); --shPage:-22px 0 54px rgba(0,0,0,.6);
@@ -180,7 +180,19 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .pbtn[aria-checked="true"] .av{box-shadow:0 0 0 2.5px var(--ink)}
 .pbtn[aria-checked="true"]{color:var(--ink); font-weight:700}
 .pbtn .now{font-family:var(--mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink3); margin-top:-3px}
-.pbtn:active .av{transform:scale(.94)}
+.pbtn:active .av{transform:scale(.92); transition-duration:.08s}
+@media (hover:hover){ .pbtn:hover .av{transform:translateY(-3px) scale(1.05); box-shadow:var(--shUp)} }
+.pbtn[aria-checked="false"] .av{opacity:.82}
+.pbtn .av{transition:transform .38s var(--spring), box-shadow .38s var(--spring), opacity .3s var(--spring)}
+.pbtn .nm{transition:color .25s var(--spring)}
+.pbtn.pop .av{animation:pop .5s var(--spring)}
+@keyframes pop{0%{transform:scale(.88)}45%{transform:scale(1.12)}100%{transform:scale(1)}}
+.person .swap{animation:swapIn .42s var(--spring)}
+@keyframes swapIn{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
+.person .go.rise{animation:swapIn .38s var(--spring)}
+.cmpbar b{transition:left .55s var(--spring)}
+.cmp .cv{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion: reduce){ .pbtn .av, .cmpbar b{transition:none} .pbtn.pop .av, .person .swap, .person .go.rise{animation:none} }
 .pbtn:focus-visible{outline:none} .pbtn:focus-visible .av{box-shadow:0 0 0 2.5px var(--ring)}
 .person{margin-top:14px; background:var(--card); border-radius:18px; padding:17px 18px; box-shadow:var(--sh)}
 .person .head{display:grid; grid-template-columns:58px 1fr; gap:14px; align-items:center}
@@ -199,12 +211,12 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .cmp:first-child{margin-top:12px}
 .cmp .cl{font-size:13px; color:var(--ink2)}
 .cmp .cv{font-size:15px; font-weight:700; margin-top:1px}
-.strip{position:relative; height:32px; margin:6px 8px 0}
-.strip::before{content:""; position:absolute; left:0; right:0; top:8px; height:2px; border-radius:2px; background:var(--hair)}
-.strip i{position:absolute; top:4px; width:2px; height:10px; margin-left:-1px; border-radius:2px; background:var(--ink3); opacity:.45}
-.strip b{position:absolute; top:2px; width:14px; height:14px; margin-left:-7px; border-radius:50%; background:var(--ink); box-shadow:0 0 0 3px var(--sink)}
-.strip .lo,.strip .hi{position:absolute; top:19px; font-family:var(--mono); font-size:9.5px; color:var(--ink3)}
-.strip .lo{left:0} .strip .hi{right:0}
+.cmpbar{position:relative; height:32px; margin:6px 8px 0}
+.cmpbar::before{content:""; position:absolute; left:0; right:0; top:8px; height:2px; border-radius:2px; background:var(--hair)}
+.cmpbar i{position:absolute; top:4px; width:2px; height:10px; margin-left:-1px; border-radius:2px; background:var(--ink3); opacity:.45}
+.cmpbar b{position:absolute; top:2px; width:14px; height:14px; margin-left:-7px; border-radius:50%; background:var(--ink); box-shadow:0 0 0 3px var(--sink)}
+.cmpbar .lo,.cmpbar .hi{position:absolute; top:19px; font-family:var(--mono); font-size:9.5px; color:var(--ink3)}
+.cmpbar .lo{left:0} .cmpbar .hi{right:0}
 .fact .body p.cmpfoot{font-size:12.5px; color:var(--ink3); margin-top:14px; line-height:1.5}
 .selfhint{font-size:12.5px; color:var(--ink3); margin-top:10px; line-height:1.5}
 
@@ -224,10 +236,8 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .swipe .arrows span:nth-child(2){animation-delay:.14s; opacity:.6}
 .swipe .arrows span:nth-child(3){animation-delay:.28s; opacity:1}
 @keyframes drift{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
-.live{
-  font-family:var(--mono); font-size:11px; color:rgba(237,241,241,.62);
-  margin-top:3px; font-variant-numeric:tabular-nums;
-}
+/* Hier stand eine Regel .live aus dem Prototyp, ohne Verwendung. Sie traf die
+   laufende Bewegungskarte (.move.live) und machte deren Titel blass und klein. */
 
 /* ═══ SIMULATOR ══════════════════════════════════════════════════ */
 .simtop{position:relative; display:flex; align-items:center; padding:18px 0 6px; min-height:44px}
@@ -280,6 +290,7 @@ canvas{width:100%; height:206px; display:block; touch-action:pan-y}
 
 .strip{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
 .stat{transition:background-color .5s var(--spring); background:var(--card); border-radius:16px; padding:12px 13px; box-shadow:var(--sh)}
+.stat{display:flex; flex-direction:column; justify-content:space-between}
 .stat .k{font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink3)}
 .stat .v{font-size:18px; font-weight:700; margin-top:3px; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
 
@@ -411,10 +422,12 @@ canvas{width:100%; height:206px; display:block; touch-action:pan-y}
   min-width:40px; text-align:right; transition:color .5s var(--spring);
 }
 .reserve.hungry{box-shadow:inset 0 0 0 1.8px var(--high), var(--sh)}
-.reserve.hungry .rbar b, .reserve.hungry .rv{background:var(--high); color:var(--high)}
+/* Balken und Zahl getrennt faerben — in einer Regel bekam die Zahl Hintergrund
+   und Schrift in derselben Farbe und wurde zum Farbklotz. */
+.reserve.hungry .rbar b{background:var(--high)} .reserve.hungry .rv{color:var(--high)}
 .reserve.hungry .rk{color:var(--high)}
 .reserve.low{box-shadow:inset 0 0 0 1.8px var(--low), var(--sh)}
-.reserve.low .rbar b, .reserve.low .rv{background:var(--low); color:var(--low)}
+.reserve.low .rbar b{background:var(--low)} .reserve.low .rv{color:var(--low)}
 .reserve.low .rk{color:var(--low)}
 
 /* ─── Bewegungskarte ─── */
@@ -536,6 +549,30 @@ input[type=range]::-moz-range-thumb{width:30px;height:30px;border:0;border-radiu
 .screen p.lede{font-size:15.5px; color:var(--ink2); margin:0 0 22px; line-height:1.5}
 .legend{display:flex; gap:18px; flex-wrap:wrap; font-family:var(--mono); font-size:11px; color:var(--ink2); margin:12px 0 10px}
 .legend i{display:inline-block; width:16px; height:2.5px; vertical-align:middle; margin-right:7px; border-radius:2px}
+.legend i.dash{background:repeating-linear-gradient(90deg, var(--low) 0 5px, transparent 5px 8px)}
+#pRev h2.fh{margin-bottom:4px}
+.fsub{font-size:13.5px; color:var(--ink2); margin:0 0 4px; line-height:1.5}
+.fcsum{font-size:13.5px; color:var(--ink2); line-height:1.55; margin:12px 2px 0}
+.fcsum b{color:var(--ink)} .fcsum .lo{color:var(--low); font-weight:600}
+.fcsum .hint{display:block; font-size:12px; color:var(--ink3); margin-top:6px}
+.chartcard.fx{margin-top:14px; padding:12px 8px 8px}
+.fxhead{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:2px 8px 6px; flex-wrap:wrap}
+.fxk{font-family:var(--mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink3)}
+.fxchips{display:flex; gap:6px}
+.fxc{appearance:none; border:0; cursor:default; background:var(--sink); color:var(--ink); border-radius:99px; padding:6px 11px;
+  font:600 12px var(--sans); display:inline-flex; align-items:center; gap:6px}
+.fxc i{width:10px; height:10px; border-radius:3px; display:inline-block}
+.fxc i.ins{background:var(--ins)} .fxc i.food{background:var(--high)}
+button.fxc{cursor:pointer; transition:transform .25s var(--spring), background .25s var(--spring)}
+button.fxc:active{transform:scale(.95)}
+button.fxc[aria-expanded="true"]{background:var(--ink); color:var(--paper)}
+.fxc .caret{display:inline-block; transition:transform .3s var(--spring); font-size:10px}
+button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
+#revFx{height:150px; cursor:pointer}
+.fxsplit{display:flex; gap:4px 14px; flex-wrap:wrap; padding:4px 8px 0; font-family:var(--mono); font-size:11px; color:var(--ink2)}
+.fxsplit[hidden]{display:none}
+.fxsplit i{display:inline-block; width:16px; height:3px; border-radius:2px; vertical-align:middle; margin-right:6px}
+.fxnote{font-size:12px; color:var(--ink3); line-height:1.5; margin:8px 8px 2px}
 .decisions{list-style:none; margin:0; padding:0}
 .decisions li{
   display:flex; gap:13px; padding:12px 15px; margin-bottom:6px; border-radius:13px;
@@ -748,12 +785,31 @@ input[type=range]::-moz-range-thumb{width:30px;height:30px;border:0;border-radiu
     <div class="tile"><div class="k">Nachtalarme</div><div class="v" id="rAlarm">—</div></div>
     <div class="tile"><div class="k">Sensor gedrückt</div><div class="v" id="rFault">—</div></div>
   </div>
+  <h2 class="fh">Die nächsten 12 Stunden</h2>
+  <p class="fsub">Was deine bisherigen Entscheidungen noch bewirken — wenn ab jetzt keine weiteren dazukommen.</p>
   <div class="legend">
     <span><i style="background:var(--ink)"></i>Sensor — was du gesehen hast</span>
     <span><i style="background:var(--low)"></i>Blut — was wirklich war</span>
+    <span><i class="dash"></i>Blut — was kommt</span>
     <span id="legFault" hidden><i style="background:var(--ink3);opacity:.35"></i>Sensor gedrückt — Messfehler, kein Abfall</span>
   </div>
   <div class="chartcard"><canvas id="revChart"></canvas></div>
+  <p class="fcsum" id="fcSum"></p>
+  <div class="chartcard fx">
+    <div class="fxhead">
+      <span class="fxk">Wirkung · mg/dL pro Stunde</span>
+      <span class="fxchips">
+        <span class="fxc"><i class="ins"></i>Insulin</span>
+        <button class="fxc" id="fxFood" aria-expanded="false"><i class="food"></i>Essen <span class="caret">▶</span></button>
+      </span>
+    </div>
+    <canvas id="revFx" aria-label="Wirkung von Insulin und Essen auf den Blutzucker"></canvas>
+    <div class="fxsplit" id="fxSplit" hidden>
+      <span><i style="background:var(--high)"></i>schnelle Kohlenhydrate</span>
+      <span><i style="background:repeating-linear-gradient(90deg, var(--high) 0 5px, transparent 5px 8px)"></i>langsame Kohlenhydrate</span>
+    </div>
+    <p class="fxnote" id="fxNote"></p>
+  </div>
   <h2>Was du eingetragen hast</h2>
   <ul class="decisions" id="revList"></ul>
   <p style="font-size:13px;color:var(--ink3);margin-top:20px;line-height:1.6">Ein simulierter Tag ist kein Leben mit Diabetes. Es fehlen die Jahre Übung, die Routinen, die Abkürzungen — und alles, was außerhalb des Körpers passiert. Wer danach glaubt, er wisse jetzt wie es ist, hat das Gegenteil gelernt.</p>
@@ -947,7 +1003,7 @@ let C = {};
 function readTheme(){
   const g = getComputedStyle(document.documentElement);
   const v = n => g.getPropertyValue(n).trim();
-  C = { ink:v("--ink"), low:v("--low"), high:v("--high"),
+  C = { ink:v("--ink"), low:v("--low"), high:v("--high"), ins:v("--ins"),
         rgbInk:v("--rgb-ink"), rgbCard:v("--rgb-card") };
 }
 readTheme();
@@ -1183,60 +1239,104 @@ wireSeg($("mealType"), b => mealType = b.dataset.t);
 /* ─── Personenwahl ────────────────────────────────────────────────
    Erst die objektiven Merkmale, aufgeklappt die Folgen im Vergleich zu den
    anderen neun. Die Folgen sind zur Bauzeit mit derselben Engine gerechnet
-   (window.PROFILES, siehe build-viewer.mjs). */
+   (window.PROFILES, siehe build-viewer.mjs).
+
+   Das Geruest wird EINMAL gebaut, danach nur noch befuellt — sonst gibt es
+   nichts, was sich bewegen koennte: Punkte gleiten, Zahlen zaehlen, die
+   Karte blendet ueber, und „Was das ausmacht" bleibt beim Durchklicken
+   offen. Genau dann lernt man etwas: Person fuer Person vergleichen. */
 const subjOf = id => window.SUBJECTS.find(s => s.id === id);
 const bmiOf  = id => { const d = subjOf(id).demo; return d.BW / (d.height/100) ** 2; };
 const fmtDE  = (x, n=0) => x.toLocaleString("de-DE", {minimumFractionDigits:n, maximumFractionDigits:n});
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let previewId = personId;
 
-function renderPeople(){
-  $("people").innerHTML = PERSONAS.map(p => `
-    <button class="pbtn" role="radio" aria-checked="${p.id === previewId}" data-id="${p.id}">
-      <span class="av">${avatarSVG(p, bmiOf(p.id))}</span>
-      <span>${p.name}</span>${p.id === personId ? '<span class="now">aktiv</span>' : ""}
-    </button>`).join("");
-  renderPersonCard();
-}
-
-function cmpRow(label, key, fmt){
+const CMP = [
+  { label:"1 Einheit Insulin ohne Essen",            key:"oneUnitDropMgdl",          fmt:v => v < 5 ? "kaum Wirkung" : `senkt um ${fmtDE(v)} mg/dL` },
+  { label:"60 g Kohlenhydrate mit passendem Bolus",  key:"mealPeakMgdl",             fmt:v => `Spitze bei ${fmtDE(v)} mg/dL` },
+  { label:"60 g Kohlenhydrate ohne Bolus",           key:"mealNoBolusPeakMgdl",      fmt:v => `Spitze bei ${fmtDE(v)} mg/dL` },
+  { label:"45 Minuten Sport, mittlere Belastung",    key:"moderateExerciseDropMgdl", fmt:v => v < 5 ? "kaum Wirkung" : `senkt um ${fmtDE(v)} mg/dL` },
+  { label:"20 Minuten harter Sport",                 key:"hardExerciseRiseMgdl",     fmt:v => v < 5 ? "kaum Wirkung" : `hebt um ${fmtDE(v)} mg/dL` },
+];
+const cmpRange = key => {
   const vals = PERSONAS.map(p => window.PROFILES[p.id][key]);
-  const lo = Math.min(...vals), hi = Math.max(...vals), span = hi - lo || 1;
-  const pos = v => ((v - lo) / span * 100).toFixed(1) + "%";
-  const me = window.PROFILES[previewId][key];
-  return `<div class="cmp"><div class="cl">${label}</div><div class="cv">${fmt(me)}</div>
-    <div class="strip">${vals.map(v => `<i style="left:${pos(v)}"></i>`).join("")}<b style="left:${pos(me)}"></b>
-      <span class="lo">${fmtDE(lo)}</span><span class="hi">${fmtDE(hi)}</span></div></div>`;
-}
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  return { vals, lo, hi, pos: v => ((v - lo) / (hi - lo || 1) * 100).toFixed(2) + "%" };
+};
 
-function renderPersonCard(){
-  const p = PERSONAS.find(x => x.id === previewId), s = subjOf(p.id), d = s.demo, th = s.therapy;
-  const kv = (k, v) => `<div><div class="k">${k}</div><div class="v">${v}</div></div>`;
-  const drop = v => v < 5 ? "kaum Wirkung" : `senkt um ${fmtDE(v)} mg/dL`;
-  const rise = v => v < 5 ? "kaum Wirkung" : `hebt um ${fmtDE(v)} mg/dL`;
-  const peak = v => `Spitze bei ${fmtDE(v)} mg/dL`;
+/* Zahl weich von alt nach neu zaehlen. */
+function tweenText(el, from, to, fmt){
+  if (REDUCED || from === to || from == null){ el.textContent = fmt(to); return; }
+  const t0 = performance.now(), dur = 420;
+  const tick = now => {
+    const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = fmt(from + (to - from) * e);
+    if (k < 1 && el._tw === tick) requestAnimationFrame(tick);
+  };
+  el._tw = tick; requestAnimationFrame(tick);
+}
+const replay = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+
+function buildPeople(){
+  $("people").innerHTML = PERSONAS.map(p => `
+    <button class="pbtn" role="radio" aria-checked="false" tabindex="-1" data-id="${p.id}">
+      <span class="av">${avatarSVG(p, bmiOf(p.id))}</span>
+      <span class="nm">${p.name}</span>${p.id === personId ? '<span class="now">aktiv</span>' : ""}
+    </button>`).join("");
+  const kv = (i, k) => `<div><div class="k">${k}</div><div class="v" id="pcV${i}"></div></div>`;
   $("personCard").innerHTML = `
-    <div class="head"><div class="av">${avatarSVG(p, bmiOf(p.id))}</div>
-      <div><h3>${p.name}, ${p.age}</h3><div class="line">${p.line}</div></div></div>
-    <div class="kv">
-      ${kv("Größe", fmtDE(d.height) + " cm")}${kv("Gewicht", fmtDE(d.BW) + " kg")}
-      ${kv("Ruhepuls", fmtDE(s.subject.HRrest) + " /min")}${kv("HbA1c", fmtDE(d.HbA1c, 1) + " %")}
-      ${kv("Basal", fmtDE(th.basalRateUPerH, 2) + " U/h")}${kv("KE-Faktor", fmtDE(th.carbRatioGPerU, 1) + " g/U")}
-      ${kv("Korrektur", fmtDE(th.correctionFactor) + " mg/dL/U")}${kv("Therapie", "Insulinpumpe")}
+    <div class="head swap" id="pcHead"><div class="av" id="pcAv"></div>
+      <div><h3 id="pcName"></h3><div class="line" id="pcLine"></div></div></div>
+    <div class="kv swap" id="pcKv">
+      ${kv(0,"Größe")}${kv(1,"Gewicht")}${kv(2,"Ruhepuls")}${kv(3,"HbA1c")}
+      ${kv(4,"Basal")}${kv(5,"KE-Faktor")}${kv(6,"Korrektur")}${kv(7,"Therapie")}
     </div>
-    <div class="fact" tabindex="0" role="button" aria-expanded="false">
+    <div class="fact" tabindex="0" role="button" aria-expanded="false" id="pcFx">
       <div><h3>Was das ausmacht</h3>
         <div class="body"><div>
-          ${cmpRow("1 Einheit Insulin ohne Essen", "oneUnitDropMgdl", drop)}
-          ${cmpRow("60 g Kohlenhydrate mit passendem Bolus", "mealPeakMgdl", peak)}
-          ${cmpRow("60 g Kohlenhydrate ohne Bolus", "mealNoBolusPeakMgdl", peak)}
-          ${cmpRow("45 Minuten Sport, mittlere Belastung", "moderateExerciseDropMgdl", drop)}
-          ${cmpRow("20 Minuten harter Sport", "hardExerciseRiseMgdl", rise)}
+          ${CMP.map((m, i) => { const r = cmpRange(m.key); return `
+            <div class="cmp"><div class="cl">${m.label}</div><div class="cv" id="pcC${i}"></div>
+              <div class="cmpbar">${r.vals.map(v => `<i style="left:${r.pos(v)}"></i>`).join("")}<b id="pcB${i}"></b>
+                <span class="lo">${fmtDE(r.lo)}</span><span class="hi">${fmtDE(r.hi)}</span></div></div>`; }).join("")}
           <p class="cmpfoot">Gleiche Handlung, zehn Körper. Die Striche sind die anderen neun. Gerechnet in der Simulation ab 108 mg/dL, ohne Sensorfehler — kein Maßstab für echte Menschen.</p>
         </div></div></div>
       <div class="mark"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v13M1 7.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
     </div>
-    ${p.id === personId ? "" : `<button class="go" data-go="${p.id}">Als ${p.name} spielen</button>`}
+    <button class="go" id="pcGo" hidden></button>
     <p class="note">Name, Alter, Alltag und Aussehen sind erfunden. Körper- und Therapiewerte stammen aus einem veröffentlichten Forschungsdatensatz.</p>`;
+}
+
+let shownId = null;
+function showPerson(id, tapped){
+  const prev = shownId; shownId = previewId = id;
+  const p = PERSONAS.find(x => x.id === id), s = subjOf(id), d = s.demo, th = s.therapy;
+  document.querySelectorAll("#people .pbtn").forEach(b => {
+    const on = b.dataset.id === id;
+    b.setAttribute("aria-checked", String(on)); b.tabIndex = on ? 0 : -1;
+    if (on && tapped && !REDUCED) replay(b, "pop");
+  });
+  $("pcAv").innerHTML = avatarSVG(p, bmiOf(id));
+  $("pcName").textContent = `${p.name}, ${p.age}`;
+  $("pcLine").textContent = p.line;
+  const vals = [
+    [d.height, v => fmtDE(v) + " cm"], [d.BW, v => fmtDE(v) + " kg"],
+    [s.subject.HRrest, v => fmtDE(v) + " /min"], [d.HbA1c, v => fmtDE(v, 1) + " %"],
+    [th.basalRateUPerH, v => fmtDE(v, 2) + " U/h"], [th.carbRatioGPerU, v => fmtDE(v, 1) + " g/U"],
+    [th.correctionFactor, v => fmtDE(v) + " mg/dL/U"], [null, () => "Insulinpumpe"],
+  ];
+  const old = prev ? subjOf(prev) : null;
+  const oldVals = old ? [old.demo.height, old.demo.BW, old.subject.HRrest, old.demo.HbA1c,
+    old.therapy.basalRateUPerH, old.therapy.carbRatioGPerU, old.therapy.correctionFactor, null] : [];
+  vals.forEach(([v, fmt], i) => v == null ? ($("pcV"+i).textContent = fmt()) : tweenText($("pcV"+i), oldVals[i], v, fmt));
+  CMP.forEach((m, i) => {
+    const r = cmpRange(m.key), me = window.PROFILES[id][m.key];
+    $("pcB"+i).style.left = r.pos(me);
+    tweenText($("pcC"+i), prev ? window.PROFILES[prev][m.key] : null, me, m.fmt);
+  });
+  const go = $("pcGo");
+  go.hidden = id === personId;
+  if (!go.hidden){ go.textContent = `Als ${p.name} spielen`; go.dataset.go = id; if (prev && !REDUCED) replay(go, "rise"); }
+  if (prev && prev !== id && !REDUCED){ replay($("pcHead"), "swap"); replay($("pcKv"), "swap"); }
 }
 
 function choosePerson(id){
@@ -1249,7 +1349,16 @@ function choosePerson(id){
 
 $("people").addEventListener("click", e => {
   const b = e.target.closest(".pbtn"); if (!b) return;
-  previewId = b.dataset.id; renderPeople();
+  showPerson(b.dataset.id, true);
+});
+/* Pfeiltasten wie in jeder Radiogruppe */
+$("people").addEventListener("keydown", e => {
+  const dir = { ArrowRight:1, ArrowDown:1, ArrowLeft:-1, ArrowUp:-1 }[e.key]; if (!dir) return;
+  e.preventDefault();
+  const i = PERSONAS.findIndex(p => p.id === previewId);
+  const nx = PERSONAS[(i + dir + PERSONAS.length) % PERSONAS.length].id;
+  showPerson(nx, true);
+  document.querySelector(`#people .pbtn[data-id="${nx}"]`).focus();
 });
 $("personCard").addEventListener("click", e => {
   const go = e.target.closest("[data-go]"); if (go) return choosePerson(go.dataset.go);
@@ -1262,7 +1371,8 @@ $("personCard").addEventListener("keydown", e => {
   e.preventDefault();
   f.setAttribute("aria-expanded", String(f.getAttribute("aria-expanded") !== "true"));
 });
-renderPeople();
+buildPeople();
+showPerson(personId, false);
 
 /* ─── Aufklappbare Karten ─────────────────────────────────────── */
 $("facts").addEventListener("click", e => {
@@ -1892,8 +2002,173 @@ function updateReview(){
   /* Lag der letzte Druckfehler in den vergangenen 24 h, reicht das Fenster
      bis zu ihm zurueck — sonst sieht man ihn nur in der Liste. */
   const back = lastF && eng.s.t - lastF.t < 1440 ? Math.ceil((eng.s.t - lastF.t)/60) + 1 : 0;
-  drawChart($("revChart"), eng.trace, Math.min(24, Math.max(6, rangeH, back)), eng.s.t, {review:true, faults});
+  const pastMin = Math.min(24, Math.max(6, rangeH, back)) * 60;
+  const F = getForecast(pastMin);
+  drawForecast($("revChart"), F, pastMin, faults);
+  drawEffects($("revFx"), F, pastMin);
+  paintForecastText(F);
 }
+
+/* ─── Vorhersage ──────────────────────────────────────────────────
+   Die Engine rechnet ab dem aktuellen Zustand zwoelf Stunden weiter, mit
+   allem, was schon entschieden ist, und ohne alles, was noch kommen
+   koennte. Dazu die Wirkung von Insulin und Essen: Blutzucker mit minus
+   Blutzucker ohne diese Entscheidungen. Rechnen nur, wenn sich etwas
+   geaendert hat — sechs Laeufe ueber bis zu 36 Stunden. */
+const FC_HORIZON = 720;
+let FC = null, fcKey = "", fxSplit = false;
+function getForecast(pastMin){
+  const key = eng.s.t + ":" + pastMin + ":" + eng.input.length;
+  if (key !== fcKey){ fcKey = key; FC = eng.forecast(pastMin, FC_HORIZON, 5); }
+  return FC;
+}
+
+function fcFrame(cv, pastMin, padT, padB){
+  const dpr = Math.min(3, window.devicePixelRatio || 1);
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if (!w) return null;
+  cv.width = w*dpr; cv.height = h*dpr;
+  const c = cv.getContext("2d");
+  c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h);
+  const padL = 10, padR = 44;
+  const t0 = eng.s.t - pastMin, t1 = eng.s.t + FC_HORIZON;
+  const X = t => padL + (t - t0)/(t1 - t0)*(w - padL - padR);
+  return { c, w, h, padL, padR, padT, padB, t0, t1, X };
+}
+
+/* Zukunft leicht hinterlegt, Jetzt-Linie, Stundenmarken alle drei Stunden. */
+function fcFrameDeco(f, label){
+  const { c, w, h, padR, padT, padB, t1, X } = f, now = eng.s.t;
+  c.fillStyle = `rgba(${C.rgbInk},.035)`;
+  c.fillRect(X(now), padT - 6, X(t1) - X(now), h - padT - padB + 6);
+  c.strokeStyle = `rgba(${C.rgbInk},.4)`; c.lineWidth = 1; c.setLineDash([2,3]);
+  c.beginPath(); c.moveTo(X(now)+.5, padT - 6); c.lineTo(X(now)+.5, h - padB); c.stroke(); c.setLineDash([]);
+  if (label){
+    c.fillStyle = `rgba(${C.rgbInk},.55)`; c.font = "500 9px 'DM Mono',monospace";
+    c.textAlign = "left"; c.fillText("jetzt", X(now) + 4, padT + 2);
+    c.textAlign = "right"; c.fillText("ohne weitere Entscheidungen", w - padR - 2, padT + 2);
+  }
+  c.fillStyle = `rgba(${C.rgbInk},.55)`; c.font = "400 10px 'DM Mono',monospace"; c.textAlign = "center";
+  for (let tt = Math.ceil(f.t0/180)*180; tt <= t1; tt += 180){
+    if (X(tt) < f.padL + 14 || X(tt) > w - padR - 8) continue;
+    c.fillText(String(Math.floor((tt/60)%24)).padStart(2,"0")+":00", X(tt), h - 5);
+  }
+}
+
+function drawForecast(cv, F, pastMin, faults){
+  const f = fcFrame(cv, pastMin, 16, 22); if (!f) return;
+  const { c, w, h, padL, padR, padT, padB, t0, X } = f, now = eng.s.t;
+  const gLo = 40, gHi = 400;
+  const Y = g => h - padB - (Math.log(Math.max(gLo, Math.min(gHi, g))/gLo)/Math.log(gHi/gLo))*(h - padT - padB);
+
+  c.fillStyle = `rgba(${C.rgbInk},.06)`;
+  c.fillRect(padL, Y(180), w - padL - padR, Y(70) - Y(180));
+  for (const [g,cc,al] of [[70,C.low,.9],[180,C.high,.78],[250,C.high,.3]]){
+    c.strokeStyle = cc; c.globalAlpha = al; c.lineWidth = 1.2; c.setLineDash(g === 250 ? [3,4] : []);
+    c.beginPath(); c.moveTo(padL, Y(g)+.5); c.lineTo(w - padR, Y(g)+.5); c.stroke(); c.setLineDash([]);
+    c.fillStyle = cc; c.font = "500 10px 'DM Mono',monospace"; c.textAlign = "left";
+    c.fillText(String(g), w - padR + 8, Y(g) + 3.5); c.globalAlpha = 1;
+  }
+  for (const fl of faults || []){
+    const a = Math.max(t0, fl.t - 5), b = Math.min(now, fl.end + 5); if (b <= a) continue;
+    c.fillStyle = `rgba(${C.rgbInk},.07)`; c.fillRect(X(a), padT, X(b) - X(a), h - padT - padB);
+  }
+  fcFrameDeco(f, true);
+
+  /* Blut bisher: durchgezogen */
+  c.strokeStyle = C.low; c.lineWidth = 2; c.lineJoin = "round"; c.beginPath();
+  let go = false;
+  for (const p of eng.trace){
+    if (p.t < t0 || p.t > now) continue;
+    go ? c.lineTo(X(p.t), Y(p.G)) : (c.moveTo(X(p.t), Y(p.G)), go = true);
+  }
+  if (go) c.lineTo(X(now), Y(eng.s.G));
+  c.stroke();
+
+  /* Blut ab jetzt: gestrichelt */
+  c.setLineDash([5,4]); c.beginPath();
+  F.blood.forEach((g, i) => { const x = X(now + i*F.stride); i ? c.lineTo(x, Y(g)) : c.moveTo(x, Y(g)); });
+  c.stroke(); c.setLineDash([]);
+
+  /* Sensor bisher */
+  for (const p of eng.trace){
+    if (p.t < t0 || p.t > now) continue;
+    c.globalAlpha = .9;
+    c.fillStyle = p.sensor < 70 ? C.low : p.sensor > 180 ? C.high : C.ink;
+    c.beginPath(); c.arc(X(p.t), Y(p.sensor), 2.1, 0, 6.284); c.fill();
+  }
+  c.globalAlpha = 1;
+
+  /* Tiefster Punkt der Vorhersage, wenn er unter 70 liegt */
+  let mi = 0; F.blood.forEach((g, i) => { if (g < F.blood[mi]) mi = i; });
+  if (F.blood[mi] < 70){
+    const x = X(now + mi*F.stride), y = Y(F.blood[mi]);
+    c.fillStyle = C.low; c.beginPath(); c.arc(x, y, 4, 0, 6.284); c.fill();
+    c.font = "600 10px 'DM Mono',monospace"; c.textAlign = "center";
+    c.fillText(String(Math.round(F.blood[mi])), x, y + 15);
+  }
+}
+
+function drawEffects(cv, F, pastMin){
+  const f = fcFrame(cv, pastMin, 12, 20); if (!f) return;
+  const { c, w, h, padL, padR, padT, padB, X } = f;
+  /* Oben, was Essen gerade ins Blut bringt; unten, was Insulin gerade
+     herausnimmt. Beides in mg/dL pro Stunde, eine gemeinsame Skala. */
+  const up = fxSplit
+    ? [{ v:F.fast, col:C.high, dash:[] }, { v:F.slow, col:C.high, dash:[5,4] }]
+    : [{ v:F.food, col:C.high, dash:[] }];
+  const down = [{ v:F.insulin, col:C.ins, dash:[] }];
+  const idx0 = Math.max(0, Math.floor((f.t0 - F.from)/F.stride));
+  const maxOf = arr => { let m = 0; for (const s of arr) for (let i = idx0; i < s.v.length; i++) m = Math.max(m, s.v[i]); return m; };
+  const nice = m => { const st = m > 300 ? 100 : m > 120 ? 50 : m > 40 ? 20 : 10; return Math.max(st, Math.ceil(m/st)*st); };
+  const top = nice(maxOf(up)), bot = nice(maxOf(down));
+  const H = h - padT - padB, mid = padT + H * top/(top + bot);
+  const Y = v => mid - v/(top + bot)*H;
+
+  fcFrameDeco(f, false);
+  c.strokeStyle = `rgba(${C.rgbInk},.25)`; c.lineWidth = 1;
+  c.beginPath(); c.moveTo(padL, mid + .5); c.lineTo(w - padR, mid + .5); c.stroke();
+  c.fillStyle = `rgba(${C.rgbInk},.55)`; c.font = "500 10px 'DM Mono',monospace"; c.textAlign = "left";
+  c.fillText("+" + top, w - padR + 6, padT + 8); c.fillText("0", w - padR + 6, mid + 3.5); c.fillText("−" + bot, w - padR + 6, h - padB - 2);
+
+  const plot = (s, sign) => {
+    const pts = [];
+    for (let i = idx0; i < s.v.length; i++){ const tt = F.from + i*F.stride; if (tt >= f.t0) pts.push([X(tt), Y(sign*s.v[i])]); }
+    if (!pts.length) return;
+    c.globalAlpha = s.dash.length ? .08 : .16; c.fillStyle = s.col;
+    c.beginPath(); c.moveTo(pts[0][0], mid); pts.forEach(([x,y]) => c.lineTo(x, y)); c.lineTo(pts[pts.length-1][0], mid); c.closePath(); c.fill();
+    c.globalAlpha = 1; c.strokeStyle = s.col; c.lineWidth = 2; c.setLineDash(s.dash);
+    c.beginPath(); pts.forEach(([x,y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); c.setLineDash([]);
+  };
+  up.forEach(s => plot(s, 1)); down.forEach(s => plot(s, -1));
+  c.fillStyle = `rgba(${C.rgbInk},.5)`; c.font = "500 9px 'DM Mono',monospace"; c.textAlign = "right";
+  c.fillText("bringt Zucker ins Blut", w - padR - 4, padT + 8);
+  c.fillText("nimmt Zucker heraus", w - padR - 4, h - padB - 4);
+}
+
+function paintForecastText(F){
+  const now = eng.s.t, B = F.blood;
+  let mi = 0, ma = 0; B.forEach((g, i) => { if (g < B[mi]) mi = i; if (g > B[ma]) ma = i; });
+  const at = i => fmtT((now + i*F.stride) % 1440);
+  const end = Math.round(B[B.length - 1]);
+  const low = B[mi] < 70
+    ? ` <span class="lo">Unter 70 ab ${at(B.findIndex(g => g < 70))}, tiefster Wert ${Math.round(B[mi])} um ${at(mi)}.</span>`
+    : ` Tiefster Wert ${Math.round(B[mi])} um ${at(mi)}, höchster ${Math.round(B[ma])} um ${at(ma)}.`;
+  $("fcSum").innerHTML = `Wenn du nichts mehr tust: in zwölf Stunden etwa <b>${end} mg/dL</b>.${low}` +
+    `<span class="hint">Diese Kurve kennt nur die Simulation. Im echten Leben sieht niemand voraus — dort gibt es nur den Sensor von eben.</span>`;
+  $("fxNote").textContent = fxSplit
+    ? "Schnelle Kohlenhydrate (Traubenzucker, Saft) wirken früh und steil, langsame (Brot, Nudeln) später und flacher. Fett und Eiweiß rechnet das Modell nicht — fettiges Essen läuft hier als langsame Kohlenhydrate."
+    : "Wie viel Zucker dein Essen gerade ins Blut bringt und dein Insulin herausnimmt, in mg/dL pro Stunde. Der Wert bewegt sich nur um die Differenz. Tipp auf „Essen“, um es aufzuteilen.";
+}
+
+function toggleFxSplit(){
+  fxSplit = !fxSplit;
+  $("fxFood").setAttribute("aria-expanded", String(fxSplit));
+  $("fxSplit").hidden = !fxSplit;
+  updateReview();
+}
+$("fxFood").addEventListener("click", toggleFxSplit);
+$("revFx").addEventListener("click", toggleFxSplit);
 
 function revItem(e){
   if (e.kind === "meal"){

@@ -124,6 +124,9 @@ class Engine {
       asleep: false, gly: 1, Z: 0, emg: null,
     };
     this.pump = N.flatBasalProfile(this.therapy.basalRateUPerH);
+    /* Zustand alle 30 min, damit die Vorhersage die letzten Stunden mit und
+       ohne einzelne Entscheidungen nachrechnen kann. */
+    this._snaps = [{ t:this.s.t, z:Array.from(this.z) }];
     this.rng = {
       state: () => this.tick,
       setState: (v) => { this.tick = v|0; },
@@ -184,10 +187,17 @@ class Engine {
     this._boluses.push({ t, U, share, over });
   }
 
+  /* Basalaenderung als Ereignis in der Eingabeliste, nicht als neues
+     Pumpenprogramm. So bleibt die ganze Basalgeschichte erhalten — die
+     Vorhersage muss die Vergangenheit nachrechnen koennen. Zwei Aenderungen
+     in derselben Minute: die letzte gilt. */
   setBasal(rate){
-    this.events.push({ kind:"basal", t:this.s.t, from:this.s.basalSet, to:rate });
+    const t = this.s.t;
+    this.events.push({ kind:"basal", t, from:this.s.basalSet, to:rate });
     this.s.basalSet = rate;
-    this.pump = N.flatBasalProfile(rate);
+    for (let i = this.input.length - 1; i >= 0; i--)
+      if (this.input[i].kind === "basal" && this.input[i].t === t) this.input.splice(i, 1);
+    this.input.push({ kind:"basal", t, rateUPerH: rate });
   }
 
   startActivity(inten, dur){
@@ -282,7 +292,7 @@ class Engine {
     return { v:1, subjectId:this.subjectId, seed:this.seed,
              z:N.serializeState(this.z), input:this.input,
              reserve:this._reserve, act:this._act, sensorIndex:this._sensorIndex,
-             faults:this.sensorFaults };
+             faults:this.sensorFaults, snaps:this._snaps };
   }
   canRestore(core){
     return !!core && core.v === 1 && core.subjectId === this.subjectId && Number.isInteger(core.seed);
@@ -297,31 +307,45 @@ class Engine {
     this._sensorIndex = core.sensorIndex;
     this.sensorFaults = core.faults || [];
     this._fault = this.sensorFaults.find(f => f.open) || null;
-    this.pump = N.flatBasalProfile(this.s.basalSet);
+    this._snaps = core.snaps && core.snaps.length ? core.snaps : [{ t:this.s.t, z:Array.from(this.z) }];
+    /* Aeltere Staende kannten Basalaenderungen nur als Pumpenprogramm. */
+    this.pump = N.flatBasalProfile(this.therapy.basalRateUPerH);
+    if (!this.input.some(e => e.kind === "basal") && Math.abs(this.s.basalSet - this.therapy.basalRateUPerH) > 1e-9)
+      this.input.push({ kind:"basal", t:this.s.t, rateUPerH:this.s.basalSet });
     this._sync();
     return true;
   }
 
   /* ── Ein Simulationsschritt, eine Minute ── */
-  step(){
-    const t = this.s.t;
-    this._runPlan(t);
+  /* Eingaben der Engine fuer die Minute [t, t+1) aus einer Ereignisliste.
+     Dieselbe Funktion fuer den Lauf und fuer die Vorhersage — sonst rechnet
+     die Vorhersage eine andere Vergangenheit nach, als gelaufen ist. */
+  _u(t, ev){
     const u = {
       uFastCarbs: 0, uSlowCarbs: 0,
-      uHR: N.heartRateAt(t, this.input, this.p.HRrest),
-      uInsulin: N.insulinInputAt(t, 1, this.pump, this.input),
+      uHR: N.heartRateAt(t, ev, this.p.HRrest),
+      uInsulin: N.insulinInputAt(t, 1, this.pump, ev),
     };
-    for (const e of this.input){
+    for (const e of ev){
       if (e.kind !== "meal") continue;
       const overlap = Math.min(t+1, e.t+1) - Math.max(t, e.t);
       if (overlap <= 0) continue;
       u.uFastCarbs += N.gCarbsToMmol(e.fastCarbsG) * overlap;
       u.uSlowCarbs += N.gCarbsToMmol(e.slowCarbsG) * overlap;
     }
+    return u;
+  }
 
-    this.z = N.rk4Step(N.derivatives, this.z, t, 1, this.p, u);
+  step(){
+    const t = this.s.t;
+    this._runPlan(t);
+    this.z = N.rk4Step(N.derivatives, this.z, t, 1, this.p, this._u(t, this.input));
     this.tick++;
     this.s.t = t + 1;
+    if (this.s.t % 30 === 0){
+      this._snaps.push({ t:this.s.t, z:Array.from(this.z) });
+      if (this._snaps.length > 50) this._snaps.shift();     // gut 24 Stunden
+    }
 
     /* Beduerfnisschicht: Reserven, rein Erlebnisebene, keine Physiologie. */
     this._reserve = N.advanceReserve(this._reserve, 1,
@@ -387,6 +411,81 @@ class Engine {
     } else if (this._fault){
       this._fault.end = t; delete this._fault.open; this._fault = null;
     }
+  }
+
+  /* ── Vorhersage ─────────────────────────────────────────────────────
+     Was die bisherigen Entscheidungen noch bewirken, wenn ab jetzt keine
+     weiteren dazukommen: keine neue Mahlzeit, kein Bolus, kein geplantes
+     Training. Was schon laeuft (verzoegerter Bolus, laufende Bewegung,
+     geaenderte Basalrate), laeuft weiter.
+
+     blood — Blutzucker ab jetzt, aus dem exakten aktuellen Zustand [mg/dL].
+     full  — Blutzucker ab dem Schnappschuss vor pastMin, mit allen
+             Entscheidungen nachgerechnet [mg/dL]. Trifft die gelaufene
+             Vergangenheit.
+     Wirkungen als Raten [mg/dL pro Stunde], gemessen am Blut:
+       food, fast, slow — Aufnahme aus dem Darm (D2/tmax), schnell und
+             langsam getrennt; die beiden ergeben genau food.
+       insulin — wie viel Zucker das Insulin aus deinen Entscheidungen
+             gerade aus dem Koerper nimmt: Bolus und Abweichung vom
+             Therapie-Basal. Positiv = senkt. Gerechnet ueber eine Kopie
+             der Insulinkette (S1, S2, I, x2, x3), die nur diesen Anteil
+             traegt — die Kette ist linear im Insulin, der Anteil laesst
+             sich deshalb sauber abtrennen.
+             Gewertet: Verbrauch im Gewebe (x2·Q2) und gebremste Leber
+             (EGP0·x3). Nicht der Transport x1·Q1 — der verschiebt Zucker
+             nur zwischen Blut und Gewebe, ein Teil kommt zurueck.
+     Beide Raten sind Bruttofluesse: Essen bringt, Insulin nimmt. Der
+     Blutzucker bewegt sich nur um die Differenz (plus Leber, Niere,
+     Grundverbrauch).
+     Werte alle `stride` Minuten. */
+  forecast(pastMin = 360, horizonMin = 720, stride = 5){
+    const now = this.s.t, end = now + horizonMin, p = this.p;
+    let snap = this._snaps[0];
+    for (const sn of this._snaps) if (sn.t <= now - pastMin) snap = sn;
+    const perH = MGDL * 60 / p.VG;                       // mmol/min -> mg/dL pro Stunde
+    const basalMU = N.basalRateToMUPerMin(this.therapy.basalRateUPerH);
+    const ev = this.input;
+
+    const blood = [];
+    { let z = Float64Array.from(this.z);
+      for (let t = now; ; t++){
+        if ((t - now) % stride === 0) blood.push(toMgdl(N.glucoseFrom(N.get(z, "Q1"), p.VG)));
+        if (t >= end) break;
+        z = N.rk4Step(N.derivatives, z, t, 1, p, this._u(t, ev));
+      } }
+
+    /* Insulinkette nur fuer den Anteil aus Entscheidungen */
+    const dk = (d, u, si) => [
+      u - d[0]/p.tmaxI,
+      (d[0] - d[1])/p.tmaxI,
+      d[1]/(p.VI*p.tmaxI) - p.ke*d[2],
+      p.kb2*si*d[2] - p.ka2*d[3],
+      p.kb3*si*d[2] - p.ka3*d[4],
+    ];
+    const rk = (d, u, si) => {
+      const k1 = dk(d, u, si), k2 = dk(d.map((v,i) => v + k1[i]/2), u, si),
+            k3 = dk(d.map((v,i) => v + k2[i]/2), u, si), k4 = dk(d.map((v,i) => v + k3[i]), u, si);
+      return d.map((v,i) => v + (k1[i] + 2*k2[i] + 2*k3[i] + k4[i])/6);
+    };
+
+    const full = [], insulin = [], food = [], fast = [], slow = [];
+    let z = Float64Array.from(snap.z), d = [0,0,0,0,0];
+    for (let t = snap.t; ; t++){
+      if ((t - snap.t) % stride === 0){
+        const G = N.glucoseFrom(N.get(z, "Q1"), p.VG);
+        full.push(toMgdl(G));
+        const f = N.get(z, "D2Fast")/p.tmaxGFast * perH, sl = N.get(z, "D2Slow")/p.tmaxG * perH;
+        fast.push(f); slow.push(sl); food.push(f + sl);
+        insulin.push((d[3]*N.get(z, "Q2") + p.EGP0*d[4]) * perH);
+      }
+      if (t >= end) break;
+      const u = this._u(t, ev);
+      const si = N.sensitivityFactor(N.glucoseFrom(N.get(z, "Q1"), p.VG), p);
+      d = rk(d, u.uInsulin - basalMU, si);
+      z = N.rk4Step(N.derivatives, z, t, 1, p, u);
+    }
+    return { from: snap.t, now, end, stride, blood, full, insulin, food, fast, slow };
   }
 
   /* ── Anzeigezustaende ── */

@@ -241,3 +241,25 @@ Die Korrekturen für `tsub` und `tmaxI` standen nur im App-Adapter. Viewer, Kali
 
 Zehn wählbare Personen statt eines festen Subjekts, mit Avataren; Details in `09_Personen.md`. Standard ist jetzt Lena (Subjekt 10) statt Subjekt 1, weil Subjekt 1 bei Insulin und moderatem Sport am schwachen Rand liegt. Das Menü zeigt zuerst die objektiven Merkmale, aufgeklappt die Folgen im Vergleich zu den anderen neun. Die Folgen rechnet `responseProfile()` (neu, `engine/src/scenario/profile.ts`) beim Bau mit derselben Engine. Ein eigenes Profil mit echten Werten wird nicht gebaut (Zweckbestimmung, DSGVO, Scheingenauigkeit); später vielleicht Ähnlichkeits-Fragen ohne Zahlen. Prüfstand: 120 Tests, Adapterprüfung 39 Punkte.
 
+---
+
+## 12. Nachtrag 26.09.2026 — Vorhersage auf der Auswertungsseite, drei Darstellungsfehler, lebendigere Personenwahl
+
+**Vorhersage.** Die Kurve der Auswertung zeigt jetzt die letzten Stunden und die nächsten zwölf: Sensorwerte und Blut bis jetzt, danach gestrichelt das Blut, wenn ab jetzt keine Entscheidung mehr dazukommt — keine Mahlzeit, kein Bolus, kein geplantes Training. Was schon läuft (verzögerter Bolus, laufende Bewegung, geänderte Basalrate), läuft weiter. Darunter die Wirkung in mg/dL pro Stunde: oben, was Essen gerade ins Blut bringt (Aufnahme aus dem Darm, `D2/tmax`), unten, was das Insulin aus den eigenen Entscheidungen gerade herausnimmt (Verbrauch im Gewebe `x2·Q2` und gebremste Leber `EGP0·x3`, über eine Kopie der Insulinkette nur für Bolus und Basalabweichung). Tippen auf „Essen" teilt in schnelle und langsame Kohlenhydrate. Dazu ein Satz: wo der Wert in zwölf Stunden liegt, tiefster und höchster Punkt, und ausdrücklich, dass nur die Simulation diese Kurve kennt.
+
+Nicht der Transport `x1·Q1` als Insulinwirkung: Er verschiebt Zucker nur zwischen Blut und Gewebe, ein Teil kommt zurück; als Wirkung gezeigt wäre er dreimal so groß wie der tatsächliche Verbrauch. Ein erster Versuch mit Differenzen „mit minus ohne Entscheidung" wurde verworfen: Ohne Bolus bleibt der Wert stundenlang hoch, die Insulinwirkung sah dann noch nach acht Stunden riesig aus, obwohl das Insulin längst weg war.
+
+**Fett und Eiweiß** kann die Aufteilung nicht zeigen, weil ExtHovorka sie nicht rechnet — gestrichen seit dem Umbau („V1 bleibt schlank"). Fettiges Essen läuft als langsame Kohlenhydrate; die App sagt das unter der Aufteilung. Eine echte Fett-/Eiweißwirkung bräuchte eine belegte Modellerweiterung und wäre eine Umkehr der damaligen Entscheidung.
+
+Dafür im Adapter: Zustands-Schnappschuss alle 30 min (gut 24 h, mitgespeichert), Basaländerungen als Engine-Ereignis in der Eingabeliste statt als neues Pumpenprogramm (sonst ist die Basalgeschichte nicht nachrechenbar), gemeinsame Eingabefunktion für Lauf und Vorhersage. Geprüft: Die nachgerechnete Vergangenheit trifft den gelaufenen Wert auf 1e-6 mg/dL, die Vorhersage beginnt exakt beim aktuellen Blutzucker, Insulinwirkung hat ihr Maximum 1–3 h nach dem Bolus und ist nach 6 h auf 3 % abgeklungen, schnelle Kohlenhydrate wirken vor langsamen, ein geplantes, noch nicht begonnenes Training ändert die Vorhersage nicht, nach Neuladen ist sie identisch.
+
+**Drei Darstellungsfehler auf der Simulatorseite:**
+
+1. *Die Kacheln „Insulin aktiv / KH aktiv / im Ziel" lagen über dem Reservenbalken.* Selbst verursacht mit der Personenwahl: Die neuen Vergleichsleisten hießen `.strip` wie der Kachelstreifen des Simulators und gaben ihm feste Höhe und absolute Kinder. Umbenannt in `.cmpbar`. Zusätzlich stehen die Werte jetzt bündig, auch wenn „Insulin aktiv" auf schmalen Geräten umbricht.
+2. *Der Titel der laufenden Bewegung war fast unsichtbar.* Aus dem Prototyp: Eine unbenutzte Regel `.live` (heller Text, 11 px) traf die Bewegungskarte, sobald sie „live" war — seit geplante Bewegung wirklich läuft (W13), passiert das ständig. Regel entfernt.
+3. *Der Reservenwert war ein Farbklotz.* Aus dem Prototyp: Eine Regel gab Balken UND Zahl Hintergrund und Schrift in derselben Farbe. Getrennt.
+
+Gegen Wiederholung: `build-viewer.mjs` prüft jetzt die Syntax aller Inline-Skripte und bricht den Bau ab — ein Schnittfehler beim Umbau hatte die Seite kurzzeitig komplett lahmgelegt.
+
+**Personenwahl lebendiger.** Das Gerüst wird einmal gebaut und danach nur befüllt: Avatar springt beim Antippen, Ring blendet ein, die Karte gleitet über, die Vergleichspunkte wandern zur neuen Position, die Zahlen zählen um, und „Was das ausmacht" bleibt beim Durchklicken offen — so lassen sich Personen direkt vergleichen. Pfeiltasten wechseln die Person. Wer reduzierte Bewegung eingestellt hat, bekommt alles ohne Animation.
+

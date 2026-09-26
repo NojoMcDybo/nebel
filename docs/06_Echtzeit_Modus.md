@@ -73,3 +73,8 @@ Zwei zusätzliche Testfälle über die Matrix in `10_Engine_Spec_V2` hinaus:
 | Serialisierung ist verlustfrei | Zustand speichern, laden, weiterrechnen ergibt denselben Verlauf wie ohne Unterbrechung |
 
 Beide stehen in `engine/tests/realtime.test.ts` und sind rot, bis `realtime.ts` gebaut ist.
+
+## Vorhersage in der Auswertung (26.09.2026)
+
+Die Auswertung zeigt, wohin der Wert in den nächsten zwölf Stunden läuft, wenn keine Entscheidung mehr dazukommt, und wie stark Essen und Insulin gerade wirken. Grundlage: Zustands-Schnappschüsse alle 30 min und die vollständige Eingabeliste, beides im Spielstand gesichert. Details im Changelog, Nachtrag 12. Die Vorhersage ist ein Lernbild der Simulation, keine Prognosefunktion — im echten Leben gibt es sie nicht, und die App sagt das.
+
