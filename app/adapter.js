@@ -117,6 +117,11 @@ class Engine {
     this._seen = {}; this._planned = new Set(); this._illUntil = -1;
     this._ext = []; this._comp = null; this._alcDone = false; this._alcAt = -1;
     this._act = null;
+    /* Sensorfehler mit Ursache (Druck im Schlaf). Bewusst NICHT in events:
+       live soll die Nutzerin selbst einschaetzen, ob der Abfall echt ist.
+       Erst der Rueckblick zeigt diese Liste. */
+    this.sensorFaults = [];
+    this._fault = null;
     this._reserve = 1;
 
     this.s = {
@@ -283,7 +288,8 @@ class Engine {
   snapshot(){
     return { v:1, subjectId:this.subjectId, seed:this.seed,
              z:N.serializeState(this.z), input:this.input,
-             reserve:this._reserve, act:this._act, sensorIndex:this._sensorIndex };
+             reserve:this._reserve, act:this._act, sensorIndex:this._sensorIndex,
+             faults:this.sensorFaults };
   }
   canRestore(core){
     return !!core && core.v === 1 && core.subjectId === this.subjectId && Number.isInteger(core.seed);
@@ -296,6 +302,8 @@ class Engine {
     this._reserve = core.reserve ?? 1;
     this._act = core.act || null;
     this._sensorIndex = core.sensorIndex;
+    this.sensorFaults = core.faults || [];
+    this._fault = this.sensorFaults.find(f => f.open) || null;
     this.pump = N.flatBasalProfile(this.s.basalSet);
     this._sync();
     return true;
@@ -353,6 +361,7 @@ class Engine {
     });
     const v = Math.max(40, Math.min(400, Math.round(raw)));
     this.lastSensor = v;
+    this._trackFault(v);
     this.trace.push({ t:this.s.t, G:this.s.G, gi:this.s.Gi, sensor:v, born:performance.now() });
     if (this.trace.length > 4032) this.trace.shift();   // 14 Tage
 
@@ -364,6 +373,26 @@ class Engine {
     else if (idx !== this._sensorIndex){
       this._sensorIndex = idx;
       this.events.push({ kind:"state", t:this.s.t, name:"Sensor gewechselt — die ersten Stunden rauscht er mehr" });
+    }
+  }
+
+  /* Druckereignis mitschreiben: Beginn, Ende, tiefster angezeigter Wert und
+     was das Blut in diesem Moment tatsaechlich hatte. */
+  _trackFault(v){
+    const comp = this.s.asleep
+      ? N.compressionAt(N.NEBEL_SENSOR_V2, this.seed + 77, this.s.t) : 0;
+    const t = this.s.t, G = Math.round(this.s.G);
+    if (comp > 0){
+      if (!this._fault){
+        this._fault = { kind:"druck", t, end:t, open:true, sensorLow:v, bloodAtLow:G, drop:Math.round(comp) };
+        this.sensorFaults.push(this._fault);
+      } else {
+        const f = this._fault;
+        f.end = t; f.drop = Math.max(f.drop, Math.round(comp));
+        if (v < f.sensorLow){ f.sensorLow = v; f.bloodAtLow = G; }
+      }
+    } else if (this._fault){
+      this._fault.end = t; delete this._fault.open; this._fault = null;
     }
   }
 

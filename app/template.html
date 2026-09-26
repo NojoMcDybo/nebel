@@ -703,10 +703,12 @@ input[type=range]::-moz-range-thumb{width:30px;height:30px;border:0;border-radiu
     <div class="tile"><div class="k">Notfälle</div><div class="v" id="rEmg">—</div></div>
     <div class="tile"><div class="k">Sensorabweichung</div><div class="v" id="rMard">—</div></div>
     <div class="tile"><div class="k">Nachtalarme</div><div class="v" id="rAlarm">—</div></div>
+    <div class="tile"><div class="k">Sensor gedrückt</div><div class="v" id="rFault">—</div></div>
   </div>
   <div class="legend">
     <span><i style="background:var(--ink)"></i>Sensor — was du gesehen hast</span>
     <span><i style="background:var(--low)"></i>Blut — was wirklich war</span>
+    <span id="legFault" hidden><i style="background:var(--ink3);opacity:.35"></i>Sensor gedrückt — Messfehler, kein Abfall</span>
   </div>
   <div class="chartcard"><canvas id="revChart"></canvas></div>
   <h2>Was du eingetragen hast</h2>
@@ -1179,6 +1181,19 @@ function drawChart(cv, pts, hours, tNow, opts={}){
     c.fillStyle = `rgba(${C.rgbInk},.5)`;
     c.font = "500 8.5px 'DM Mono',monospace"; c.textAlign = "center";
     c.fillText("N E B E L", 0, 3); c.restore();
+  }
+
+  if (opts.review && opts.faults){
+    for (const f of opts.faults){
+      const a = Math.max(t0, f.t - 5), b = Math.min(tNow, f.end + 5);
+      if (b <= a) continue;
+      c.fillStyle = `rgba(${C.rgbInk},.07)`;
+      c.fillRect(X(a), padT, X(b)-X(a), h-padT-padB);
+      c.strokeStyle = `rgba(${C.rgbInk},.3)`; c.lineWidth = 1; c.setLineDash([2,3]);
+      c.strokeRect(X(a)+.5, padT+.5, X(b)-X(a)-1, h-padT-padB-1); c.setLineDash([]);
+      c.fillStyle = `rgba(${C.rgbInk},.6)`; c.font = "500 9px 'DM Mono',monospace"; c.textAlign = "center";
+      c.fillText("gedrückt", X(a)+(X(b)-X(a))/2, padT+11);
+    }
   }
 
   if (opts.review){
@@ -1710,35 +1725,58 @@ function updateReview(){
   $("rAlarm").textContent = al.length
     ? al.length + (al.some(e => e.snoozed) ? " ⚠" : "") : "0";
   $("revTitle").textContent = "Tag " + (Math.floor(eng.s.t/1440)+1);
-  const stamp = eng.events.length + ":" + tr.length;
+  const faults = eng.sensorFaults || [];
+  $("rFault").textContent = faults.length ? faults.length + "×" : "0";
+  $("legFault").hidden = !faults.length;
+  const lastF = faults[faults.length-1];
+  const stamp = eng.events.length + ":" + tr.length + ":" + faults.length + ":" + (lastF ? lastF.end : 0);
   if (stamp !== revStamp){
   revStamp = stamp;
-  $("revList").innerHTML = eng.events.slice().reverse().map(e => {
-    if (e.kind === "meal"){
-      const d = Math.round(e.truth - e.est);
-      const cl = Math.abs(d) >= 10 ? ' class="miss"' : '';
-      return `<li><b>${fmtT(e.t)}</b><span${cl}>${e.est} g geschätzt · tatsächlich ${Math.round(e.truth)} g (${d>=0?"+":"−"}${Math.abs(d)})</span></li>`;
-    }
-    if (e.kind === "move")
-      return `<li><b>${fmtT(e.t)}</b><span>${e.name} · ${e.dur} min · Belastung ${(e.inten*100).toFixed(0)} %</span></li>`;
-    if (e.kind === "kombi")
-      return `<li><b>${fmtT(e.t)}</b><span class="miss">${e.name}</span></li>`;
-    if (e.kind === "emg")
-      return `<li><b>${fmtT(e.t)}</b><span class="miss">${e.name}</span></li>`;
-    if (e.kind === "state")
-      return `<li><b>${fmtT(e.t)}</b><span>${e.name}</span></li>`;
-    if (e.kind === "basal")
-      return `<li><b>${fmtT(e.t)}</b><span>Basal ${e.from.toFixed(2)} → ${e.to.toFixed(2)} U/h</span></li>`;
-    if (e.kind === "alarm")
-      return `<li><b>${fmtT(e.t)}</b><span class="miss">${e.low ? "Tiefalarm" : "Hochalarm"} bei ${e.value}${e.snoozed ? " — weitergeschlafen" : ""}</span></li>`;
-    if (e.kind === "warn") return "";
-    const p = Math.round((e.effective/e.units-1)*100);
-    const cl = Math.abs(p) >= 15 ? ' class="miss"' : '';
-    const sp = e.share >= 1 ? "" : ` · ${Math.round(e.share*100)}/${Math.round((1-e.share)*100)} über ${e.over} min`;
-    return `<li><b>${fmtT(e.t)}</b><span${cl}>${e.units.toFixed(1)} U${sp} · aufgenommen ${p>=0?"+":""}${p} %</span></li>`;
-  }).join("") || `<li><b>—</b><span>keine Entscheidungen protokolliert</span></li>`;
+  /* Druck auf den Sensor erst hier aufloesen. Dazu: Hat die Nutzerin darauf
+     reagiert? Genau das ist die Lehre — einem Messfehler geglaubt zu haben. */
+  const faultItems = faults.map(f => {
+    const inWin = e => e.t >= f.t && e.t <= f.end + 15;
+    const ate = eng.events.filter(e => e.kind === "meal" && inWin(e));
+    const alarm = eng.events.some(e => e.kind === "alarm" && e.low && inWin(e));
+    const reac = ate.length
+      ? ` · du hast ${Math.round(ate.reduce((a,e)=>a+e.est,0))} g gegessen, auf einen Messfehler`
+      : alarm ? " · Tiefalarm ausgelöst, das Blut war nie tief" : "";
+    return { t:f.t, html:`<li><b>${fmtT(f.t)}</b><span class="miss">Sensor gedrückt, ${Math.max(5, f.end - f.t)} min · angezeigt ${f.sensorLow}, Blut ${f.bloodAtLow}${reac}</span></li>` };
+  });
+  const evItems = eng.events.map(e => ({ t:e.t, html:revItem(e) }));
+  $("revList").innerHTML = evItems.concat(faultItems)
+    .sort((a,b) => b.t - a.t).map(x => x.html).join("")
+    || `<li><b>—</b><span>keine Entscheidungen protokolliert</span></li>`;
   }
-  drawChart($("revChart"), eng.trace, Math.max(6, rangeH), eng.s.t, {review:true});
+  /* Lag der letzte Druckfehler in den vergangenen 24 h, reicht das Fenster
+     bis zu ihm zurueck — sonst sieht man ihn nur in der Liste. */
+  const back = lastF && eng.s.t - lastF.t < 1440 ? Math.ceil((eng.s.t - lastF.t)/60) + 1 : 0;
+  drawChart($("revChart"), eng.trace, Math.min(24, Math.max(6, rangeH, back)), eng.s.t, {review:true, faults});
+}
+
+function revItem(e){
+  if (e.kind === "meal"){
+    const d = Math.round(e.truth - e.est);
+    const cl = Math.abs(d) >= 10 ? ' class="miss"' : '';
+    return `<li><b>${fmtT(e.t)}</b><span${cl}>${e.est} g geschätzt · tatsächlich ${Math.round(e.truth)} g (${d>=0?"+":"−"}${Math.abs(d)})</span></li>`;
+  }
+  if (e.kind === "move")
+    return `<li><b>${fmtT(e.t)}</b><span>${e.name} · ${e.dur} min · Belastung ${(e.inten*100).toFixed(0)} %</span></li>`;
+  if (e.kind === "kombi")
+    return `<li><b>${fmtT(e.t)}</b><span class="miss">${e.name}</span></li>`;
+  if (e.kind === "emg")
+    return `<li><b>${fmtT(e.t)}</b><span class="miss">${e.name}</span></li>`;
+  if (e.kind === "state")
+    return `<li><b>${fmtT(e.t)}</b><span>${e.name}</span></li>`;
+  if (e.kind === "basal")
+    return `<li><b>${fmtT(e.t)}</b><span>Basal ${e.from.toFixed(2)} → ${e.to.toFixed(2)} U/h</span></li>`;
+  if (e.kind === "alarm")
+    return `<li><b>${fmtT(e.t)}</b><span class="miss">${e.low ? "Tiefalarm" : "Hochalarm"} bei ${e.value}${e.snoozed ? " — weitergeschlafen" : ""}</span></li>`;
+  if (e.kind === "warn") return "";
+  const p = Math.round((e.effective/e.units-1)*100);
+  const cl = Math.abs(p) >= 15 ? ' class="miss"' : '';
+  const sp = e.share >= 1 ? "" : ` · ${Math.round(e.share*100)}/${Math.round((1-e.share)*100)} über ${e.over} min`;
+  return `<li><b>${fmtT(e.t)}</b><span${cl}>${e.units.toFixed(1)} U${sp} · aufgenommen ${p>=0?"+":""}${p} %</span></li>`;
 }
 
 /* ─── Datenausgabe ─────────────────────────────────────────────
@@ -1770,6 +1808,7 @@ $("btnJson").onclick = () => {
   download("nebel-lauf.json", JSON.stringify({
     erzeugt: new Date().toISOString(), parameter: P,
     zustand: eng.s, reality: eng.reality, ereignisse: eng.events,
+    sensorfehler: eng.sensorFaults || [],
     verlauf: eng.trace.map(p => ({t:p.t, blut:+p.G.toFixed(1), sensor:p.sensor})),
   }, null, 1), "application/json");
 };

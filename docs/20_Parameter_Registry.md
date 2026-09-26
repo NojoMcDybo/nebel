@@ -164,7 +164,7 @@ Grundidee: Ein echter Sensor irrt **kohärent**. Er liegt über Stunden gleichm�
 
 - **Der erste Tag bleibt ruhig.** Der Start der Simulation ist schon genug zu verarbeiten. Der Sensor sitzt beim Start bereits 2–7 Tage, der erste Wechsel fällt frühestens auf Tag 3.
 - **Situative Ereignisse frühestens ab der zweiten Nacht**, zufällig. Druck auf den Sensor nur, wenn die Person schläft.
-- **Einschätzungsleistung:** Der Druckabfall ist bewusst als plötzlicher Abfall modelliert, der wie eine echte Hypo aussehen kann. Die Nutzerin muss unterscheiden: echter Wechsel oder Messfehler? Im Protokoll erscheint er nicht, auflösen soll ihn der Rückblick (offen, 6.).
+- **Einschätzungsleistung:** Der Druckabfall ist bewusst als plötzlicher Abfall modelliert, der wie eine echte Hypo aussehen kann. Die Nutzerin muss unterscheiden: echter Wechsel oder Messfehler? Im Live-Protokoll erscheint er nicht. Erst der Rückblick deckt ihn auf: als markierter Bereich in der Kurve, als Eintrag mit angezeigtem Wert gegen den echten Blutwert und mit der Reaktion der Nutzerin, falls sie darauf gegessen hat oder ein Tiefalarm kam.
 - **Sensorwechsel** erscheint als Ereignis im Protokoll („Sensor gewechselt — die ersten Stunden rauscht er mehr"), weil man im echten Leben weiß, wann man ihn gesetzt hat.
 
 **Umsetzung:** zählerbasiert wie der Rest der Beobachtungsschicht (`uniformAt`/`normalAt(seed, index)`), die Nachholintegration bleibt bitgleich. Drift als Catmull-Rom-Kurve durch Zufallsstützstellen, Zittern als AR(1) über eine abgeschnittene Impulsantwort. `engine/src/observation.ts`, Tests in `engine/tests/sensor-v2.test.ts`.

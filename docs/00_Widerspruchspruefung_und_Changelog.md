@@ -184,3 +184,17 @@ Offene Frage aus dem Rauchtest, jetzt beantwortet: 60 g ohne Bolus führen bei P
 
 Prüfstand: 112 Tests grün, `tsc` sauber, Adapterprüfung von 21 auf 28 Punkte erweitert (Plan läuft, Verschieben bei tiefem Wert, Nachrechnen bitgleich trotz Überlappung, eigener Seed je Sitzung, fremder Spielstand abgelehnt, Fortsetzen bitgleich). Gerendert: Druckereignis in Nacht 2 — Sensor fällt in 35 min von 85 auf 65, Körper bleibt bei 79.
 
+---
+
+## 7. Nachtrag 26.09.2026 — Rückblick deckt Druck auf den Sensor auf
+
+Druckereignisse bleiben live unsichtbar, sonst gäbe es nichts einzuschätzen. Der Adapter schreibt sie aber mit, getrennt vom Protokoll (`eng.sensorFaults`): Beginn, Ende, tiefster angezeigter Wert, Blutwert in diesem Moment. Der Rückblick zeigt sie an drei Stellen:
+
+- **Kachel** „Sensor gedrückt" mit der Anzahl
+- **Kurve**: gestrichelt markierter Bereich „gedrückt". Liegt das letzte Ereignis innerhalb von 24 h, reicht das Kurvenfenster automatisch bis dorthin zurück
+- **Liste**: „Sensor gedrückt, 65 min · angezeigt 60, Blut 103". Hat die Nutzerin im Ereignis gegessen, steht dahinter „du hast 15 g gegessen, auf einen Messfehler"; gab es einen Tiefalarm, „Tiefalarm ausgelöst, das Blut war nie tief"
+
+Das ist die Lehre des Ereignisses: nicht, dass Sensoren irren, sondern dass man einem Messfehler geglaubt und danach gehandelt hat. Die Ereignisse überleben Speichern und Neuladen und stehen im JSON-Export unter `sensorfehler`.
+
+Prüfstand: Adapterprüfung auf 33 Punkte (Ereignis mitgeschrieben, Sensor tiefer als Blut, nicht im Live-Protokoll, überlebt Speichern, wach kein Ereignis). Gerendert mit beiden Varianten: ohne Reaktion und mit Traubenzucker auf den Messfehler.
+

@@ -119,3 +119,29 @@ Object.assign(b.s, saved.s); b.rng.setState(saved.tick); b.acts = saved.acts; b.
 for (let i=0;i<300;i++){ a.step(); b.step(); }
 ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.lastSensor === b.lastSensor,
    `G ${a.s.G.toFixed(2)} / ${b.s.G.toFixed(2)} mg/dL`);
+
+/* ── Druck auf den Sensor: live verborgen, im Rueckblick aufgedeckt ── */
+{
+  const Nb = window.Nebel;
+  let seed = 1, ev = null;
+  for (; seed < 400 && ev === null; seed++)
+    for (let t = 1440; t < 3*1440 && ev === null; t += 5)
+      if (Nb.compressionAt(Nb.NEBEL_SENSOR_V2, seed + 77, t) > 0) ev = t;
+  seed--;
+  const f = new Engine(seed, 0);
+  f.acts = [];
+  while (f.s.t < ev + 120){
+    const h = (f.s.t/60) % 24;
+    f.s.asleep = h >= 23 || h < 7;
+    f.step();
+  }
+  const fl = f.sensorFaults[0];
+  ok("Druckereignis mitgeschrieben", !!fl && !fl.open && fl.end > fl.t, fl ? `${Math.round((fl.end-fl.t))} min, angezeigt ${fl.sensorLow}, Blut ${fl.bloodAtLow}` : "keins");
+  ok("… Sensor zeigt tiefer als das Blut", !!fl && fl.sensorLow < fl.bloodAtLow - 8);
+  ok("… und steht NICHT im Live-Protokoll", !f.events.some(e => /druck|gedr/i.test(e.name || "")));
+  const snapF = JSON.parse(JSON.stringify(f.snapshot()));
+  ok("… und ueberlebt Speichern", snapF.faults.length === f.sensorFaults.length);
+  const awake = new Engine(seed, 0); awake.acts = [];
+  while (awake.s.t < ev + 120) awake.step();          // wach: niemand liegt auf dem Arm
+  ok("Wach kein Druckereignis", awake.sensorFaults.length === 0);
+}
