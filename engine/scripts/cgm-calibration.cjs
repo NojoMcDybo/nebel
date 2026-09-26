@@ -11,8 +11,8 @@ const subjects = fs.readdirSync(dir).filter(f => f.endsWith(".json"))
   .sort((a, b) => +a.match(/\d+/)[0] - +b.match(/\d+/)[0])
   .map(f => { const r = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")), m = r.model_parameters, d = r.demographic_info;
     return { id: f.replace(".json", ""),
-      p: { ...N.withPopulationConstants({ kb1:m.kb1,kb2:m.kb2,kb3:m.kb3,EGP0:m.EGP0,F01:m.F01,tmaxI:m.tmaxI,p3:m.p3,p4:m.p4,p5:m.p5,
-             BW:m.BW,HRrest:m.HRrest,HRmax:m.HRmax,VG:m.VG,VI:m.VI,VT_HRR:m.VT_HRR }), tsub: 5 },
+      p: N.nebelParameters({ kb1:m.kb1,kb2:m.kb2,kb3:m.kb3,EGP0:m.EGP0,F01:m.F01,tmaxI:m.tmaxI,p3:m.p3,p4:m.p4,p5:m.p5,
+             BW:m.BW,HRrest:m.HRrest,HRmax:m.HRmax,VG:m.VG,VI:m.VI,VT_HRR:m.VT_HRR }),
       th: { basalRateUPerH: d.basal, carbRatioGPerU: d.carb_insulin_ratio, correctionFactor: d.correction_bolus } }; });
 
 const G6 = N.DEXCOM_G6_VETTORETTI_2019;

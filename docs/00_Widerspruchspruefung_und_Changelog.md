@@ -70,7 +70,7 @@ Foundation §10 und Spec §11 fordern Interstitium, Filterung und Rauschen. ExtH
 
 Zusätzlich: Foundation §10 nennt eine physiologische Verzögerung von *„~5–10 min"* (ISPAD). ExtHovorka setzt `tsub = 15 min`. Direkter Zahlenwiderspruch.
 
-**Korrektur, erweitert am 23.09.2026:** Zwei Werte, getrennt geführt. Die Engine behält 15 min als Quellwert, damit der Orakelabgleich aussagekräftig bleibt. Die Anwendung kalibriert auf **5 min**, gestützt auf die ISPAD-Angabe von 5–10 min — die Kalibrierung ist also besser belegt als der Quellwert. Zulässig, weil `tsub` ausschließlich in die Beobachtungsschicht fällt: `IG` wird von keinem anderen Zustand gelesen, die Physiologie bleibt unberührt. Die übrige Sensorschicht (Filter, Rauschen, Abtastung) bleibt Nebel-Eigenleistung und ist als Annahme markiert.
+**Korrektur, erweitert am 23.09.2026:** Zwei Werte, getrennt geführt. Die Engine behält 15 min als Quellwert, damit der Orakelabgleich aussagekräftig bleibt. Die Anwendung kalibriert auf **5 min** (seit 26.09. zentral im Nebel-Parametersatz, `engine/src/calibration.ts`), gestützt auf die ISPAD-Angabe von 5–10 min — die Kalibrierung ist also besser belegt als der Quellwert. Zulässig, weil `tsub` ausschließlich in die Beobachtungsschicht fällt: `IG` wird von keinem anderen Zustand gelesen, die Physiologie bleibt unberührt. Die übrige Sensorschicht (Filter, Rauschen, Abtastung) bleibt Nebel-Eigenleistung und ist als Annahme markiert.
 
 ### W10 — MDI vs. CSII
 Alle drei Dokumente sprechen generisch von „subkutanem Insulin" und „Basal + Bolus". Beschlossen ist Pumpentherapie (CSII).
@@ -228,4 +228,10 @@ Nebenwirkungen geprüft: 60 g mit Bolus nach KE-Faktor steigen im Median nur noc
 **Texte angepasst.** Startseite und Bolus-Hinweis sagen jetzt „am stärksten nach etwa einer Stunde, vorbei nach drei bis vier". Außerdem hat die Startseitenregel „Nichts wirkt für sich allein" noch Schlaf, Stress, Krankheit, Alkohol und Leberreserven als Einflüsse genannt, die es seit dem Umbau nicht mehr gibt. Sie beschreibt jetzt, was V1 tatsächlich kann: Bewegung macht Insulin für Stunden stärker (nachgerechnet: nach Nachmittagstraining liegt die Nacht bei 13 von 20 Subjekten 3–21 mg/dL tiefer, bei einigen nicht), dazu die Sensorereignisse.
 
 Quelle: Fachinformation NovoRapid PumpCart, Abschnitte 5.1 und 5.2, https://www.medicines.org.uk/emc/product/7922/smpc
+
+---
+
+## 10. Nachtrag 26.09.2026 — Kalibrierung zentral in der Engine
+
+Die Korrekturen für `tsub` und `tmaxI` standen nur im App-Adapter. Viewer, Kalibrierskripte und künftige Szenarien rechneten deshalb weiter mit der trägen Insulinaufnahme und 15 min Sensorverzögerung — App und Rest liefen auseinander. Jetzt stehen beide Korrekturen mit Beleg in `engine/src/calibration.ts`. `nebelParameters(subject)` liefert den Parametersatz, mit dem Nebel rechnet; App, Viewer und `cgm-calibration.cjs` nutzen ihn. Der Orakelabgleich und die Tests der Gleichungen nutzen ausdrücklich die Quellwerte, damit ein Rechenfehler weiter auffällt. Der Viewer kann zum Vergleich auf „Quelle" umschalten. Kalibrierzahlen in Registry 5.3 mit dem Nebel-Parametersatz neu gerechnet; sie verschieben sich nur am Rand. Neue Übersicht: Registry Abschnitt 7.
 

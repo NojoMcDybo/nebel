@@ -120,6 +120,12 @@ td:nth-child(3){color:var(--ink3);width:70px}
         <option value="none">keiner — nur Verzögerung</option>
       </select>
       <span class="at" id="noiseval"></span>
+      <span style="flex:1"></span>
+      <label for="params">Parameter</label>
+      <select id="params">
+        <option value="nebel">Nebel — kalibriert wie die App</option>
+        <option value="quelle">Quelle — unverändert, wie im Orakel</option>
+      </select>
     </div>
   </div>
 
@@ -167,7 +173,9 @@ const state = { idx: 0, unit: "mgdl", events: [], cursorMin: null, noise: "v2", 
 /* ---------- Simulation ---------- */
 function simulate() {
   const s = S[state.idx];
-  const p = N.withPopulationConstants(s.subject);
+  /* Standard: der Parametersatz, mit dem auch die App rechnet. "Quelle" zeigt
+     die unkorrigierten Werte der Referenzimplementierung zum Vergleich. */
+  const p = state.params_src === "quelle" ? N.withPopulationConstants(s.subject) : N.nebelParameters(s.subject);
   const sensor = state.noise === "v2" ? N.REALISTIC_SENSOR : state.noise === "g6" ? N.LAB_G6_SENSOR : N.DEFAULT_SENSOR;
   state.run = N.simulate({
     durationMin: DUR, stepMin: STEP, parameters: p, therapy: s.therapy,
@@ -184,7 +192,7 @@ const label = (evs, text) => evs.map((e, i) => i === 0 ? { ...e, label: text } :
 
 function addEvent(kind) {
   const t = state.cursorMin ?? 480;
-  const s = S[state.idx], p = N.withPopulationConstants(s.subject);
+  const s = S[state.idx], p = state.params ?? N.nebelParameters(s.subject);
   const mk = {
     mealFast: () => [{ kind: "meal", t, fastCarbsG: 40, slowCarbsG: 0, label: "40 g schnell" }],
     mealSlow: () => [{ kind: "meal", t, fastCarbsG: 0, slowCarbsG: 60, label: "60 g langsam" }],
@@ -370,6 +378,7 @@ el("reset").addEventListener("click", () => { state.events = []; render(); });
 el("subj").addEventListener("change", (e) => { state.idx = +e.target.value; render(); });
 el("unit").addEventListener("change", (e) => { state.unit = e.target.value; render(); });
 el("noise").addEventListener("change", (e) => { state.noise = e.target.value; render(); });
+el("params").addEventListener("change", (e) => { state.params_src = e.target.value; render(); });
 el("theme").addEventListener("click", () => {
   const cur = document.documentElement.getAttribute("data-theme");
   const dark = cur ? cur === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;

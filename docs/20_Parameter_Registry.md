@@ -21,7 +21,7 @@ Kalibrierstatus-Legende:
 | `kb3` | 1/min pro mU/L | Verstärkung Insulinwirkung EGP-Suppression | 1.898e-4 | 8.254e-4 | 1.710e-3 | Q |
 | `EGP0` | mmol/min | Endogene Glukoseproduktion bei null Insulinwirkung | 0.563 | 1.547 | 2.875 | Q |
 | `F01` | mmol/min/kg | Nicht-insulinabhängige Glukoseaufnahme pro kg | 2.444e-3 | 8.425e-3 | 2.037e-2 | Q |
-| `tmaxI` | min | Zeitkonstante der subkutanen Insulinabsorption | 57.9 | 109.0 | 130.7 | Q — **in der App 50 min für alle (N, an Fachinformation kalibriert, Changelog Nachtrag 9)** |
+| `tmaxI` | min | Zeitkonstante der subkutanen Insulinabsorption | 57.9 | 109.0 | 130.7 | Q — **im Nebel-Parametersatz 50 min für alle (N, an Fachinformation kalibriert, Abschnitt 7)** |
 | `p3` | mmol/min | Bewegungsgetriebener Glukosefluss ins periphere Kompartiment | 1.886 | 9.699 | 25.72 | Q |
 | `p4` | mmol/min | Bewegungsgetriebener peripherer Verbrauch | 1.598 | 2.851 | 4.844 | Q |
 | `p5` | mmol | Verlängerter Nacheffekt der Belastung (über `x2`) | 0.944 | 3.212 | 5.169 | Q |
@@ -182,14 +182,16 @@ Quellen:
 
 | Variante | MARD | Spanne | < 70 | 70–180 | > 180 | Schritt ruhig | Sprünge ≥ 4 mg/dL |
 |---|---|---|---|---|---|---|---|
-| nur Verzögerung (5 min) | 0,8 % | 0,4–1,6 | – | – | – | ±0,3 | 0 % |
-| G6-Labormodell | 5,3 % | 4,7–6,2 | 12,2 % | 5,3 % | 4,9 % | ±3,5 | 31 % |
-| **Nebel V2** | **6,3 %** | 2,5–13,8 | 13,3 % | 6,3 % | 4,9 % | **±1,3** | **0 %** |
+| nur Verzögerung (5 min) | 0,7 % | 0,4–1,3 | – | – | – | ±0,4 | 0 % |
+| G6-Labormodell | 5,3 % | 4,8–6,0 | 12,8 % | 5,2 % | 4,7 % | ±3,5 | 32 % |
+| **Nebel V2** | **6,2 %** | 2,5–13,8 | 14,3 % | 6,2 % | 5,5 % | **±1,3** | **1 %** |
+
+Gerechnet mit dem Nebel-Parametersatz (Abschnitt 7), Stand 26.09.2026. Mit den Quellwerten für `tmaxI` lagen die Zahlen fast gleich (V2 6,3 %, im Tief 13,3 %); die schnellere Insulinwirkung verschiebt sie nur am Rand.
 
 Lesart:
 
 - **V2 ist im Mittel so genau wie das G6-Modell, aber anders verteilt.** Von Wert zu Wert ruhig, dafür unterscheiden sich Sensoren deutlich voneinander (2,5 bis 13,8 %). Das entspricht der Erfahrung „meistens sehr präzise, ab und zu liegt ein Sensor daneben".
-- **Im Tiefbereich ist der Sensor etwa doppelt so ungenau wie im Zielbereich** (13,3 % gegen 6,3 %): Verzögerung beim Abfall und ein absolut gleich großer Fehler auf einem kleinen Wert. Die Aussage der Startseite („am stärksten im Tiefen") bleibt gedeckt, in der Stärke „doppelt", nicht „viermal".
+- **Im Tiefbereich ist der Sensor etwa doppelt so ungenau wie im Zielbereich** (14,3 % gegen 6,2 %): Verzögerung beim Abfall und ein absolut gleich großer Fehler auf einem kleinen Wert. Die Aussage der Startseite („am stärksten im Tiefen") bleibt gedeckt, in der Stärke „doppelt", nicht „viermal".
 - **Beide MARD liegen unter klinischen Werten** (Hanson 2024: 8,9 % und 13,6 % für zwei aktuelle Systeme). Erwartbar: Klinische MARD misst gegen eine Laborreferenz mit eigenem Fehler; hier ist die Referenz die exakte Modellglukose. Die Parameter werden nicht auf eine Ziel-MARD getrimmt.
 
 **Korrektur 23.09.2026 — die früheren Zahlen dieses Abschnitts waren falsch.** Hier stand für das G6-Modell eine MARD von 12,8 % (Spanne 4,9–17,7) und im Tiefbereich 21,9 %, „viermal so ungenau". Diese Zahlen stammten aus einem defekten Prüfszenario. `exerciseBlock()` setzte keinen Ruhepunkt vor den Block. Die Herzfrequenz ist eine linear interpolierte Spur, sie stieg deshalb zwischen den Blöcken aufeinanderfolgender Tage den ganzen Tag an (76 → 113 bpm). 14 von 20 Subjekten lagen 47–71 % der Zeit unter 70 mg/dL, viele am numerischen Boden von 18 mg/dL, wo jeder absolute Fehler relativ riesig wird. Behoben durch einen Ruheanker bei `start − 1`, abgesichert durch einen Regressionstest. Siehe Changelog, Nachtrag 6.
@@ -215,3 +217,20 @@ Lesart:
 Die Reserven-Parameter gehören zur Erlebnisschicht und dürfen nie als physiologische Werte ausgegeben werden. Sie sind bewusst grob und werden nach den ersten Testsitzungen nach Gefühl kalibriert — das ist bei einem Bedürfnismodell zulässig, bei einem physiologischen Parameter nicht.
 
 Regel aus der V1-Spec, weiterhin bindend: Ein Parameter darf nicht gleichzeitig als Literaturwert und als empirisch optimierter Wert ausgegeben werden.
+
+## 7. Nebel-Kalibrierung (`engine/src/calibration.ts`)
+
+Wo ein Quellwert nachweislich nicht zur Wirklichkeit passt, wird er an genau einer Stelle korrigiert. Die Engine hat damit zwei Parametersätze:
+
+| Parametersatz | Funktion | Wer nutzt ihn |
+|---|---|---|
+| Quelle | `withPopulationConstants(subject)` | Orakelabgleich, Tests der Gleichungen, Viewer auf Wunsch |
+| **Nebel** | `nebelParameters(subject)` | App, Viewer (Standard), Kalibrierskripte |
+
+| Parameter | Quelle | Nebel | Status | Beleg |
+|---|---|---|---|---|
+| `tsub` | 15 min | **5 min** | N, an Q kalibriert | ISPAD 5–10 min; Vettoretti 2019 τ = 3,8 min. Nur Beobachtungsschicht (W9) |
+| `tmaxI` | 58–131 min | **50 min** für alle | N, an Q kalibriert | Fachinformation Insulin aspart: Maximum 1–3 h, Wirkdauer 3–5 h. Changelog Nachtrag 9 |
+
+Abgesichert durch `tests/calibration.test.ts`: Die Kalibrierung verändert das Basalgleichgewicht nicht, legt die Wirkung von 1 U in die Grenzen der Fachinformation, und die Gegenprobe mit Quellwerten liegt außerhalb.
+

@@ -195,7 +195,7 @@ ExtHovorka endet bei `IG`. Alles Weitere ist Nebel-Annahme und wird als solche g
 
 | Baustein | V1-Entscheidung |
 |---|---|
-| Physiologische Verzögerung | **5 min in der Anwendung**, kalibriert nach ISPAD (5–10 min). Der Quellwert 15 min bleibt in der Engine und wird für den Orakelabgleich verwendet. Zulässig, weil `tsub` nur die Beobachtungsschicht betrifft — `IG` wird von keinem anderen Zustand gelesen |
+| Physiologische Verzögerung | **5 min im Nebel-Parametersatz** (`engine/src/calibration.ts`), kalibriert nach ISPAD (5–10 min). Der Quellwert 15 min bleibt abrufbar und wird für den Orakelabgleich verwendet. Zulässig, weil `tsub` nur die Beobachtungsschicht betrifft — `IG` wird von keinem anderen Zustand gelesen |
 | Abtastung | 5-min-Raster, wie handelsübliche CGM |
 | Rauschen und Kalibrierfehler | **Sensormodell V2** (seit 23.09.2026): fester Kalibriercharakter je Sensor nach Vettoretti et al. 2019, langsame Drift über Stunden, kleines Zittern, Anhebung nach dem Setzen und bei Bewegung. Das publizierte G6-Modell bleibt als Vergleich (`LAB_G6_SENSOR`); es springt von Wert zu Wert zu stark. Zählerbasiert, Nachholintegration bitgleich. Parameter, Belege und Kalibrierungsprüfung in `20_Parameter_Registry.md` Abschnitt 5 |
 | Filterung | Im Fehlermodell nicht vorgesehen; Glättung bleibt implementiert, aber aus |

@@ -47,6 +47,7 @@ Damit sind auch die Groessenordnungen bestaetigt, nicht nur das qualitative Verh
 | `model.ts` | fertig — 16 Gleichungen, Gleichgewicht per Relaxation |
 | `solver.ts` | fertig — Euler und RK4 |
 | `simulate.ts` | fertig |
+| `calibration.ts` | fertig — Nebel-Kalibrierung (`tsub` 5 min, `tmaxI` 50 min) mit Beleg; `nebelParameters()` fuer App und Werkzeuge, Quellwerte bleiben fuer das Orakel |
 | `observation.ts` | fertig — Sensormodell V2 (Standard) und G6-Fehlermodell (Vettoretti 2019) zum Vergleich, zaehlerbasiert, 5-min-Raster |
 | `realtime.ts` | fertig — Nachholintegration, Append-only, Sandbox-Fork |
 | `scenario/needs.ts` | fertig — Reserven und Hunger, Szenarioschicht |

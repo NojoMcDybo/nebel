@@ -23,38 +23,11 @@
 const N = window.Nebel;
 const MGDL = N.MGDL_PER_MMOLL;
 
-/* ── Nebel-Kalibrierung der Beobachtungsschicht ─────────────────────
-   tsub ist die Zeitkonstante zwischen Plasma und Interstitium und damit
-   die sichtbare Sensorverzoegerung. ExtHovorka fuehrt 15 min; ISPAD gibt
-   fuer die physiologische Verzoegerung 5 bis 10 min an. Nebel nimmt 5 min.
-
-   Das ist zulaessig, weil tsub ausschliesslich in die Beobachtungsschicht
-   faellt: IG wird von keinem anderen Zustand gelesen, die Physiologie
-   bleibt unberuehrt. Der Quellwert bleibt in der Engine stehen und wird
-   fuer den Orakelabgleich verwendet — ueberschrieben wird nur hier, fuer
-   die Anzeige, klar gekennzeichnet.
-   Siehe docs/20_Parameter_Registry.md und Widerspruchspruefung W9. */
-const NEBEL_TSUB_MIN = 5;
-
-/* ── Nebel-Kalibrierung der Insulinaufnahme ──────────────────────────
-   tmaxI ist die Zeitkonstante der Aufnahme aus dem Unterhautgewebe. Die 20
-   Quellsubjekte liegen bei 58 bis 131 min (Patient 1: 114). Damit erreicht
-   1 U ihre staerkste Wirkung erst nach 1,7 h und ist nach 6 h noch nicht
-   vorbei — deutlich traeger als ein Analoginsulin in der Pumpe.
-
-   Fachinformation NovoRapid (Insulin aspart), Abschnitt 5.1/5.2: Wirkbeginn
-   nach 10–20 min, Maximum nach 1–3 h, Wirkdauer 3–5 h; Plasmaspitze nach
-   40 min (IQR 30–40). Mit tmaxI = 50 min liegt die Wirkung im Modell bei
-   Maximum 1,0 h und Tiefpunkt 3,5 h (Median der 20 Subjekte), also in den
-   Grenzen der Fachinformation. Die Plasmaspitze kommt dann nach etwa 59 min,
-   langsamer als die 40 min der Fachinformation. Beides zugleich trifft das
-   Modell mit einem Parameter nicht; Vorrang hat die Wirkung, weil nur sie
-   sichtbar ist.
-
-   Das Basalgleichgewicht haengt nicht von tmaxI ab (S1 = S2 = u·tmaxI,
-   I = u/(VI·ke)). Der Quellwert bleibt in der Engine und im Orakelabgleich.
-   Siehe docs/20_Parameter_Registry.md und Changelog Nachtrag 9. */
-const NEBEL_TMAXI_MIN = 50;
+/* ── Nebel-Kalibrierung ──────────────────────────────────────────────
+   Wo Quellwerte nachweislich nicht zur Wirklichkeit passen, korrigiert die
+   Engine sie an genau einer Stelle: engine/src/calibration.ts. Derzeit die
+   Sensorverzoegerung tsub (15 -> 5 min) und die Insulinaufnahme tmaxI
+   (58–131 -> 50 min). Beleg und Begruendung stehen dort. */
 const toMgdl = (mmol) => mmol * MGDL;
 
 /* Mahlzeitentypen. tau trifft die Absorptionskonstanten der Engine
@@ -95,7 +68,7 @@ const KOMBIS = {};
    gesamte Anzeige friert ein. */
 const P = {
   tau_i:    N.POPULATION_CONSTANTS.tmaxG,
-  tau_sens: NEBEL_TSUB_MIN,
+  tau_sens: N.NEBEL_CALIBRATION.tsub,
 };
 
 class Engine {
@@ -110,7 +83,7 @@ class Engine {
     const sub = window.SUBJECTS[subjectIndex];
     this.subjectId = sub.id;
     /* Quellparameter, danach die eine bewusste Nebel-Kalibrierung. */
-    this.p = { ...N.withPopulationConstants(sub.subject), tsub: NEBEL_TSUB_MIN, tmaxI: NEBEL_TMAXI_MIN };
+    this.p = N.nebelParameters(sub.subject);
     this.therapy = sub.therapy;
     this.seed = seed;
     this.tick = 0;
