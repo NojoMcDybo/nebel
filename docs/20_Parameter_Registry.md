@@ -201,6 +201,7 @@ Lesart:
 | Filterzeitkonstante | Beobachtung | N | Im G6-Modell nicht vorgesehen, bleibt 0 |
 | Drift, Zittern, Erster Tag, Bewegung (V2) | Beobachtung | N | Stärken gesetzt (5.2). Gegen echte Sensorspuren prüfen — reale Daten nur lokal und mit ausdrücklicher Zustimmung der Person |
 | Druck auf den Sensor: Dauer, Tiefe | Beobachtung | N | Häufigkeit aus Baysal 2014 abgeleitet; Dauer 30–90 min und Tiefe 15–40 mg/dL noch ohne Beleg |
+| Korrekturfaktor und KE-Faktor der App-Kacheln | Therapie | Q, aber ungeprüft | Stammen aus `demographic_info` des Datensatzes, nicht aus dem Modell. Prüfung 26.09. (1 U, 2 h nach 60 g ohne Bolus, größte Differenz zum Lauf ohne Korrektur): Modell / Datensatz im Median 0,75, Spanne 0,27–1,41. Patient 1 passt (25 gegen 28 mg/dL pro U), Patient 7 nicht (17 gegen 64). KE-Faktor noch nicht geprüft |
 | Weitere Sensorereignisse | Beobachtung | offen | z. B. Störsubstanzen wie hochdosiertes Vitamin C (herstellerabhängig), frühestens an späteren Tagen |
 | Abtastrate | Beobachtung | N | 5 min, Gerätekonvention |
 | KH-Split schnell/langsam | Mahlzeit | N | Zuordnungsregel realer Mahlzeiten auf `uFastCarbs`/`uSlowCarbs` — braucht eine begründete Heuristik, keine Bauchzahl |

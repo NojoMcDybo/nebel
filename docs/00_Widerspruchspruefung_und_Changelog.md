@@ -198,3 +198,9 @@ Das ist die Lehre des Ereignisses: nicht, dass Sensoren irren, sondern dass man 
 
 Prüfstand: Adapterprüfung auf 33 Punkte (Ereignis mitgeschrieben, Sensor tiefer als Blut, nicht im Live-Protokoll, überlebt Speichern, wach kein Ereignis). Gerendert mit beiden Varianten: ohne Reaktion und mit Traubenzucker auf den Messfehler.
 
+---
+
+## 8. Nachtrag 26.09.2026 — Korrekturfaktor der App passt nicht zu jedem Modellkörper
+
+Die App zeigt unter „Deine Therapiewerte" den Korrekturfaktor aus dem Datensatz (`demographic_info.correction_bolus`). Er ist nicht aus den Modellparametern abgeleitet. Nachgerechnet für alle 20 Subjekte: 1 U, gegeben 2 h nach 60 g ohne Bolus, größte Absenkung gegenüber dem Lauf ohne diese Einheit. Das Verhältnis Modell zu Datensatz liegt im Median bei 0,75, in der Spanne von 0,27 bis 1,41. Beim Standardsubjekt Patient 1 passt es (25 gegen 28 mg/dL pro U), bei Patient 7 liegt die Kachel um den Faktor 3,8 daneben (64 angezeigt, 17 im Modell). Die Messung hängt vom Ausgangswert ab, weil die Insulinsensitivität im Hyperbereich sinkt (bei 270 mg/dL auf 0,83). Offen: Kachel aus dem Modell ableiten oder die Abweichung als Lerninhalt erklären. Der KE-Faktor ist noch nicht geprüft. Eingetragen in Registry Abschnitt 6.
+
