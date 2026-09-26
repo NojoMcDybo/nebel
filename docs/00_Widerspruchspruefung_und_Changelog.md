@@ -263,3 +263,16 @@ Gegen Wiederholung: `build-viewer.mjs` prüft jetzt die Syntax aller Inline-Skri
 
 **Personenwahl lebendiger.** Das Gerüst wird einmal gebaut und danach nur befüllt: Avatar springt beim Antippen, Ring blendet ein, die Karte gleitet über, die Vergleichspunkte wandern zur neuen Position, die Zahlen zählen um, und „Was das ausmacht" bleibt beim Durchklicken offen — so lassen sich Personen direkt vergleichen. Pfeiltasten wechseln die Person. Wer reduzierte Bewegung eingestellt hat, bekommt alles ohne Animation.
 
+---
+
+## 13. Nachtrag 26.09.2026 — Feinschliff nach Nojos Test
+
+- **Avatare leben:** Kopf wiegt leicht, Oberkörper atmet, Augen blinzeln, jede Figur im eigenen Takt; beim Antippen grüßt der Kopf, in der Karte ebenso. Bei reduzierter Bewegung aus.
+- **Auswahlrahmen bleibt beim Überfahren mit der Maus** (vorher ersetzte der Hover-Schatten den Rahmen).
+- **Pluszeichen dreht ohne Ruckeln:** eigene Zeichenebene für das Kreuz, und die große Karte „Was das ausmacht" staucht beim Klicken nicht mehr.
+- **Pfeiltasten in der Personenwahl blättern nicht mehr die Seite um.**
+- **Startseite zu kurz:** Der Flex-Container streckte den Inhalt auf Fensterhöhe, der Abstand unter dem letzten Element fiel aus dem Scrollbereich; der Simulator-Knopf endete unter dem Seitenindikator. Betrifft alle drei Seiten, behoben.
+- **Diagramme beim Wechsel hell/dunkel:** Canvas kennt keine CSS-Übergänge. Die Diagrammfarben werden jetzt in derselben halben Sekunde gemischt und jedes Bild neu gezeichnet, ohne die Vorhersage neu zu rechnen.
+- **Kennzahlen der Auswertung kompakt:** eine Karte mit zwei Spalten statt acht Kacheln, gut halb so hoch.
+- Die Vorhersagekurve beginnt nicht vor dem Start der Sitzung.
+

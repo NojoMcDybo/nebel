@@ -94,26 +94,37 @@ function avatarSVG(persona, bmi = 23){
     ? `<g fill="none" stroke="${ink}" stroke-width="1.25"><circle cx="34.6" cy="36.6" r="4.3"/><circle cx="45.4" cy="36.6" r="4.3"/><path d="M38.9 36.4 L41.1 36.4"/></g>`
     : "";
 
-  return `<svg viewBox="8 7 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${persona.name}">
+  /* Lebendig: Kopf wiegt leicht, Oberkoerper atmet, Augen blinzeln. Jede
+     Figur mit eigenem Takt (aus dem Namen), damit nicht alle synchron
+     schaukeln. Die Animation selbst steht im CSS der App (.av-head …). */
+  const h = [...persona.name].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) % 997, 7);
+  const tempo = `--d:${-(h % 60) / 10}s;--d2:${-(h % 47) / 10}s;--d3:${-(h % 53) / 10}s`;
+  return `<svg viewBox="8 7 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${persona.name}" style="${tempo}">
   <defs><clipPath id="${uid}"><circle cx="40" cy="39" r="32"/></clipPath></defs>
   <g clip-path="url(#${uid})">
     <rect width="80" height="80" fill="var(--sink)"/>
-    ${back}
-    <path d="M${40 - w} 84 C${40 - w} 66 ${40 - w * .55} 58.5 40 58.5 C${40 + w * .55} 58.5 ${40 + w} 66 ${40 + w} 84 Z" fill="${L.shirt}"/>
-    <path d="M34.6 46 L34.6 58.2 Q40 62.5 45.4 58.2 L45.4 46 Z" fill="${skinD}"/>
-    <ellipse cx="26.9" cy="37" rx="2.4" ry="3.4" fill="${skinD}"/>
-    <ellipse cx="53.1" cy="37" rx="2.4" ry="3.4" fill="${skinD}"/>
-    <ellipse cx="40" cy="35" rx="13.5" ry="16" fill="${skin}"/>
-    ${front}
-    <g stroke="${hairD}" stroke-width="1.3" stroke-linecap="round" fill="none">
-      <path d="M31.6 31.4 Q34.5 30 37.3 31.1"/><path d="M42.7 31.1 Q45.5 30 48.4 31.4"/>
+    <g class="av-head">${back}</g>
+    <g class="av-body">
+      <path d="M${40 - w} 84 C${40 - w} 66 ${40 - w * .55} 58.5 40 58.5 C${40 + w * .55} 58.5 ${40 + w} 66 ${40 + w} 84 Z" fill="${L.shirt}"/>
+      <path d="M34.6 46 L34.6 58.2 Q40 62.5 45.4 58.2 L45.4 46 Z" fill="${skinD}"/>
     </g>
-    <circle cx="34.6" cy="36.6" r="1.35" fill="${ink}"/>
-    <circle cx="45.4" cy="36.6" r="1.35" fill="${ink}"/>
-    <path d="M40 38.8 L39.1 42 L40.7 42.2" stroke="${skinD}" stroke-width="1.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    ${beard}
-    <path d="M36.4 45.3 Q40 47.6 43.6 45.3" stroke="${L.beard ? skin : lip}" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-    ${glasses}
+    <g class="av-head">
+      <ellipse cx="26.9" cy="37" rx="2.4" ry="3.4" fill="${skinD}"/>
+      <ellipse cx="53.1" cy="37" rx="2.4" ry="3.4" fill="${skinD}"/>
+      <ellipse cx="40" cy="35" rx="13.5" ry="16" fill="${skin}"/>
+      ${front}
+      <g stroke="${hairD}" stroke-width="1.3" stroke-linecap="round" fill="none">
+        <path d="M31.6 31.4 Q34.5 30 37.3 31.1"/><path d="M42.7 31.1 Q45.5 30 48.4 31.4"/>
+      </g>
+      <g class="av-eyes">
+        <circle cx="34.6" cy="36.6" r="1.35" fill="${ink}"/>
+        <circle cx="45.4" cy="36.6" r="1.35" fill="${ink}"/>
+      </g>
+      <path d="M40 38.8 L39.1 42 L40.7 42.2" stroke="${skinD}" stroke-width="1.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      ${beard}
+      <path d="M36.4 45.3 Q40 47.6 43.6 45.3" stroke="${L.beard ? skin : lip}" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      ${glasses}
+    </g>
   </g>
 </svg>`;
 }
