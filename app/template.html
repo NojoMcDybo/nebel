@@ -170,6 +170,44 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 }
 .warnbox b{color:var(--low)}
 
+/* Personenwahl */
+.people{display:grid; grid-template-columns:repeat(5,1fr); gap:10px 8px}
+.pbtn{appearance:none; border:0; background:none; padding:0; cursor:pointer; display:grid; justify-items:center; gap:6px;
+  color:var(--ink2); font:500 12px/1.2 var(--sans)}
+.pbtn .av{width:100%; max-width:62px; aspect-ratio:1; border-radius:50%; overflow:hidden; box-shadow:var(--sh);
+  transition:transform .3s var(--spring), box-shadow .3s var(--spring)}
+.pbtn .av svg{display:block; width:100%; height:100%}
+.pbtn[aria-checked="true"] .av{box-shadow:0 0 0 2.5px var(--ink)}
+.pbtn[aria-checked="true"]{color:var(--ink); font-weight:700}
+.pbtn .now{font-family:var(--mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink3); margin-top:-3px}
+.pbtn:active .av{transform:scale(.94)}
+.pbtn:focus-visible{outline:none} .pbtn:focus-visible .av{box-shadow:0 0 0 2.5px var(--ring)}
+.person{margin-top:14px; background:var(--card); border-radius:18px; padding:17px 18px; box-shadow:var(--sh)}
+.person .head{display:grid; grid-template-columns:58px 1fr; gap:14px; align-items:center}
+.person .head .av{width:58px; height:58px; border-radius:50%; overflow:hidden}
+.person .head .av svg{display:block; width:100%; height:100%}
+.person h3{margin:0; font-size:17px; letter-spacing:-.01em}
+.person .line{color:var(--ink2); font-size:14px; margin-top:1px}
+.person .kv{display:grid; grid-template-columns:1fr 1fr; gap:10px 14px; margin-top:14px}
+.person .kv .k{font-family:var(--mono); font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink3)}
+.person .kv .v{font-size:15px; font-weight:600; margin-top:2px}
+.person .note{font-size:11.5px; color:var(--ink3); margin-top:12px; line-height:1.5}
+.person .go{margin-top:14px; width:100%; appearance:none; border:0; cursor:pointer; background:var(--ink); color:var(--paper);
+  border-radius:14px; padding:13px 16px; font:700 14.5px var(--sans)}
+.person .fact{margin-top:14px; box-shadow:none; background:var(--sink); padding:14px 16px}
+.cmp{margin-top:16px}
+.cmp:first-child{margin-top:12px}
+.cmp .cl{font-size:13px; color:var(--ink2)}
+.cmp .cv{font-size:15px; font-weight:700; margin-top:1px}
+.strip{position:relative; height:32px; margin:6px 8px 0}
+.strip::before{content:""; position:absolute; left:0; right:0; top:8px; height:2px; border-radius:2px; background:var(--hair)}
+.strip i{position:absolute; top:4px; width:2px; height:10px; margin-left:-1px; border-radius:2px; background:var(--ink3); opacity:.45}
+.strip b{position:absolute; top:2px; width:14px; height:14px; margin-left:-7px; border-radius:50%; background:var(--ink); box-shadow:0 0 0 3px var(--sink)}
+.strip .lo,.strip .hi{position:absolute; top:19px; font-family:var(--mono); font-size:9.5px; color:var(--ink3)}
+.strip .lo{left:0} .strip .hi{right:0}
+.fact .body p.cmpfoot{font-size:12.5px; color:var(--ink3); margin-top:14px; line-height:1.5}
+.selfhint{font-size:12.5px; color:var(--ink3); margin-top:10px; line-height:1.5}
+
 /* Wisch-Aufforderung */
 .swipe{
   margin:30px 0 108px; background:var(--ink); color:var(--paper); border-radius:20px;
@@ -565,6 +603,11 @@ input[type=range]::-moz-range-thumb{width:30px;height:30px;border:0;border-radiu
       </div>
     </div>
 
+    <div class="eyebrow">Wer bist du heute?</div>
+    <div class="people" id="people" role="radiogroup" aria-label="Person wählen"></div>
+    <div class="person" id="personCard"></div>
+    <p class="selfhint">Du hast selbst Typ-1-Diabetes? Such dir die Person, die dir am nächsten kommt, und zeig sie deinem Umfeld.</p>
+
     <div class="eyebrow">Deine Therapiewerte</div>
     <div class="grid4">
       <div class="tile"><div class="k">KE-Faktor</div><div class="v" id="tKE">—</div></div>
@@ -894,6 +937,7 @@ input[type=range]::-moz-range-thumb{width:30px;height:30px;border:0;border-radiu
 /*__SUBJECTS__*/
 /*__ENGINE__*/
 /*__ADAPTER__*/
+/*__PERSONAS__*/
 
 /* ══════════════════════════════════════════════════════════════════
    TEIL 2 — DARSTELLUNG (beim Swift-Port ersetzen, nicht uebersetzen)
@@ -915,7 +959,20 @@ const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 const LAG_WORDS = {3:"drei",5:"fünf",7:"sieben",10:"zehn",12:"zwölf",15:"fünfzehn",20:"zwanzig"};
 const LAG_MIN = Math.round(P.tau_sens);
 const LAG_TXT = (LAG_WORDS[LAG_MIN] ?? LAG_MIN) + " Minuten";
-const eng = new Engine();
+/* ─── Person ────────────────────────────────────────────────────
+   Gewaehlt auf der Startseite, gemerkt im Browser. Ein Wechsel beginnt
+   eine neue Sitzung: anderer Koerper, anderer Verlauf. */
+const PERSON_KEY = "nebel.person.v1";
+function readPerson(){
+  const h = location.hash.match(/person=(Patient_\d+)/);
+  if (h) return h[1];
+  try { const v = localStorage.getItem(PERSON_KEY); if (v) return v; } catch(e){}
+  return DEFAULT_PERSONA;
+}
+let personId = readPerson();
+if (!PERSONAS.some(p => p.id === personId)) personId = DEFAULT_PERSONA;
+const PERSON = PERSONAS.find(p => p.id === personId);
+const eng = new Engine(undefined, Math.max(0, window.SUBJECTS.findIndex(s => s.id === personId)));
 
 /* Die Therapiewerte stammen aus dem publizierten Subjekt, nicht aus einer
    festen Zahl im Markup — sonst behauptet die Startseite etwas anderes,
@@ -1123,6 +1180,90 @@ $("realityYes").onclick = () => {
 let mealType = "fast";
 wireSeg($("mealType"), b => mealType = b.dataset.t);
 
+/* ─── Personenwahl ────────────────────────────────────────────────
+   Erst die objektiven Merkmale, aufgeklappt die Folgen im Vergleich zu den
+   anderen neun. Die Folgen sind zur Bauzeit mit derselben Engine gerechnet
+   (window.PROFILES, siehe build-viewer.mjs). */
+const subjOf = id => window.SUBJECTS.find(s => s.id === id);
+const bmiOf  = id => { const d = subjOf(id).demo; return d.BW / (d.height/100) ** 2; };
+const fmtDE  = (x, n=0) => x.toLocaleString("de-DE", {minimumFractionDigits:n, maximumFractionDigits:n});
+let previewId = personId;
+
+function renderPeople(){
+  $("people").innerHTML = PERSONAS.map(p => `
+    <button class="pbtn" role="radio" aria-checked="${p.id === previewId}" data-id="${p.id}">
+      <span class="av">${avatarSVG(p, bmiOf(p.id))}</span>
+      <span>${p.name}</span>${p.id === personId ? '<span class="now">aktiv</span>' : ""}
+    </button>`).join("");
+  renderPersonCard();
+}
+
+function cmpRow(label, key, fmt){
+  const vals = PERSONAS.map(p => window.PROFILES[p.id][key]);
+  const lo = Math.min(...vals), hi = Math.max(...vals), span = hi - lo || 1;
+  const pos = v => ((v - lo) / span * 100).toFixed(1) + "%";
+  const me = window.PROFILES[previewId][key];
+  return `<div class="cmp"><div class="cl">${label}</div><div class="cv">${fmt(me)}</div>
+    <div class="strip">${vals.map(v => `<i style="left:${pos(v)}"></i>`).join("")}<b style="left:${pos(me)}"></b>
+      <span class="lo">${fmtDE(lo)}</span><span class="hi">${fmtDE(hi)}</span></div></div>`;
+}
+
+function renderPersonCard(){
+  const p = PERSONAS.find(x => x.id === previewId), s = subjOf(p.id), d = s.demo, th = s.therapy;
+  const kv = (k, v) => `<div><div class="k">${k}</div><div class="v">${v}</div></div>`;
+  const drop = v => v < 5 ? "kaum Wirkung" : `senkt um ${fmtDE(v)} mg/dL`;
+  const rise = v => v < 5 ? "kaum Wirkung" : `hebt um ${fmtDE(v)} mg/dL`;
+  const peak = v => `Spitze bei ${fmtDE(v)} mg/dL`;
+  $("personCard").innerHTML = `
+    <div class="head"><div class="av">${avatarSVG(p, bmiOf(p.id))}</div>
+      <div><h3>${p.name}, ${p.age}</h3><div class="line">${p.line}</div></div></div>
+    <div class="kv">
+      ${kv("Größe", fmtDE(d.height) + " cm")}${kv("Gewicht", fmtDE(d.BW) + " kg")}
+      ${kv("Ruhepuls", fmtDE(s.subject.HRrest) + " /min")}${kv("HbA1c", fmtDE(d.HbA1c, 1) + " %")}
+      ${kv("Basal", fmtDE(th.basalRateUPerH, 2) + " U/h")}${kv("KE-Faktor", fmtDE(th.carbRatioGPerU, 1) + " g/U")}
+      ${kv("Korrektur", fmtDE(th.correctionFactor) + " mg/dL/U")}${kv("Therapie", "Insulinpumpe")}
+    </div>
+    <div class="fact" tabindex="0" role="button" aria-expanded="false">
+      <div><h3>Was das ausmacht</h3>
+        <div class="body"><div>
+          ${cmpRow("1 Einheit Insulin ohne Essen", "oneUnitDropMgdl", drop)}
+          ${cmpRow("60 g Kohlenhydrate mit passendem Bolus", "mealPeakMgdl", peak)}
+          ${cmpRow("60 g Kohlenhydrate ohne Bolus", "mealNoBolusPeakMgdl", peak)}
+          ${cmpRow("45 Minuten Sport, mittlere Belastung", "moderateExerciseDropMgdl", drop)}
+          ${cmpRow("20 Minuten harter Sport", "hardExerciseRiseMgdl", rise)}
+          <p class="cmpfoot">Gleiche Handlung, zehn Körper. Die Striche sind die anderen neun. Gerechnet in der Simulation ab 108 mg/dL, ohne Sensorfehler — kein Maßstab für echte Menschen.</p>
+        </div></div></div>
+      <div class="mark"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v13M1 7.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+    </div>
+    ${p.id === personId ? "" : `<button class="go" data-go="${p.id}">Als ${p.name} spielen</button>`}
+    <p class="note">Name, Alter, Alltag und Aussehen sind erfunden. Körper- und Therapiewerte stammen aus einem veröffentlichten Forschungsdatensatz.</p>`;
+}
+
+function choosePerson(id){
+  const p = PERSONAS.find(x => x.id === id);
+  if (eng.trace.length > 12 && !confirm(`Mit ${p.name} neu beginnen? Der bisherige Verlauf geht verloren.`)) return;
+  try { localStorage.setItem(PERSON_KEY, id); } catch(e){}
+  location.hash = "person=" + id;
+  location.reload();
+}
+
+$("people").addEventListener("click", e => {
+  const b = e.target.closest(".pbtn"); if (!b) return;
+  previewId = b.dataset.id; renderPeople();
+});
+$("personCard").addEventListener("click", e => {
+  const go = e.target.closest("[data-go]"); if (go) return choosePerson(go.dataset.go);
+  const f = e.target.closest(".fact"); if (!f) return;
+  f.setAttribute("aria-expanded", String(f.getAttribute("aria-expanded") !== "true"));
+});
+$("personCard").addEventListener("keydown", e => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const f = e.target.closest(".fact"); if (!f) return;
+  e.preventDefault();
+  f.setAttribute("aria-expanded", String(f.getAttribute("aria-expanded") !== "true"));
+});
+renderPeople();
+
 /* ─── Aufklappbare Karten ─────────────────────────────────────── */
 $("facts").addEventListener("click", e => {
   const f = e.target.closest(".fact"); if (!f) return;
@@ -1256,7 +1397,7 @@ function paint(tNow){
   const mins = Math.floor(tNow) % 1440, day = Math.floor(tNow/1440)+1;
   const hhmm = String(Math.floor(mins/60)).padStart(2,"0")+":"+String(mins%60).padStart(2,"0");
   $("clock").textContent = hhmm;
-  $("dayLabel").textContent = "Tag " + day;
+  $("dayLabel").textContent = "Tag " + day + " · " + PERSON.name;
   $("ctaSub").textContent = eng.trace.length > 1
     ? `läuft seit ${eng.trace.length*5} Minuten · ${hhmm}`
     : "nach links wischen oder ziehen";

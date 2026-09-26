@@ -235,3 +235,9 @@ Quelle: Fachinformation NovoRapid PumpCart, Abschnitte 5.1 und 5.2, https://www.
 
 Die Korrekturen für `tsub` und `tmaxI` standen nur im App-Adapter. Viewer, Kalibrierskripte und künftige Szenarien rechneten deshalb weiter mit der trägen Insulinaufnahme und 15 min Sensorverzögerung — App und Rest liefen auseinander. Jetzt stehen beide Korrekturen mit Beleg in `engine/src/calibration.ts`. `nebelParameters(subject)` liefert den Parametersatz, mit dem Nebel rechnet; App, Viewer und `cgm-calibration.cjs` nutzen ihn. Der Orakelabgleich und die Tests der Gleichungen nutzen ausdrücklich die Quellwerte, damit ein Rechenfehler weiter auffällt. Der Viewer kann zum Vergleich auf „Quelle" umschalten. Kalibrierzahlen in Registry 5.3 mit dem Nebel-Parametersatz neu gerechnet; sie verschieben sich nur am Rand. Neue Übersicht: Registry Abschnitt 7.
 
+---
+
+## 11. Nachtrag 26.09.2026 — Personenwahl auf der Startseite
+
+Zehn wählbare Personen statt eines festen Subjekts, mit Avataren; Details in `09_Personen.md`. Standard ist jetzt Lena (Subjekt 10) statt Subjekt 1, weil Subjekt 1 bei Insulin und moderatem Sport am schwachen Rand liegt. Das Menü zeigt zuerst die objektiven Merkmale, aufgeklappt die Folgen im Vergleich zu den anderen neun. Die Folgen rechnet `responseProfile()` (neu, `engine/src/scenario/profile.ts`) beim Bau mit derselben Engine. Ein eigenes Profil mit echten Werten wird nicht gebaut (Zweckbestimmung, DSGVO, Scheingenauigkeit); später vielleicht Ähnlichkeits-Fragen ohne Zahlen. Prüfstand: 120 Tests, Adapterprüfung 39 Punkte.
+

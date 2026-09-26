@@ -145,3 +145,18 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   while (awake.s.t < ev + 120) awake.step();          // wach: niemand liegt auf dem Arm
   ok("Wach kein Druckereignis", awake.sensorFaults.length === 0);
 }
+
+/* ── Personen der Startseite ── */
+{
+  const src = fs.readFileSync(path.join(root, "app/personas.js"), "utf8");
+  (0, eval)(src + "\nglobalThis.__PERSONAS = PERSONAS; globalThis.__avatar = avatarSVG; globalThis.__DEF = DEFAULT_PERSONA;");
+  const P = globalThis.__PERSONAS;
+  ok("Zehn Personen", P.length === 10, P.map(p => p.name).join(", "));
+  ok("… jede auf einem vorhandenen Subjekt", P.every(p => window.SUBJECTS.some(s => s.id === p.id)));
+  ok("… keine doppelt", new Set(P.map(p => p.id)).size === 10 && new Set(P.map(p => p.name)).size === 10);
+  ok("Standardperson ist dabei", P.some(p => p.id === globalThis.__DEF), globalThis.__DEF);
+  const svgs = P.map(p => globalThis.__avatar(p, 24));
+  ok("Avatare vollstaendig gezeichnet", svgs.every(s => s.startsWith("<svg") && !/undefined|NaN/.test(s)));
+  const g = P.map(p => { const e = new Engine(undefined, window.SUBJECTS.findIndex(s => s.id === p.id)); return e.s.G; });
+  ok("Alle starten im Gleichgewicht", g.every(v => Math.abs(v - 108) < 1), g.map(v => v.toFixed(0)).join(" "));
+}

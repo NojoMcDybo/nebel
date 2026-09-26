@@ -132,6 +132,8 @@ Gerechnet aus dem Gleichgewicht bei 108 mg/dL, ohne Sensorfehler. „60 g" = 24 
 | 20 | 75 | 6,7 | 1,00 | 36 | 160 / 108 | 261 | −33 | +81 |
 | **Median** | | | | **31** | **142** | **216** | **−33** | **+35** |
 
+Die App bietet zehn davon als Personen an (4, 6, 7, 8, 10, 11, 13, 14, 15, 18), siehe `09_Personen.md`.
+
 Lesart: Die größte Streuung liegt in der Bewegungsantwort (0 bis −89 mg/dL bei derselben moderaten Einheit), getragen von `p3`. Patient 1, das bisherige Standardsubjekt, ist bei Insulin und moderater Bewegung am schwachen Rand.
 
 Einschränkung: Alle 20 Subjekte sind Erwachsene mit HbA1c zwischen 5.7 und 7.6 %. Kinder, Jugendliche und schlecht eingestellte Verläufe sind **nicht** abgedeckt. Das gehört in den Model Validity Envelope und in die Kommunikation gegenüber Nutzern.

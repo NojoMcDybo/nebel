@@ -10,3 +10,4 @@ export * from "./simulate.js";
 export * from "./realtime.js";
 export * from "./scenario/needs.js";
 export * from "./calibration.js";
+export * from "./scenario/profile.js";

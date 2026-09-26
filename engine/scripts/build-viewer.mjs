@@ -12,6 +12,7 @@ import { build } from "esbuild";
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import vm from "node:vm";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const oracle = resolve(root, "vendor/py-mgipsim/pymgipsim/VirtualPatient/Models/T1DM/ExtHovorka/Patients");
@@ -53,6 +54,26 @@ const result = await build({
 });
 const engine = result.outputFiles[0].text;
 
+/* Personen der App: erfundene Figuren auf veroeffentlichten Koerpern
+   (app/personas.js). Ihr Antwortprofil wird hier mit derselben Engine
+   gerechnet und eingebettet — im Browser waeren es mehrere Sekunden. */
+const personasPath = resolve(root, "../app/personas.js");
+const personasSrc = existsSync(personasPath) ? readFileSync(personasPath, "utf8") : "";
+let profilesJs = "";
+if (personasSrc) {
+  const ctx = vm.createContext({});
+  vm.runInContext(engine, ctx);
+  vm.runInContext(personasSrc + "\nglobalThis.__PERSONAS = PERSONAS;", ctx);
+  const N = ctx.Nebel, profiles = {};
+  for (const p of ctx.__PERSONAS) {
+    const s = subjects.find((x) => x.id === p.id);
+    if (!s) throw new Error(`Person ${p.name}: Subjekt ${p.id} fehlt`);
+    profiles[p.id] = N.responseProfile(N.nebelParameters(s.subject), s.therapy);
+  }
+  profilesJs = `window.PROFILES = ${JSON.stringify(profiles)};`;
+  console.log(`${ctx.__PERSONAS.length} Personen, Antwortprofile gerechnet.`);
+}
+
 mkdirSync(resolve(root, "dist"), { recursive: true });
 
 /* Beide Einzeldateien aus derselben Engine bauen. */
@@ -69,6 +90,7 @@ for (const { tpl, out } of targets) {
   const html = readFileSync(tpl, "utf8")
     .replace("/*__ADAPTER__*/", () => adapter)
     .replace("/*__ENGINE__*/", () => engine)
+    .replace("/*__PERSONAS__*/", () => personasSrc + "\n" + profilesJs)
     .replace("/*__SUBJECTS__*/", () => `window.SUBJECTS = ${JSON.stringify(subjects)};`);
   writeFileSync(resolve(root, "dist", out), html, "utf8");
   console.log(`geschrieben: dist/${out}  (${(html.length / 1024).toFixed(0)} KB)`);

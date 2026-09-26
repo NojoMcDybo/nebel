@@ -7,9 +7,10 @@
 3. `06_Echtzeit_Modus.md` — Betrieb über einen echten Tag und was daraus für die Engine folgt
 4. `07_Paediatrie_Rechercheergebnis.md` — warum V1 keine Kinderwerte enthält
 5. `08_Beduerfnisse_und_Hunger.md` — warum Hunger simuliert wird und warum er nicht in die Engine gehört
-6. `10_Engine_Spec_V2_ExtHovorka.md` — die gültige technische Spezifikation der Engine
-7. `20_Parameter_Registry.md` — alle 35 Parameter mit Einheiten, Werten, Ranges und Kalibrierstatus
-8. `30_Rechtliche_Einordnung.md` — Medizinprodukterecht, Produkthaftung, GPL-Abgrenzung, Bedingungen für eine Veröffentlichung
+6. `09_Personen.md` — die zehn wählbaren Personen: was echt ist, was erfunden, warum kein eigenes Profil
+7. `10_Engine_Spec_V2_ExtHovorka.md` — die gültige technische Spezifikation der Engine
+8. `20_Parameter_Registry.md` — alle 35 Parameter mit Einheiten, Werten, Ranges und Kalibrierstatus
+9. `30_Rechtliche_Einordnung.md` — Medizinprodukterecht, Produkthaftung, GPL-Abgrenzung, Bedingungen für eine Veröffentlichung
 
 ## Status der Altdokumente
 
@@ -37,3 +38,6 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 | Echtzeit-Modus | Kernfeature, trägt das Hauptlernziel; Sandbox läuft auf einer Kopie | 22.09.2026 |
 | Pädiatrie | Nicht in V1 — kein einsetzbarer Parametersatz vorhanden | 22.09.2026 |
 | Hunger | Bedürfnis in der Erlebnisschicht, kein 17. Zustand. Leberglykogen ist V2-Kandidat | 22.09.2026 |
+| Personen | Zehn erfundene Figuren auf zehn veröffentlichten Körpern, wählbar auf der Startseite; Standard Lena (Subjekt 10) | 26.09.2026 |
+| Eigenes Profil | Keine Werteingabe (Zweckbestimmung, DSGVO). Später Ähnlichkeits-Fragen ohne Zahlen | 26.09.2026 |
+| Nebel-Kalibrierung | `tsub` 5 min, `tmaxI` 50 min, zentral in `engine/src/calibration.ts` | 26.09.2026 |
