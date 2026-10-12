@@ -11,7 +11,7 @@
 7. `10_Engine_Spec_V2_ExtHovorka.md` — die gültige technische Spezifikation der Engine
 8. `11_Fett_und_Eiweiss.md` — Fett und Eiweiß: Recherche, Umsetzung in der Engine, Kalibrierung an Studien, Grenzen
 9. `20_Parameter_Registry.md` — alle 35 Modellparameter mit Einheiten, Werten, Ranges und Kalibrierstatus, dazu Sensormodell, Nebel-Kalibrierung und Fett/Eiweiß
-10. `30_Rechtliche_Einordnung.md` — Medizinprodukterecht, Produkthaftung, GPL-Abgrenzung, Bedingungen für eine Veröffentlichung
+10. `30_Rechtliche_Einordnung.md` — Medizinprodukterecht, Produkthaftung, GPL-Abgrenzung, Bedingungen für eine Veröffentlichung und wie die App veröffentlicht wird (Abschnitt 7)
 
 ## Status der Altdokumente
 
@@ -44,3 +44,4 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 | Nebel-Kalibrierung | `tsub` 5 min, `tmaxI` 50 min, zentral in `engine/src/calibration.ts` | 26.09.2026 |
 | Fett und Eiweiß | In der Engine, ohne neuen Zustand: Magenverzögerung, Fett-Insulinresistenz ab 20 g pro Mahlzeit, späte Glukose aus Eiweiß. Kalibriert an Wolpert 2013 und Paterson 2016 | 26.09.2026 |
 | Trendpfeil | Sieben feste Stufen wie Dexcom G6, mit Schrägpfeilen; dahinter die Differenz zum vorigen Wert | 26.09.2026 |
+| Veröffentlichung | Repository öffentlich, App auf GitHub Pages über eine Action. Zehn Parametersätze als eigene GPL-Datei, Schriften lokal, Impressum aus Repository-Variablen | 12.10.2026 |

@@ -1,0 +1,77 @@
+# Veroeffentlicht die App auf GitHub Pages: https://nojomcdybo.github.io/nebel/
+#
+# Ablauf: py-mgipsim zum festgehaltenen Stand holen, die komplette Testsuite
+# samt Orakelabgleich laufen lassen, die Seite bauen, veroeffentlichen. Faellt
+# ein Schritt durch, bleibt die alte Seite stehen.
+#
+# Einmalig im Repo einstellen (siehe docs/30_Rechtliche_Einordnung.md, Abschnitt 7):
+#   Settings → Pages → Source: „GitHub Actions“
+#   Settings → Secrets and variables → Actions → Variables:
+#     NEBEL_IMPRESSUM_NAME, NEBEL_IMPRESSUM_ANSCHRIFT (Zeilen mit \n), NEBEL_IMPRESSUM_EMAIL
+# Ohne diese drei bricht der Bau ab — keine Seite ohne Impressum.
+name: Seite veroeffentlichen
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: engine/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Abhaengigkeiten
+        run: npm ci
+      - name: py-mgipsim holen (festgehaltener Stand, geprueft)
+        run: npm run oracle:fetch
+      - name: Referenzwerte fuer den Orakelabgleich
+        run: |
+          pip install numpy
+          npm run oracle:reference
+      - name: Typen
+        run: npm run typecheck
+      - name: Tests
+        run: npm test
+      - name: Adapter
+        run: npm run check:adapter
+      - name: Seite bauen
+        run: npm run viewer -- --release
+        env:
+          NEBEL_IMPRESSUM_NAME: ${{ vars.NEBEL_IMPRESSUM_NAME }}
+          NEBEL_IMPRESSUM_ANSCHRIFT: ${{ vars.NEBEL_IMPRESSUM_ANSCHRIFT }}
+          NEBEL_IMPRESSUM_EMAIL: ${{ vars.NEBEL_IMPRESSUM_EMAIL }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: engine/dist/site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

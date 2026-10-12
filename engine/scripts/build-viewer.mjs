@@ -1,15 +1,28 @@
 /**
- * Baut den Engine-Viewer als EINE selbstenthaltene HTML-Datei.
+ * Baut zwei Dinge aus derselben Engine:
  *
- * Grund fuer ein einziges File: Die Seite laeuft per Doppelklick ueber file://,
- * ohne Server. ES-Module und fetch() sind dort gesperrt, deshalb werden Engine
- * und Subjektparameter zur Bauzeit eingebettet.
+ * 1. dist/nebel-viewer.html — Entwicklerwerkzeug, EINE selbstenthaltene Datei
+ *    mit allen 20 Parametersaetzen. Laeuft per Doppelklick ueber file://.
+ *    Bleibt lokal, wird nicht veroeffentlicht.
  *
- * Die Ausgabe enthaelt die Parametersaetze aus vendor/ und landet deshalb in
- * dist/ — gitignored. Sie wird nicht weitergegeben.
+ * 2. dist/site/ — die App, so wie sie veroeffentlicht wird:
+ *      index.html          App (Apache 2.0), Engine, Adapter, Personen
+ *      personen-daten.js   die zehn Parametersaetze, eigene Datei unter GPL-3.0
+ *      rechtliches.html    Impressum, Datenschutz, Lizenzen
+ *      fonts/              Schriften (SIL OFL 1.1), kein Google-Abruf
+ *      lizenzen/           Apache-2.0.txt, GPL-3.0.txt
+ *    Warum die Daten getrennt liegen: docs/30_Rechtliche_Einordnung.md, Abschnitt 7.
+ *    dist/nebel.html leitet nur noch auf dist/site/index.html weiter.
+ *
+ * --release (in der GitHub Action): bricht ab, wenn Impressumsangaben fehlen,
+ * ein Lizenztext fehlt oder eine Seite etwas von fremden Servern laedt.
+ * Impressumsangaben kommen aus NEBEL_IMPRESSUM_NAME, NEBEL_IMPRESSUM_ANSCHRIFT
+ * (Zeilen mit \n trennen) und NEBEL_IMPRESSUM_EMAIL — nie aus dem Repo.
+ *
+ * dist/ ist gitignored: Die Ausgaben enthalten Parametersaetze aus vendor/.
  */
 import { build } from "esbuild";
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
@@ -75,30 +88,139 @@ if (personasSrc) {
 }
 
 mkdirSync(resolve(root, "dist"), { recursive: true });
+const release = process.argv.includes("--release");
+const problems = [];
+const problem = (msg) => { problems.push(msg); console.error((release ? "FEHLER: " : "Hinweis: ") + msg); };
 
-/* Beide Einzeldateien aus derselben Engine bauen. */
-const targets = [
-  { tpl: resolve(root, "viewer/template.html"),      out: "nebel-viewer.html" },
-  { tpl: resolve(root, "../app/template.html"),      out: "nebel.html" },
-];
-for (const { tpl, out } of targets) {
-  if (!existsSync(tpl)) { console.log(`uebersprungen: ${out} (keine Vorlage)`); continue; }
-  /* Der Adapter wird bei JEDEM Bau frisch eingesetzt. Vorher lag eine Kopie
-     in der Vorlage — Aenderungen an adapter.js liefen ins Leere. */
-  const adapterPath = resolve(root, "../app/adapter.js");
-  const adapter = existsSync(adapterPath) ? readFileSync(adapterPath, "utf8") : "";
-  const html = readFileSync(tpl, "utf8")
-    .replace("/*__ADAPTER__*/", () => adapter)
-    .replace("/*__ENGINE__*/", () => engine)
-    .replace("/*__PERSONAS__*/", () => personasSrc + "\n" + profilesJs)
-    .replace("/*__SUBJECTS__*/", () => `window.SUBJECTS = ${JSON.stringify(subjects)};`);
-  /* Syntaxpruefung aller Inline-Skripte: ein Tippfehler in der Vorlage
-     soll den Bau abbrechen, nicht still eine tote Seite erzeugen. */
+const adapterPath = resolve(root, "../app/adapter.js");
+const adapter = existsSync(adapterPath) ? readFileSync(adapterPath, "utf8") : "";
+const fill = (tpl) => readFileSync(tpl, "utf8")
+  .replace("/*__ADAPTER__*/", () => adapter)
+  .replace("/*__ENGINE__*/", () => engine)
+  .replace("/*__PERSONAS__*/", () => personasSrc + "\n" + profilesJs);
+
+/* Syntaxpruefung aller Inline-Skripte: ein Tippfehler in der Vorlage
+   soll den Bau abbrechen, nicht still eine tote Seite erzeugen. */
+const checkScripts = (html, name) => {
   for (const m of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) {
-    try { new vm.Script(m[1], { filename: out }); }
-    catch (e) { console.error(`Syntaxfehler in ${out}: ${e.message}`); process.exit(1); }
+    try { new vm.Script(m[1], { filename: name }); }
+    catch (e) { console.error(`Syntaxfehler in ${name}: ${e.message}`); process.exit(1); }
   }
-  writeFileSync(resolve(root, "dist", out), html, "utf8");
-  console.log(`geschrieben: dist/${out}  (${(html.length / 1024).toFixed(0)} KB)`);
+};
+
+/* Nichts von fremden Servern laden — keine Schriften, keine Skripte, keine
+   Stile. Verweise (<a href>) sind erlaubt. */
+const checkNoExternal = (html, name) => {
+  const pats = [/<script[^>]+src=["']?(https?:)?\/\//i, /<link[^>]+href=["']?(https?:)?\/\//i,
+                /url\(\s*["']?(https?:)?\/\//i, /@import/i, /<img[^>]+src=["']?(https?:)?\/\//i,
+                /<iframe/i];
+  for (const re of pats) if (re.test(html)) problem(`${name} laedt etwas von einem fremden Server (${re})`);
+};
+
+/* ── 1. Viewer ── */
+{
+  const tpl = resolve(root, "viewer/template.html");
+  if (existsSync(tpl)) {
+    const html = fill(tpl).replace("/*__SUBJECTS__*/", () => `window.SUBJECTS = ${JSON.stringify(subjects)};`);
+    checkScripts(html, "nebel-viewer.html");
+    writeFileSync(resolve(root, "dist", "nebel-viewer.html"), html, "utf8");
+    console.log(`geschrieben: dist/nebel-viewer.html  (${(html.length / 1024).toFixed(0)} KB, ${subjects.length} Subjekte)`);
+  }
 }
-console.log(`${subjects.length} Subjekte eingebettet.`);
+
+/* ── 2. App: dist/site ── */
+const appTpl = resolve(root, "../app/template.html");
+if (existsSync(appTpl)) {
+  if (!personasSrc) { console.error("app/personas.js fehlt — ohne Personen keine App."); process.exit(1); }
+  const site = resolve(root, "dist/site");
+  for (const d of ["", "fonts", "lizenzen"]) mkdirSync(resolve(site, d), { recursive: true });
+
+  /* index.html — ohne Parametersaetze */
+  const html = fill(appTpl);
+  if (html.includes("__SUBJECTS__")) { console.error("app/template.html bettet die Parametersaetze ein — sie gehoeren nach personen-daten.js."); process.exit(1); }
+  if (!html.includes('<script src="personen-daten.js"></script>')) { console.error("app/template.html laedt personen-daten.js nicht."); process.exit(1); }
+  checkScripts(html, "index.html");
+  checkNoExternal(html, "index.html");
+  writeFileSync(resolve(site, "index.html"), html, "utf8");
+
+  /* personen-daten.js — nur die zehn Personen der App, eigene Lizenz */
+  const ref = existsSync(resolve(root, "vendor/py-mgipsim/REF"))
+    ? readFileSync(resolve(root, "vendor/py-mgipsim/REF"), "utf8").trim() : "unbekannt";
+  const vm2 = vm.createContext({});
+  vm.runInContext(personasSrc + "\nglobalThis.__IDS = PERSONAS.map(p => p.id);", vm2);
+  const ids = vm2.__IDS;
+  const chosen = subjects.filter((s) => ids.includes(s.id));
+  if (chosen.length !== ids.length) { console.error("Nicht jede Person hat einen Parametersatz."); process.exit(1); }
+  const today = new Date().toISOString().slice(0, 10);
+  const dataJs = `/*
+ * nebel. — Parametersaetze der zehn Personen
+ *
+ * Herkunft: py-mgipsim, Illinois Institute of Technology
+ *   https://github.com/illinoistech-itm/py-mgipsim  (Stand ${ref})
+ *   pymgipsim/VirtualPatient/Models/T1DM/ExtHovorka/Patients/Patient_*.json
+ *
+ * Lizenz: GNU General Public License v3 (lizenzen/GPL-3.0.txt). Diese Datei
+ * wird unter derselben Lizenz weitergegeben. Sie ist ein eigenstaendiger Teil
+ * der Seite; der uebrige Code von nebel. steht unter Apache 2.0.
+ *
+ * Geaendert (${today}, nebel.): ${chosen.length} von ${subjects.length} Datensaetzen ausgewaehlt
+ * (${ids.join(", ")}), die benoetigten Felder aus JSON in JavaScript
+ * uebertragen. Die Werte selbst sind unveraendert. Zuordnung:
+ *   subject  ← model_parameters (kb1 kb2 kb3 EGP0 F01 tmaxI p3 p4 p5 BW HRrest HRmax VG VI VT_HRR)
+ *   therapy  ← demographic_info (basal, carb_insulin_ratio, correction_bolus)
+ *   demo     ← demographic_info (body_weight, HbA1c, height)
+ */
+window.SUBJECTS = ${JSON.stringify(chosen, null, 1)};
+`;
+  writeFileSync(resolve(site, "personen-daten.js"), dataJs, "utf8");
+
+  /* Schriften und Lizenztexte */
+  const nm = resolve(root, "node_modules");
+  const copies = [
+    ["@fontsource/dm-mono/files/dm-mono-latin-300-normal.woff2", "fonts/dm-mono-300.woff2"],
+    ["@fontsource/dm-mono/files/dm-mono-latin-400-normal.woff2", "fonts/dm-mono-400.woff2"],
+    ["@fontsource/dm-mono/files/dm-mono-latin-500-normal.woff2", "fonts/dm-mono-500.woff2"],
+    ["@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2", "fonts/plus-jakarta-sans.woff2"],
+    ["@fontsource/dm-mono/LICENSE", "fonts/OFL-DM-Mono.txt"],
+    ["@fontsource-variable/plus-jakarta-sans/LICENSE", "fonts/OFL-Plus-Jakarta-Sans.txt"],
+  ].map(([a, b]) => [resolve(nm, a), b]);
+  copies.push([resolve(root, "../LICENSE"), "lizenzen/Apache-2.0.txt"]);
+  copies.push([resolve(root, "vendor/py-mgipsim/LICENSE"), "lizenzen/GPL-3.0.txt"]);
+  for (const [from, to] of copies) {
+    if (existsSync(from)) copyFileSync(from, resolve(site, to));
+    else problem(`fehlt: ${from} (fuer ${to}) — npm install bzw. npm run oracle:fetch`);
+  }
+
+  /* rechtliches.html — Impressum aus Umgebungsvariablen */
+  const esc = (v) => v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const env = (k) => (process.env[k] ?? "").replace(/\\n/g, "\n").trim();
+  const imp = { NAME: env("NEBEL_IMPRESSUM_NAME"), ANSCHRIFT: env("NEBEL_IMPRESSUM_ANSCHRIFT"), EMAIL: env("NEBEL_IMPRESSUM_EMAIL") };
+  for (const [k, v] of Object.entries(imp)) if (!v) problem(`Impressum: NEBEL_IMPRESSUM_${k} ist nicht gesetzt`);
+  const de = today.split("-").reverse().join(".");
+  const legalTpl = resolve(root, "../app/rechtliches.html");
+  if (existsSync(legalTpl)) {
+    const legal = readFileSync(legalTpl, "utf8")
+      .replaceAll("{{IMPRESSUM_NAME}}", esc(imp.NAME || "[Name fehlt: NEBEL_IMPRESSUM_NAME]"))
+      .replaceAll("{{IMPRESSUM_ANSCHRIFT}}", esc(imp.ANSCHRIFT || "[Anschrift fehlt: NEBEL_IMPRESSUM_ANSCHRIFT]"))
+      .replaceAll("{{IMPRESSUM_EMAIL}}", esc(imp.EMAIL || "[E-Mail fehlt: NEBEL_IMPRESSUM_EMAIL]"))
+      .replaceAll("{{PYMGIPSIM_REF}}", esc(ref))
+      .replaceAll("{{PYMGIPSIM_REF_SHORT}}", esc(ref.slice(0, 7)))
+      .replaceAll("{{BUILD_DATE}}", de);
+    if (/\{\{[A-Z_]+\}\}/.test(legal)) problem("rechtliches.html: unbekannter Platzhalter");
+    checkNoExternal(legal, "rechtliches.html");
+    writeFileSync(resolve(site, "rechtliches.html"), legal, "utf8");
+  } else problem("app/rechtliches.html fehlt");
+
+  writeFileSync(resolve(site, ".nojekyll"), "", "utf8");
+  /* Alter Doppelklick-Pfad bleibt gueltig */
+  writeFileSync(resolve(root, "dist/nebel.html"),
+    `<!DOCTYPE html><meta charset="utf-8"><title>nebel.</title>` +
+    `<meta http-equiv="refresh" content="0; url=site/index.html">` +
+    `<p>Die App liegt jetzt in <a href="site/index.html">site/index.html</a>.</p>\n`, "utf8");
+  console.log(`geschrieben: dist/site/  (index.html ${(html.length / 1024).toFixed(0)} KB, personen-daten.js ${chosen.length} Personen, Stand py-mgipsim ${ref.slice(0, 7)})`);
+}
+
+if (release && problems.length) {
+  console.error(`\n${problems.length} Problem(e) — Veroeffentlichung abgebrochen.`);
+  process.exit(1);
+}

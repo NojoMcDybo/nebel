@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nebel. — Impressum, Datenschutz, Lizenzen</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230A0D0D'/%3E%3Ccircle cx='23' cy='22' r='3' fill='%23B8362B'/%3E%3Cpath d='M8 23V12.5c0-1.4 1.1-2.5 2.5-2.5h2c2.8 0 5 2.2 5 5V23' fill='none' stroke='%23EDF1F1' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<!-- Platzhalter in doppelten geschweiften Klammern fuellt engine/scripts/build-viewer.mjs.
+     Impressumsdaten kommen aus Umgebungsvariablen (in der GitHub Action aus den
+     Repository-Variablen), damit keine Anschrift in der Git-Historie landet. -->
+<style>
+@font-face{font-family:"DM Mono"; font-weight:400; font-display:swap; src:url("fonts/dm-mono-400.woff2") format("woff2")}
+@font-face{font-family:"Plus Jakarta Sans"; font-weight:200 800; font-display:swap; src:url("fonts/plus-jakarta-sans.woff2") format("woff2")}
+:root{--paper:#EDF1F1; --card:#FFFFFF; --ink:#0A0D0D; --ink2:#576262; --ink3:#5F6A6A; --hair:rgba(10,13,13,.11); --low:#B8362B}
+@media (prefers-color-scheme: dark){
+  :root{--paper:#0E1213; --card:#191E20; --ink:#E9EFEF; --ink2:#A3AEAE; --ink3:#7E8A8A; --hair:rgba(233,239,239,.14); --low:#FF7063}
+}
+*{box-sizing:border-box}
+html{color-scheme:light dark}
+body{margin:0; background:var(--paper); color:var(--ink); font:16px/1.6 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:680px; margin:0 auto; padding:28px 16px 72px}
+a{color:inherit; text-underline-offset:3px}
+.back{font-family:"DM Mono",ui-monospace,monospace; font-size:12px; letter-spacing:.06em; color:var(--ink3); text-decoration:none}
+.back:hover{color:var(--ink); text-decoration:underline}
+h1{font-size:30px; font-weight:800; letter-spacing:-.03em; margin:18px 0 6px}
+.lead{color:var(--ink2); margin:0 0 26px}
+section{background:var(--card); border-radius:18px; padding:20px 20px 8px; margin:0 0 14px; box-shadow:0 0 0 1px var(--hair)}
+h2{font-size:19px; font-weight:800; letter-spacing:-.02em; margin:0 0 10px}
+h3{font-size:15px; font-weight:700; margin:18px 0 4px}
+p, li{color:var(--ink2); font-size:15px}
+p{margin:0 0 12px}
+ul{margin:0 0 12px; padding-left:20px}
+address{font-style:normal; color:var(--ink); margin:0 0 12px; white-space:pre-line}
+.k{font-family:"DM Mono",ui-monospace,monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink3); margin:0 0 4px}
+.warn b{color:var(--low)}
+small{color:var(--ink3)}
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← zur Simulation</a>
+  <h1>Rechtliches</h1>
+  <p class="lead">Impressum, Datenschutz und woher die Teile dieser Seite stammen.</p>
+
+  <section class="warn">
+    <h2>Wofür nebel. da ist</h2>
+    <p><b>Lernwerkzeug, kein Medizinprodukt.</b> nebel. simuliert erfundene Personen mit Typ-1-Diabetes, damit Angehörige und Freunde nachvollziehen können, wie sich der Alltag damit anfühlt. Die Seite ist nicht bestimmt zur Diagnose, Überwachung, Vorhersage oder Behandlung einer Krankheit und kein Medizinprodukt im Sinne der Verordnung (EU) 2017/745.</p>
+    <p>Keine Zahl aus der Simulation taugt für eine echte Therapieentscheidung. Dafür ist das Diabetesteam zuständig.</p>
+  </section>
+
+  <section id="impressum">
+    <h2>Impressum</h2>
+    <p class="k">Angaben gemäß § 5 DDG</p>
+    <address>{{IMPRESSUM_NAME}}
+{{IMPRESSUM_ANSCHRIFT}}</address>
+    <p class="k">Kontakt</p>
+    <p><a href="mailto:{{IMPRESSUM_EMAIL}}">{{IMPRESSUM_EMAIL}}</a></p>
+    <p>Privates, nicht-kommerzielles Bildungsprojekt. Keine Werbung, keine Bezahlung, keine Spenden.</p>
+  </section>
+
+  <section id="datenschutz">
+    <h2>Datenschutz</h2>
+    <p>Kurz: Diese Seite setzt keine Cookies, enthält kein Tracking und lädt nichts von Dritten nach, auch keine Schriften. Was du in der Simulation tust, bleibt in deinem Browser.</p>
+
+    <h3>Verantwortlich</h3>
+    <p>{{IMPRESSUM_NAME}}, Anschrift und Kontakt wie im Impressum.</p>
+
+    <h3>Bereitstellung über GitHub Pages</h3>
+    <p>Die Seite wird über GitHub Pages ausgeliefert (GitHub B.V., Prins Bernhardplein 200, 1097 JB Amsterdam, Niederlande, und GitHub, Inc., USA). Beim Aufruf verarbeitet GitHub technisch notwendige Zugriffsdaten, darunter deine IP-Adresse; GitHub speichert sie nach eigener Angabe aus Sicherheitsgründen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO: das berechtigte Interesse, die Seite sicher und stabil bereitzustellen. Dabei können Daten in die USA übermittelt werden. GitHub nimmt nach eigener Angabe am EU-U.S. Data Privacy Framework teil, für das ein Angemessenheitsbeschluss der EU-Kommission besteht (Art. 45 DSGVO). Einzelheiten: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub General Privacy Statement</a>.</p>
+
+    <h3>Speicherung in deinem Browser</h3>
+    <p>Die Simulation legt den Spielstand und die gewählte Person im lokalen Speicher deines Browsers ab (localStorage), damit du später weitermachen kannst. Diese Daten verlassen dein Gerät nicht, ich erhalte sie nicht. Rechtsgrundlage ist § 25 Abs. 2 Nr. 2 TDDDG: Die Speicherung ist unbedingt erforderlich für die Funktion, die du ausdrücklich nutzt. Löschen kannst du sie mit „Von vorn beginnen“ in der Auswertung oder über die Website-Daten deines Browsers. Die Exporte als CSV und JSON entstehen ebenfalls nur auf deinem Gerät.</p>
+
+    <h3>Keine Gesundheitsdaten</h3>
+    <p>Alles in der Simulation betrifft erfundene Personen. Die Seite fragt keine echten Blutzucker-, Insulin- oder Mahlzeitenwerte ab und hat dafür kein Eingabefeld.</p>
+
+    <h3>Deine Rechte</h3>
+    <p>Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18) und Widerspruch (Art. 21). Du kannst dich bei einer Datenschutz-Aufsichtsbehörde beschweren (Art. 77), zum Beispiel bei der Landesbeauftragten für Datenschutz und Informationsfreiheit Nordrhein-Westfalen. Ich selbst speichere keine Daten über dich; die Zugriffsdaten liegen bei GitHub.</p>
+  </section>
+
+  <section id="lizenzen">
+    <h2>Lizenzen und Herkunft</h2>
+    <h3>Programm und Texte</h3>
+    <p>Quellcode, Oberfläche und Texte von nebel. stehen unter der <a href="lizenzen/Apache-2.0.txt">Apache License 2.0</a>. Quellcode: <a href="https://github.com/NojoMcDybo/nebel">github.com/NojoMcDybo/nebel</a>.</p>
+
+    <h3>Die zehn Körper</h3>
+    <p>Die Modellparameter der zehn Personen (<a href="personen-daten.js">personen-daten.js</a>) stammen aus den 20 virtuellen Personen der Bibliothek <a href="https://github.com/illinoistech-itm/py-mgipsim/tree/{{PYMGIPSIM_REF}}">py-mgipsim</a> (Illinois Institute of Technology), Stand <code>{{PYMGIPSIM_REF_SHORT}}</code>. Sie stehen unter der <a href="lizenzen/GPL-3.0.txt">GNU General Public License v3</a> und werden hier als eigene Datei unter dieser Lizenz weitergegeben. Geändert wurde nur die Form: zehn der zwanzig Datensätze ausgewählt, die benötigten Felder aus JSON in JavaScript übertragen. Die Werte selbst sind unverändert. Wo nebel. von ihnen abweicht (Sensorverzögerung, Insulinaufnahme), passiert das erst beim Rechnen und ist im Quellcode dokumentiert. Namen, Alter und Aussehen der Personen sind erfunden.</p>
+
+    <h3>Modell</h3>
+    <p>Die Physiologie folgt dem erweiterten Hovorka-Modell nach Hobbs et al. (2019), <i>Computers &amp; Chemical Engineering</i>, und Siket, Rashid &amp; Cinar (2025), <i>Journal of Diabetes Science and Technology</i>. Die Gleichungen sind aus den Veröffentlichungen umgesetzt, nicht aus dem Code von py-mgipsim übernommen. Fett, Eiweiß und Sensorfehler sind eigene Ergänzungen, mit Quellen dokumentiert im <a href="https://github.com/NojoMcDybo/nebel/tree/main/docs">Projektordner docs/</a>.</p>
+
+    <h3>Schriften</h3>
+    <p>DM Mono (The DM Mono Project Authors) und Plus Jakarta Sans (The Plus Jakarta Sans Project Authors), beide unter der SIL Open Font License 1.1: <a href="fonts/OFL-DM-Mono.txt">DM Mono</a>, <a href="fonts/OFL-Plus-Jakarta-Sans.txt">Plus Jakarta Sans</a>.</p>
+  </section>
+
+  <p><small>Stand dieser Seite: {{BUILD_DATE}}</small></p>
+  <a class="back" href="./">← zur Simulation</a>
+</main>
+</body>
+</html>

@@ -331,3 +331,34 @@ Kalibriert an Wolpert 2013 (Fett) und Paterson 2016 (Eiweiß), im Mittel der 20 
 - Wolpert-Faktor 1,37–1,47
 - Richtung gegen Smart und O'Connell
 - im Adapter: Fett hält Kohlenhydrate im Magen, spät höher, Summen stimmen
+
+## 16. Nachtrag 12.10.2026 — Die App wird öffentlich
+
+**Ziel:** Angehörige sollen die Simulation über einen Link öffnen können, ohne Installation. Adresse: `https://nojomcdybo.github.io/nebel/`. Rechtliche Begründung: `30_Rechtliche_Einordnung.md`, Abschnitt 7.
+
+**Der Haken, bisher übersehen:** Die fertige App bettete alle 20 Parametersätze aus py-mgipsim ein. „Keine Parametersätze im Repository“ hätte für eine öffentliche Seite nichts genützt, denn sie hätte die Sätze an jeden Besucher verteilt. Jetzt:
+- `engine/dist/site/personen-daten.js`: nur die zehn genutzten Sätze, als eigene Datei unter GPL-3.0, mit Herkunft (fester Commit), Änderungsvermerk und Lizenztext. Die App selbst bleibt Apache 2.0.
+- `scripts/fetch-oracle.sh` holt py-mgipsim auf Commit `b985f8c` statt `main`, prüft einen Hash über die 20 Patientendateien und nimmt jetzt den Lizenztext mit. Der Hash ist identisch mit dem bisher benutzten Stand.
+
+**Bau:**
+- `npm run viewer` erzeugt jetzt `dist/site/` mit `index.html`, `personen-daten.js`, `rechtliches.html`, `fonts/` und `lizenzen/`. `dist/nebel.html` leitet nur noch dorthin weiter.
+- Der Viewer bleibt eine Einzeldatei mit allen 20 Sätzen und bleibt lokal.
+- `--release` bricht ab, wenn Impressumsangaben oder Lizenztexte fehlen oder eine Seite etwas von fremden Servern lädt.
+
+**Widersprüche, gefunden und behoben:**
+- **Google Fonts.** Die App lud ihre Schriften von Google. Das widerspricht der Aussage, Nebel verarbeite keine personenbezogenen Daten (`30_…`, Abschnitt 4), denn die IP jedes Besuchers ging an Google. Jetzt liegen die Schriften lokal (Fontsource, SIL OFL 1.1, als npm-Entwicklungsabhängigkeit). Geprüft: Die Seite fragt nur noch ihren eigenen Host an.
+- **`30_Rechtliche_Einordnung.md` führte drei Bedingungen als offen**, die längst erfüllt waren: kein Bolusrechner, keine Eingabe echter Werte, Hinweis in der App. Status korrigiert.
+- **Root-`README.md`, Abschnitt „Stand“:** „Physiologie noch nicht implementiert“ war seit dem 22.09. falsch. „Eine erwachsene Beispielperson“ stimmt seit der Personenwahl nicht mehr. Beides korrigiert, dazu Link zur App und Bauanleitung.
+
+**Neu:**
+- **Seite „Rechtliches“** (`app/rechtliches.html`): Zweck, Impressum, Datenschutz, Lizenzen und Herkunft. Verlinkt auf der Startseite und in der Auswertung. Die Impressumsangaben kommen aus Repository-Variablen, nicht aus dem Repo.
+- **GitHub Action** `.github/workflows/pages.yml`: holen, Orakel, Typen, 133 Tests, Adapter, Bau mit `--release`, veröffentlichen.
+  - Im Cloud-Container von Grund auf nachgestellt: frische Installation, festgehaltener Datensatz mit Hash, Referenzwerte, alle Prüfungen grün, Bau mit `--release` erfolgreich.
+  - Nur der Tarball-Download war dort gesperrt, der Datensatz kam stattdessen per Git zum selben Commit.
+- **Favicon** „n.“ als Inline-SVG, damit der Browser kein `favicon.ico` vergeblich anfragt.
+
+**Offen:**
+- Impressumsangaben eintragen.
+- Repository öffentlich schalten und Pages aktivieren.
+- Mail an die Autorinnen und Autoren von py-mgipsim senden.
+- Die Texte vor breiter Verbreitung einmal juristisch ansehen lassen.
