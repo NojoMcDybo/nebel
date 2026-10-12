@@ -356,6 +356,7 @@ Kalibriert an Wolpert 2013 (Fett) und Paterson 2016 (Eiweiß), im Mittel der 20 
   - Im Cloud-Container von Grund auf nachgestellt: frische Installation, festgehaltener Datensatz mit Hash, Referenzwerte, alle Prüfungen grün, Bau mit `--release` erfolgreich.
   - Nur der Tarball-Download war dort gesperrt, der Datensatz kam stattdessen per Git zum selben Commit.
 - **Favicon** „n.“ als Inline-SVG, damit der Browser kein `favicon.ico` vergeblich anfragt.
+- **Root-`README.md` auf Englisch** (Nojos Wunsch, 12.10.): Zweckbestimmung, Funktionen, Engine, Bauanleitung, Lizenzen. Die App und `docs/` bleiben deutsch, das README sagt das.
 
 **Offen:**
 - Impressumsangaben eintragen.
