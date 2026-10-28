@@ -143,9 +143,8 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 /* ═══ HOME ═══════════════════════════════════════════════════════ */
 .hero{padding:64px 0 6px}
 .hero h1{
-  font-size:60px; font-weight:800; letter-spacing:-.045em; line-height:.92; margin:0 0 12px;
+  font-size:60px; font-weight:800; letter-spacing:-.045em; line-height:.92; margin:0;
 }
-.hero p{font-size:16px; color:var(--ink2); margin:0; max-width:30ch; line-height:1.5}
 .eyebrow{
   font-family:var(--mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase;
   color:var(--ink3); margin:38px 0 12px;
@@ -188,25 +187,41 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .fact .mark{will-change:transform; backface-visibility:hidden}
 .fact .mark svg{display:block}
 .person .fact:active{transform:none}
-.grid4{display:grid; grid-template-columns:1fr 1fr; gap:9px}
-.tile{transition:background-color .5s var(--spring); background:var(--card); border-radius:18px; padding:15px 17px; box-shadow:var(--sh)}
-.tile .k{font-family:var(--mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink3)}
-.tile .v{font-size:21px; font-weight:700; margin-top:4px; letter-spacing:-.02em}
 .warnbox{
   background:var(--card); border-radius:18px; padding:16px 18px; margin-top:9px;
   font-size:13px; color:var(--ink2); line-height:1.55;
   box-shadow:inset 0 0 0 1.5px var(--ring);
 }
 .warnbox b{color:var(--low)}
-/* Einmaliger Hinweis vor der ersten Nutzung: Grenzen zuerst, dann der Rest. */
-.gate{position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--paper); overflow-y:auto}
+/* Einmaliger Hinweis vor der ersten Nutzung. Oeffnet mit Feder, der Knopf
+   quittiert mit Haken, danach schliesst das Fenster nach oben weg. */
+.gate{position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:20px;
+  background:rgba(var(--rgb-paper),.78); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); overflow-y:auto}
 .gate[hidden]{display:none}
-.gate .box{width:100%; max-width:460px; background:var(--card); border-radius:26px; padding:26px 22px; box-shadow:var(--shUp)}
-.gate h2{font-size:24px; font-weight:800; letter-spacing:-.03em; margin:0 0 14px}
-.gate p, .gate li{font-size:14px; line-height:1.6; color:var(--ink2); margin:0 0 10px}
-.gate ul{margin:0 0 14px; padding-left:20px}
+.gate:not([hidden]){animation:gateFade .4s var(--spring) both}
+.gate .box{width:100%; max-width:380px; background:var(--card); border-radius:26px; padding:24px 22px 22px; box-shadow:var(--shUp)}
+.gate:not([hidden]) .box{animation:gateRise .62s var(--spring) .06s both}
+.gate.out{animation:gateFadeOut .42s var(--spring) forwards; pointer-events:none}
+.gate.out .box{animation:gateAway .42s cubic-bezier(.5,0,.8,.4) forwards}
+@keyframes gateFade{from{opacity:0}to{opacity:1}}
+@keyframes gateFadeOut{to{opacity:0}}
+@keyframes gateRise{from{opacity:0; transform:translateY(34px) scale(.94)}to{opacity:1; transform:none}}
+@keyframes gateAway{to{opacity:0; transform:translateY(-28px) scale(.96)}}
+.gate h2{font-size:22px; font-weight:800; letter-spacing:-.03em; margin:0 0 10px}
+.gate p{font-size:14px; line-height:1.55; color:var(--ink2); margin:0 0 18px}
 .gate b{color:var(--ink)}
-.gate button{width:100%; font:inherit; font-weight:700; font-size:15px; color:var(--paper); background:var(--ink); border:0; border-radius:16px; padding:15px; cursor:pointer}
+.gate button{position:relative; width:100%; height:50px; font:inherit; font-weight:700; font-size:15px; color:var(--paper); background:var(--ink);
+  border:0; border-radius:16px; cursor:pointer; overflow:hidden; transition:transform .22s var(--spring), background-color .3s var(--spring)}
+.gate button:active{transform:scale(.96)}
+.gate button .t, .gate button .ck{position:absolute; inset:0; display:grid; place-items:center; transition:opacity .22s var(--spring), transform .3s var(--spring)}
+.gate button .ck{opacity:0; transform:scale(.5)}
+.gate button .ck svg{width:24px; height:24px}
+.gate button .ck path{stroke-dasharray:22; stroke-dashoffset:22}
+.gate button.ok{pointer-events:none; animation:gateBump .42s var(--spring)}
+.gate button.ok .t{opacity:0; transform:translateY(-8px)}
+.gate button.ok .ck{opacity:1; transform:none}
+.gate button.ok .ck path{stroke-dashoffset:0; transition:stroke-dashoffset .3s ease-out .1s}
+@keyframes gateBump{0%{transform:scale(1)} 35%{transform:scale(.95)} 100%{transform:scale(1)}}
 .legal{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-align:center; margin:14px 0 0}
 .legal a{color:var(--ink3); text-decoration:none; padding:6px 4px}
 .legal a:hover, .legal a:focus-visible{color:var(--ink); text-decoration:underline}
@@ -220,7 +235,14 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .pbtn .av svg{display:block; width:100%; height:100%}
 .pbtn[aria-checked="true"] .av{box-shadow:0 0 0 2.5px var(--ink)}
 .pbtn[aria-checked="true"]{color:var(--ink); font-weight:700}
-.pbtn .now{font-family:var(--mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink3); margin-top:-3px}
+.pbtn .avw{position:relative; width:100%; max-width:62px}
+.pbtn .bdg{position:absolute; right:-3px; top:-3px; width:20px; height:20px; border-radius:50%; display:grid; place-items:center;
+  background:var(--ink); color:var(--paper); box-shadow:0 0 0 2.5px var(--paper); animation:pop .5s var(--spring)}
+.pbtn .bdg svg{width:11px; height:11px}
+.eyebrow.row{display:flex; justify-content:space-between; align-items:center; gap:10px}
+.eyebrow .act{display:inline-flex; align-items:center; gap:6px; letter-spacing:.12em; color:var(--ink); background:var(--card); border-radius:99px; padding:5px 11px 5px 9px; box-shadow:var(--sh)}
+.eyebrow .act i{width:6px; height:6px; border-radius:50%; background:var(--ink)}
+.eyebrow .act.swap{animation:swapIn .42s var(--spring)}
 .pbtn:active .av{transform:scale(.92); transition-duration:.08s}
 @media (hover:hover){
   .pbtn:hover .av{transform:translateY(-3px) scale(1.05)}
@@ -654,6 +676,9 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   .btn:hover{opacity:.9}
   .swipe:hover{transform:translateX(-3px)}
 }
+/* Begruessung einer neu geoeffneten Ebene: Bloecke steigen gestaffelt auf. */
+.page.greet .inner > *{animation:greetIn .72s var(--spring) both; animation-delay:calc(var(--gi,0) * 48ms)}
+@keyframes greetIn{from{opacity:0; transform:translateY(18px) scale(.985)}to{opacity:1; transform:none}}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation:none!important}}
 :focus-visible{outline:2.5px solid var(--ink); outline-offset:3px}
 @media (max-width:350px){.hero h1{font-size:48px} .value{font-size:72px}}
@@ -664,13 +689,8 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateT" hidden>
   <div class="box">
     <h2 id="gateT">Bevor es losgeht</h2>
-    <p><b>nebel. ist ein Lernsystem und kein Medizinprodukt.</b> Es simuliert erfundene Personen, damit Angehörige und Freunde den Alltag mit Typ-1-Diabetes nachempfinden können.</p>
-    <ul>
-      <li>Es gibt <b>keine Dosierungsempfehlung</b> und keine Beratung. Die Werte taugen nicht für Insulin- oder andere Therapieentscheidungen.</li>
-      <li>Du kannst <b>keine eigenen Werte</b> eingeben. Alles hier ist simuliert.</li>
-      <li>Kein Ergebnis aus nebel. ersetzt dein Diabetesteam.</li>
-    </ul>
-    <button type="button" id="gateOk">Verstanden, ich nutze nebel. nur zum Lernen</button>
+    <p><b>nebel. ist ein Lernsystem, kein Medizinprodukt.</b> Die Werte sind simuliert und taugen nicht für Insulindosierung oder andere Therapieentscheidungen. Dafür ist dein Diabetesteam da.</p>
+    <button type="button" id="gateOk"><span class="t">Verstanden</span><span class="ck"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
     <p class="legal"><a href="rechtliches.html">Impressum · Datenschutz · Lizenzen</a></p>
   </div>
 </div>
@@ -680,7 +700,6 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   <div class="page" id="pHome"><div class="inner">
     <div class="hero">
       <h1>nebel.</h1>
-      <p>Ein Tag mit Typ-1-Diabetes. Der Sensor zeigt dir nicht, wie es deinem Körper geht, sondern wie es ihm vor <span class="lagTxt">einer Weile</span> ging.</p>
     </div>
 
     <div class="eyebrow">Fünf Regeln</div>
@@ -722,18 +741,11 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
       </div>
     </div>
 
-    <div class="eyebrow">Wer bist du heute?</div>
+    <div class="eyebrow row"><span>Wer bist du heute?</span><span class="act" id="actTag"></span></div>
     <div class="people" id="people" role="radiogroup" aria-label="Person wählen"></div>
     <div class="person" id="personCard"></div>
     <p class="selfhint">Du hast selbst Typ-1-Diabetes? Such dir die Person, die dir am nächsten kommt, und zeig sie deinem Umfeld.</p>
 
-    <div class="eyebrow">Deine Therapiewerte</div>
-    <div class="grid4">
-      <div class="tile"><div class="k">KE-Faktor</div><div class="v" id="tKE">—</div></div>
-      <div class="tile"><div class="k">Korrektur</div><div class="v" id="tKorr">—</div></div>
-      <div class="tile"><div class="k">Zielbereich</div><div class="v">70–180</div></div>
-      <div class="tile"><div class="k">Basal</div><div class="v" id="tBasal">—</div></div>
-    </div>
     <div class="warnbox"><b>Lernwerkzeug, kein Medizinprodukt.</b> Die Werte sind simuliert und taugen nicht für reale Therapieentscheidungen. Kein Bolusrechner.</div>
     <p class="legal"><a href="rechtliches.html">Impressum · Datenschutz · Lizenzen</a></p>
 
@@ -1131,15 +1143,7 @@ if (!PERSONAS.some(p => p.id === personId)) personId = DEFAULT_PERSONA;
 const PERSON = PERSONAS.find(p => p.id === personId);
 const eng = new Engine(undefined, Math.max(0, window.SUBJECTS.findIndex(s => s.id === personId)));
 
-/* Die Therapiewerte stammen aus dem publizierten Subjekt, nicht aus einer
-   festen Zahl im Markup — sonst behauptet die Startseite etwas anderes,
-   als die Engine rechnet. */
 (() => {
-  const set = (id, txt) => { const e = document.getElementById(id); if (e) e.textContent = txt; };
-  const ke = eng.therapy.carbRatioGPerU;
-  set("tKE",    (Number.isInteger(ke) ? ke.toFixed(0) : ke.toFixed(1)) + " g/U");
-  set("tKorr",  Math.round(eng.therapy.correctionFactor) + " mg/dL");
-  set("tBasal", eng.therapy.basalRateUPerH.toFixed(2) + " U/h");
   /* Die Sensorverzoegerung steht an vier Stellen im Text. Sie kommt aus
      derselben Konstante, aus der die Nebelzone gezeichnet wird — sonst
      behauptet die Seite eine Zahl, die die Engine nicht rechnet. */
@@ -1186,17 +1190,39 @@ function applyProg(p){
       b.setAttribute("aria-current", String(Math.round(clamp(p,0,LAST)) === +b.dataset.p));
   });
 }
+const endSnap = () => {
+  clearTimeout(snapTo._t);
+  PAGES.forEach(el => el.classList.remove("snap"));
+  FOGS.forEach(f => f && f.classList.remove("snap"));
+};
 function snapTo(target){
+  const from = page;
   page = clamp(target, 0, LAST);
   PAGES.forEach(el => el.classList.add("snap"));
   FOGS.forEach(f => f && f.classList.add("snap"));
   applyProg(page);
   if (page === 2) setTimeout(updateReview, 590);
   clearTimeout(snapTo._t);
-  snapTo._t = setTimeout(() => {
-    PAGES.forEach(el => el.classList.remove("snap"));
-    FOGS.forEach(f => f && f.classList.remove("snap"));
-  }, 580);
+  snapTo._t = setTimeout(endSnap, 580);
+  // Nur eine neu geoeffnete Ebene begruesst mit Bewegung, nicht der Rueckweg.
+  if (page > from && !quiet()){
+    const cvs = page === 1 ? [$("chart")] : page === 2 ? [$("revChart"), $("revFx")] : [];
+    cvs.forEach(cv => { cv._rvId = (cv._rvId || 0) + 1; cv.style.clipPath = "inset(0 100% 0 0)"; });
+    setTimeout(() => {
+      if (page === target) greetPage(page);
+      else cvs.forEach(cv => { cv._rvId = (cv._rvId || 0) + 1; cv.style.clipPath = ""; });
+    }, page === 2 ? 600 : 260);
+  }
+}
+/* Sichtbarer Fortschritt mitten in einer laufenden Animation: aus der
+   tatsaechlichen Position der Ebenen, nicht aus dem Ziel. */
+function visualProg(){
+  const w = pager.clientWidth || 1;
+  for (let i = LAST; i >= 1; i--){
+    const tx = new DOMMatrixReadOnly(getComputedStyle(PAGES[i]).transform).m41;
+    if (tx < w - .5) return clamp(i - tx/w, i - 1, i);
+  }
+  return 0;
 }
 /* Auf dem Desktop beginnt der Browser sofort eine Textmarkierung, sobald
    die Maus gedrueckt gehalten und bewegt wird. Drei Gegenmassnahmen:
@@ -1210,16 +1236,21 @@ pager.addEventListener("dragstart", e => e.preventDefault());
 pager.addEventListener("pointerdown", e => {
   if (e.target.closest("input[type=range], .sheet, .screen")) return;
   if (e.pointerType === "mouse" && !e.target.closest(INTERACTIVE)) e.preventDefault();
+  /* Beginnt ein Zug, waehrend die letzte Ebene noch einrastet, wuerde deren
+     Uebergang dem Finger hinterherlaufen. Erst abbrechen, dann ab der
+     tatsaechlichen Position weiterziehen. */
+  const vp = PAGES.some(el => el.classList.contains("snap")) ? visualProg() : prog;
+  if (vp !== prog){ endSnap(); applyProg(vp); }
   drag = {x:e.clientX, y:e.clientY, t:performance.now(), lock:null,
-          base:page, last:e.clientX, v:0, moved:false};
+          base:page, p0:vp, last:e.clientX, v:0, moved:false};
 });
 
 pager.addEventListener("pointermove", e => {
   if (!drag) return;
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   if (!drag.lock){
-    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-    drag.lock = Math.abs(dx) > Math.abs(dy)*1.15 ? "x" : "y";
+    if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+    drag.lock = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
     if (drag.lock === "x"){
       pager.setPointerCapture(e.pointerId);
       document.body.classList.add("dragging");
@@ -1231,9 +1262,10 @@ pager.addEventListener("pointermove", e => {
   e.preventDefault();
   drag.moved = true;
   const now = performance.now();
-  drag.v = (e.clientX - drag.last)/Math.max(1, now - drag.t);
+  // Geglaettet: ein kurzes Verharren vor dem Loslassen soll den Schwung nicht loeschen.
+  drag.v = .35*drag.v + .65*(e.clientX - drag.last)/Math.max(1, now - drag.t);
   drag.last = e.clientX; drag.t = now;
-  let p = drag.base - dx/pager.clientWidth;
+  let p = drag.p0 - dx/pager.clientWidth;
   if (p < 0) p = p*0.32;                        // Gummiband an den Raendern
   if (p > 1) p = 1 + (p-1)*0.32;
   applyProg(clamp(p, -0.12, LAST + 0.12));
@@ -1256,12 +1288,15 @@ function endDrag(){
   if (!wasX) return;
   if (moved){
     swallowClick = true;
+    setTimeout(() => { swallowClick = false; }, 80);   // kam kein Klick, darf er den naechsten nicht schlucken
     const sel = getSelection();
     if (sel && !sel.isCollapsed) sel.removeAllRanges();
   }
-  if (v < -0.45) return snapTo(base + 1);
-  if (v >  0.45) return snapTo(base - 1);
-  snapTo(Math.round(clamp(prog, 0, LAST)));
+  // Ein Viertel der Breite oder ein kurzer Wisch genuegt.
+  const d = prog - base;
+  if (v < -0.22 || d >  0.22) return snapTo(base + 1);
+  if (v >  0.22 || d < -0.22) return snapTo(base - 1);
+  snapTo(base);
 }
 pager.addEventListener("pointerup", endDrag);
 pager.addEventListener("pointercancel", endDrag);
@@ -1320,6 +1355,46 @@ addEventListener("keydown", e => {
   if (e.key === "Escape") closeSheets();
 });
 applyProg(0);
+
+/* ─── Begruessung: neue Ebene, neue Bewegung ──────────────────────
+   Beim Oeffnen steigen die Bloecke gestaffelt auf, die Diagramme zeichnen
+   sich von links auf, die Zahlen der Auswertung zaehlen hoch. Alles laeuft
+   ueber CSS-Klassen und clip-path, die Zeichenfunktionen bleiben unberuehrt. */
+const quiet = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+function greetPage(i){
+  if (quiet()) return;
+  const el = PAGES[i];
+  [...el.firstElementChild.children].forEach((c, k) => c.style.setProperty("--gi", Math.min(k, 14)));
+  el.classList.remove("greet"); void el.offsetWidth; el.classList.add("greet");
+  clearTimeout(el._gt); el._gt = setTimeout(() => el.classList.remove("greet"), 1500);
+  if (i === 1){ startReveal($("chart")); const bg = $("bg"); bg.classList.remove("pulse"); void bg.offsetWidth; bg.classList.add("pulse"); }
+  if (i === 2){ startReveal($("revChart")); startReveal($("revFx")); revGreet = true; updateReview(); }
+}
+function startReveal(cv){
+  cv._rv0 = performance.now();
+  const id = cv._rvId = (cv._rvId || 0) + 1;
+  const step = now => {
+    if (cv._rvId !== id) return;
+    const k = Math.min(1, (now - cv._rv0) / 1000), e = 1 - Math.pow(1 - k, 3);
+    cv.style.clipPath = k < 1 ? `inset(0 ${((1 - e) * 100).toFixed(2)}% 0 0)` : "";
+    if (k < 1) requestAnimationFrame(step);
+  };
+  cv.style.clipPath = "inset(0 100% 0 0)";
+  requestAnimationFrame(step);
+}
+let revGreet = false;
+function countUp(el){
+  const m = el.textContent.match(/^(\D*?)(\d+(?:\.\d+)?)(.*)$/); if (!m) return;
+  const to = +m[2], dec = (m[2].split(".")[1] || "").length, t0 = performance.now();
+  const id = el._cu = (el._cu || 0) + 1;
+  const tick = now => {
+    if (el._cu !== id) return;
+    const k = Math.min(1, (now - t0) / 800), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = m[1] + (to * e).toFixed(dec) + m[3];
+    if (k < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
 
 /* ─── Segmentregler mit gleitendem Knopf ──────────────────────── */
 function moveKnob(seg){
@@ -1428,13 +1503,16 @@ const replay = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.
 function buildPeople(){
   $("people").innerHTML = PERSONAS.map(p => `
     <button class="pbtn" role="radio" aria-checked="false" tabindex="-1" data-id="${p.id}">
-      <span class="av">${avatarSVG(p, bmiOf(p.id))}</span>
-      <span class="nm">${p.name}</span>${p.id === personId ? '<span class="now">aktiv</span>' : ""}
+      <span class="avw"><span class="av">${avatarSVG(p, bmiOf(p.id))}</span>${p.id === personId
+        ? '<span class="bdg" title="aktiv"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.4l2.3 2.3 4.7-5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' : ""}</span>
+      <span class="nm">${p.name}</span>
     </button>`).join("");
+  $("actTag").innerHTML = `<i></i>aktiv: ${PERSON.name}`;
   const kv = (i, k) => `<div><div class="k">${k}</div><div class="v" id="pcV${i}"></div></div>`;
   $("personCard").innerHTML = `
     <div class="head swap" id="pcHead"><div class="av" id="pcAv"></div>
       <div><h3 id="pcName"></h3><div class="line" id="pcLine"></div></div></div>
+    <button class="go" id="pcGo" hidden></button>
     <div class="kv swap" id="pcKv">
       ${kv(0,"Größe")}${kv(1,"Gewicht")}${kv(2,"Ruhepuls")}${kv(3,"HbA1c")}
       ${kv(4,"Basal")}${kv(5,"KE-Faktor")}${kv(6,"Korrektur")}${kv(7,"Therapie")}
@@ -1450,7 +1528,6 @@ function buildPeople(){
         </div></div></div>
       <div class="mark"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v13M1 7.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
     </div>
-    <button class="go" id="pcGo" hidden></button>
     <p class="note">Name, Alter, Alltag und Aussehen sind erfunden. Körper- und Therapiewerte stammen aus einem veröffentlichten Forschungsdatensatz.</p>`;
 }
 
@@ -1483,7 +1560,7 @@ function showPerson(id, tapped){
   });
   const go = $("pcGo");
   go.hidden = id === personId;
-  if (!go.hidden){ go.textContent = `Als ${p.name} spielen`; go.dataset.go = id; if (prev && !REDUCED) replay(go, "rise"); }
+  if (!go.hidden){ go.textContent = `Wechsel zu ${p.name} bestätigen`; go.dataset.go = id; if (prev && !REDUCED) replay(go, "rise"); }
   if (prev && prev !== id && !REDUCED){ replay($("pcHead"), "swap"); replay($("pcKv"), "swap"); }
 }
 
@@ -1876,12 +1953,15 @@ const GATE_KEY = "nebel.hinweis.v1";
 (() => {
   let ok = false;
   try { ok = localStorage.getItem(GATE_KEY) === "1"; } catch(e){}
-  if (ok) return;
+  if (ok){ requestAnimationFrame(() => greetPage(0)); return; }
   const gate = $("gate"), pager = $("pager");
   gate.hidden = false; pager.inert = true;
   $("gateOk").onclick = () => {
     try { localStorage.setItem(GATE_KEY, "1"); } catch(e){}
-    gate.hidden = true; pager.inert = false;
+    const done = () => { gate.hidden = true; gate.classList.remove("out"); pager.inert = false; greetPage(page); };
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return done();
+    $("gateOk").classList.add("ok");                       // Haken zeichnet sich
+    setTimeout(() => { gate.classList.add("out"); setTimeout(done, 400); }, 480);
   };
   $("gateOk").focus();
 })();
@@ -2152,6 +2232,10 @@ function updateReview(){
   $("revTitle").textContent = "Tag " + (Math.floor(eng.s.t/1440)+1);
   const faults = eng.sensorFaults || [];
   $("rFault").textContent = faults.length ? faults.length + "×" : "0";
+  if (revGreet){
+    revGreet = false;
+    ["rTir","rLow","rAvg","rDec","rEmg","rMard","rAlarm","rFault"].forEach(id => countUp($(id)));
+  }
   $("legFault").hidden = !faults.length;
   const lastF = faults[faults.length-1];
   const stamp = eng.events.length + ":" + tr.length + ":" + faults.length + ":" + (lastF ? lastF.end : 0);
