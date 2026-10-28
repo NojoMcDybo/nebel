@@ -143,9 +143,13 @@ Begründung:
 - **Vorberechnete Antwortprofile.** `window.PROFILES` in `index.html` sind Rechenergebnisse der Nebel-Engine, keine Kopie des Datensatzes. Geprüft: Kein Parameterwert steht in `index.html`.
 - **Festgehaltener Stand.** `scripts/fetch-oracle.sh` holt py-mgipsim auf Commit `b985f8c` (25.02.2026) und prüft einen Hash über alle 20 Patientendateien. Sie sind identisch mit dem Stand, gegen den Engine und Registry kalibriert sind. Ändert sich der Datensatz oben, bekommt die Seite nicht still andere Körper.
 
-**Parallel:** Anfrage an die Autorinnen und Autoren von py-mgipsim, ob sie mit der Weitergabe einverstanden sind. Stand 12.10.: Entwurf liegt bei Nojo, noch nicht gesendet.
+**Anfrage an die Autorinnen und Autoren von py-mgipsim** (gesendet 12.10.2026, Antwort von Ali Cinar am 28.10.2026): Dank für das Interesse an ihrer Arbeit und die Nutzung der Ergebnisse, keine Einwände gegen die Weitergabe der zehn Sätze. Die Antwort enthält zwei Bitten, beide umgesetzt:
+- Die App muss ausdrücklich sagen, dass sie nur ein Lernsystem ist und weder als Medizinprodukt noch für Insulindosierung taugt.
+- Diese Grenzen sollen das Erste sein, was Nutzende bestätigen, bevor sie den Rest nutzen: Hinweisfenster „Bevor es losgeht“ beim ersten Aufruf (`app/template.html`, Schlüssel `nebel.hinweis.v1`). Ohne Bestätigung bleibt die App dahinter gesperrt.
 
-**Rückfalloption**, falls die Antwort negativ ausfällt: eine eigene virtuelle Population aus veröffentlichten Verteilungen. Echte Arbeit, die zehn Personen müssten neu kalibriert werden.
+Außerdem möchten die Autorinnen und Autoren den Link wissen, sobald die Seite online ist.
+
+**Rückfalloption**, falls die Autorinnen und Autoren die Weitergabe später doch untersagen: eine eigene virtuelle Population aus veröffentlichten Verteilungen. Echte Arbeit, die zehn Personen müssten neu kalibriert werden.
 
 ### 7.2 Keine Abrufe bei Dritten
 

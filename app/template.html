@@ -198,6 +198,15 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
   box-shadow:inset 0 0 0 1.5px var(--ring);
 }
 .warnbox b{color:var(--low)}
+/* Einmaliger Hinweis vor der ersten Nutzung: Grenzen zuerst, dann der Rest. */
+.gate{position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--paper); overflow-y:auto}
+.gate[hidden]{display:none}
+.gate .box{width:100%; max-width:460px; background:var(--card); border-radius:26px; padding:26px 22px; box-shadow:var(--shUp)}
+.gate h2{font-size:24px; font-weight:800; letter-spacing:-.03em; margin:0 0 14px}
+.gate p, .gate li{font-size:14px; line-height:1.6; color:var(--ink2); margin:0 0 10px}
+.gate ul{margin:0 0 14px; padding-left:20px}
+.gate b{color:var(--ink)}
+.gate button{width:100%; font:inherit; font-weight:700; font-size:15px; color:var(--paper); background:var(--ink); border:0; border-radius:16px; padding:15px; cursor:pointer}
 .legal{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-align:center; margin:14px 0 0}
 .legal a{color:var(--ink3); text-decoration:none; padding:6px 4px}
 .legal a:hover, .legal a:focus-visible{color:var(--ink); text-decoration:underline}
@@ -651,6 +660,20 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
 </style>
 </head>
 <body>
+
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateT" hidden>
+  <div class="box">
+    <h2 id="gateT">Bevor es losgeht</h2>
+    <p><b>nebel. ist ein Lernsystem und kein Medizinprodukt.</b> Es simuliert erfundene Personen, damit Angehörige und Freunde den Alltag mit Typ-1-Diabetes nachempfinden können.</p>
+    <ul>
+      <li>Es gibt <b>keine Dosierungsempfehlung</b> und keine Beratung. Die Werte taugen nicht für Insulin- oder andere Therapieentscheidungen.</li>
+      <li>Du kannst <b>keine eigenen Werte</b> eingeben. Alles hier ist simuliert.</li>
+      <li>Kein Ergebnis aus nebel. ersetzt dein Diabetesteam.</li>
+    </ul>
+    <button type="button" id="gateOk">Verstanden, ich nutze nebel. nur zum Lernen</button>
+    <p class="legal"><a href="rechtliches.html">Impressum · Datenschutz · Lizenzen</a></p>
+  </div>
+</div>
 
 <div id="pager">
   <!-- ══════════ SEITE 1 — HOME ══════════ -->
@@ -1846,6 +1869,22 @@ function toast(kind, text, cell){
   const v = $("bg");
   v.classList.remove("ping"); void v.offsetWidth; v.classList.add("ping");
 }
+
+/* Einmaliger Hinweis: ohne Bestaetigung bleibt die App dahinter gesperrt.
+   Ohne Speicher im Browser erscheint er bei jedem Besuch. */
+const GATE_KEY = "nebel.hinweis.v1";
+(() => {
+  let ok = false;
+  try { ok = localStorage.getItem(GATE_KEY) === "1"; } catch(e){}
+  if (ok) return;
+  const gate = $("gate"), pager = $("pager");
+  gate.hidden = false; pager.inert = true;
+  $("gateOk").onclick = () => {
+    try { localStorage.setItem(GATE_KEY, "1"); } catch(e){}
+    gate.hidden = true; pager.inert = false;
+  };
+  $("gateOk").focus();
+})();
 
 const closeSheets = () => document.querySelectorAll(".sheet").forEach(s => s.classList.remove("on"));
 document.querySelectorAll("[data-close]").forEach(b => b.onclick = closeSheets);
