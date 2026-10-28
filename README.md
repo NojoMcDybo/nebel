@@ -2,7 +2,7 @@
 
 A browser-based type 1 diabetes simulator for the **relatives and friends** of people living with type 1 diabetes.
 
-**Try it:** https://nojomcdybo.github.io/nebel/. It runs in the browser, on phones too, with nothing to install. The app itself is in German.
+**Try it:** https://nojomcdybo.github.io/nebel/en/ (English) or https://nojomcdybo.github.io/nebel/ (German). It runs in the browser, on phones too, with nothing to install.
 
 ## Intended purpose
 
@@ -40,7 +40,8 @@ All design decisions, sources, calibrations and known limits are documented in `
 
 | Path | Contents |
 |---|---|
-| `app/` | The app: interface (`template.html`), adapter to the engine, people, legal page |
+| `app/` | The app, written in German: interface (`template.html`), adapter to the engine, people, legal pages (`rechtliches.html`, English `rechtliches.en.html`) |
+| `engine/scripts/i18n-en.mjs` | English texts. The build swaps every German string for its English pair and writes `en/`. The build fails if a German source text changes without its pair |
 | `engine/` | Physiology engine as a standalone TypeScript module with its test suite and build scripts |
 | `docs/` | Target audience, engine specification, parameter registry, research, legal assessment, changelog (German) |
 | `.github/workflows/pages.yml` | Tests, builds and publishes the app to GitHub Pages |

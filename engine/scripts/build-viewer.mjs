@@ -9,7 +9,9 @@
  *      index.html          App (Apache 2.0), Engine, Adapter, Personen
  *      personen-daten.js   die zehn Parametersaetze, eigene Datei unter GPL-3.0
  *      rechtliches.html    Impressum, Datenschutz, Lizenzen
- *      fonts/              Schriften (SIL OFL 1.1), kein Google-Abruf
+ *      en/index.html       dieselbe App auf Englisch (scripts/i18n-en.mjs)
+ *      en/legal.html       englische Fassung von rechtliches.html (app/rechtliches.en.html)
+ *      fonts/             Schriften (SIL OFL 1.1), kein Google-Abruf
  *      lizenzen/           Apache-2.0.txt, GPL-3.0.txt
  *    Warum die Daten getrennt liegen: docs/30_Rechtliche_Einordnung.md, Abschnitt 7.
  *    dist/nebel.html leitet nur noch auf dist/site/index.html weiter.
@@ -26,6 +28,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFi
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
+import { PAIRS } from "./i18n-en.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const oracle = resolve(root, "vendor/py-mgipsim/pymgipsim/VirtualPatient/Models/T1DM/ExtHovorka/Patients");
@@ -143,6 +146,29 @@ if (existsSync(appTpl)) {
   checkNoExternal(html, "index.html");
   writeFileSync(resolve(site, "index.html"), html, "utf8");
 
+  /* en/index.html — dieselbe App, jeder Text Eins zu Eins aus i18n-en.mjs.
+     Fehlt ein Schluessel im Quelltext, ist ein deutscher Text umgezogen. */
+  mkdirSync(resolve(site, "en"), { recursive: true });
+  let htmlEn = html;
+  for (const [de, en] of [...PAIRS].sort((a, b) => b[0].length - a[0].length)) {
+    if (!htmlEn.includes(de)) { problem(`en: Quelltext nicht gefunden: ${de.slice(0, 70)}`); continue; }
+    htmlEn = htmlEn.split(de).join(en);
+  }
+  checkScripts(htmlEn, "en/index.html");
+  checkNoExternal(htmlEn, "en/index.html");
+  writeFileSync(resolve(site, "en/index.html"), htmlEn, "utf8");
+  /* Deutsche Reste im Sichtbaren (ohne Kommentare, Stile, Bezeichner) melden. */
+  {
+    const visible = htmlEn
+      .replace(/<style[\s\S]*?<\/style>/g, "").replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "").replace(/\s\/\/ .*$/gm, "")
+      .replace(/<svg[\s\S]*?<\/svg>/g, "");
+    const de = /\b(und|der|die|das|ist|nicht|ein|eine|einen|wird|mit|für|auf|sich|dein|deine|deinen|du|Sie|zu|von|wenn|nur|noch|aber|oder|Tag|Stunden|Minuten|Wert|keine|kein)\b|[äöüß]/;
+    const hits = visible.split("\n").filter((l) => de.test(l) && /["'`>]/.test(l) && !/\bthrow\b|Error\(|^\s*`/.test(l));
+    for (const l of hits.slice(0, 40)) console.error("en: deutscher Rest? " + l.trim().slice(0, 140));
+    if (hits.length) console.error(`Hinweis: en: ${hits.length} Zeilen mit deutschem Rest (nur melden, nicht abbrechen)`);
+  }
+
   /* personen-daten.js — nur die zehn Personen der App, eigene Lizenz */
   const ref = existsSync(resolve(root, "vendor/py-mgipsim/REF"))
     ? readFileSync(resolve(root, "vendor/py-mgipsim/REF"), "utf8").trim() : "unbekannt";
@@ -197,19 +223,20 @@ window.SUBJECTS = ${JSON.stringify(chosen, null, 1)};
   const imp = { NAME: env("NEBEL_IMPRESSUM_NAME"), ANSCHRIFT: env("NEBEL_IMPRESSUM_ANSCHRIFT"), EMAIL: env("NEBEL_IMPRESSUM_EMAIL") };
   for (const [k, v] of Object.entries(imp)) if (!v) problem(`Impressum: NEBEL_IMPRESSUM_${k} ist nicht gesetzt`);
   const de = today.split("-").reverse().join(".");
-  const legalTpl = resolve(root, "../app/rechtliches.html");
-  if (existsSync(legalTpl)) {
-    const legal = readFileSync(legalTpl, "utf8")
+  for (const [legalTpl, out] of [["../app/rechtliches.html", "rechtliches.html"], ["../app/rechtliches.en.html", "en/legal.html"]]) {
+  if (existsSync(resolve(root, legalTpl))) {
+    const legal = readFileSync(resolve(root, legalTpl), "utf8")
       .replaceAll("{{IMPRESSUM_NAME}}", esc(imp.NAME || "[Name fehlt: NEBEL_IMPRESSUM_NAME]"))
       .replaceAll("{{IMPRESSUM_ANSCHRIFT}}", esc(imp.ANSCHRIFT || "[Anschrift fehlt: NEBEL_IMPRESSUM_ANSCHRIFT]"))
       .replaceAll("{{IMPRESSUM_EMAIL}}", esc(imp.EMAIL || "[E-Mail fehlt: NEBEL_IMPRESSUM_EMAIL]"))
       .replaceAll("{{PYMGIPSIM_REF}}", esc(ref))
       .replaceAll("{{PYMGIPSIM_REF_SHORT}}", esc(ref.slice(0, 7)))
       .replaceAll("{{BUILD_DATE}}", de);
-    if (/\{\{[A-Z_]+\}\}/.test(legal)) problem("rechtliches.html: unbekannter Platzhalter");
-    checkNoExternal(legal, "rechtliches.html");
-    writeFileSync(resolve(site, "rechtliches.html"), legal, "utf8");
-  } else problem("app/rechtliches.html fehlt");
+    if (/\{\{[A-Z_]+\}\}/.test(legal)) problem(`${out}: unbekannter Platzhalter`);
+    checkNoExternal(legal, out);
+    writeFileSync(resolve(site, out), legal, "utf8");
+  } else problem(`${legalTpl} fehlt`);
+  }
 
   writeFileSync(resolve(site, ".nojekyll"), "", "utf8");
   /* Alter Doppelklick-Pfad bleibt gueltig */

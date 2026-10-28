@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nebel. — Legal notice, privacy, licenses</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230A0D0D'/%3E%3Ccircle cx='23' cy='22' r='3' fill='%23B8362B'/%3E%3Cpath d='M8 23V12.5c0-1.4 1.1-2.5 2.5-2.5h2c2.8 0 5 2.2 5 5V23' fill='none' stroke='%23EDF1F1' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<!-- English translation of app/rechtliches.html. Placeholders in double curly
+     braces are filled by engine/scripts/build-viewer.mjs. Paths are relative
+     to en/. The German page is the legally binding version. -->
+<style>
+@font-face{font-family:"DM Mono"; font-weight:400; font-display:swap; src:url("../fonts/dm-mono-400.woff2") format("woff2")}
+@font-face{font-family:"Plus Jakarta Sans"; font-weight:200 800; font-display:swap; src:url("../fonts/plus-jakarta-sans.woff2") format("woff2")}
+:root{--paper:#EDF1F1; --card:#FFFFFF; --ink:#0A0D0D; --ink2:#576262; --ink3:#5F6A6A; --hair:rgba(10,13,13,.11); --low:#B8362B}
+@media (prefers-color-scheme: dark){
+  :root{--paper:#0E1213; --card:#191E20; --ink:#E9EFEF; --ink2:#A3AEAE; --ink3:#7E8A8A; --hair:rgba(233,239,239,.14); --low:#FF7063}
+}
+*{box-sizing:border-box}
+html{color-scheme:light dark}
+body{margin:0; background:var(--paper); color:var(--ink); font:16px/1.6 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:680px; margin:0 auto; padding:28px 16px 72px}
+a{color:inherit; text-underline-offset:3px}
+.back{font-family:"DM Mono",ui-monospace,monospace; font-size:12px; letter-spacing:.06em; color:var(--ink3); text-decoration:none}
+.back:hover{color:var(--ink); text-decoration:underline}
+h1{font-size:30px; font-weight:800; letter-spacing:-.03em; margin:18px 0 6px}
+.lead{color:var(--ink2); margin:0 0 26px}
+section{background:var(--card); border-radius:18px; padding:20px 20px 8px; margin:0 0 14px; box-shadow:0 0 0 1px var(--hair)}
+h2{font-size:19px; font-weight:800; letter-spacing:-.02em; margin:0 0 10px}
+h3{font-size:15px; font-weight:700; margin:18px 0 4px}
+p, li{color:var(--ink2); font-size:15px}
+p{margin:0 0 12px}
+ul{margin:0 0 12px; padding-left:20px}
+address{font-style:normal; color:var(--ink); margin:0 0 12px; white-space:pre-line}
+.k{font-family:"DM Mono",ui-monospace,monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink3); margin:0 0 4px}
+.warn b{color:var(--low)}
+small{color:var(--ink3)}
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← back to the simulation</a>
+  <h1>Legal</h1>
+  <p class="lead">Legal notice, privacy and where the parts of this site come from. This is a courtesy translation; the <a href="../rechtliches.html" lang="de" hreflang="de">German version</a> is the legally binding one.</p>
+
+  <section class="warn">
+    <h2>What nebel. is for</h2>
+    <p><b>A learning tool, not a medical device.</b> nebel. simulates fictional people with type 1 diabetes so that relatives and friends can understand what everyday life with it feels like. The site is not intended for the diagnosis, monitoring, prediction or treatment of any disease and is not a medical device within the meaning of Regulation (EU) 2017/745.</p>
+    <p>No number from the simulation is suitable for a real therapy decision. That is the job of your diabetes care team.</p>
+  </section>
+
+  <section id="impressum">
+    <h2>Legal notice</h2>
+    <p class="k">Information pursuant to § 5 DDG (Germany)</p>
+    <address>{{IMPRESSUM_NAME}}
+{{IMPRESSUM_ANSCHRIFT}}</address>
+    <p class="k">Contact</p>
+    <p><a href="mailto:{{IMPRESSUM_EMAIL}}">{{IMPRESSUM_EMAIL}}</a></p>
+    <p>A private, non-commercial educational project. No advertising, no payment, no donations.</p>
+  </section>
+
+  <section id="datenschutz">
+    <h2>Privacy</h2>
+    <p>In short: this site sets no cookies, contains no tracking and loads nothing from third parties, not even fonts. What you do in the simulation stays in your browser.</p>
+
+    <h3>Controller</h3>
+    <p>{{IMPRESSUM_NAME}}, address and contact as in the legal notice.</p>
+
+    <h3>Hosting on GitHub Pages</h3>
+    <p>The site is delivered through GitHub Pages (GitHub B.V., Prins Bernhardplein 200, 1097 JB Amsterdam, Netherlands, and GitHub, Inc., USA). When you open it, GitHub processes technically necessary access data, including your IP address; according to GitHub, it stores it for security reasons. The legal basis is Art. 6(1)(f) GDPR: the legitimate interest in providing the site securely and reliably. Data may be transferred to the USA. According to GitHub, it participates in the EU-U.S. Data Privacy Framework, for which an adequacy decision of the European Commission exists (Art. 45 GDPR). Details: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub General Privacy Statement</a>.</p>
+
+    <h3>Storage in your browser</h3>
+    <p>The simulation keeps your progress and the chosen person in your browser's local storage (localStorage) so you can continue later. This data does not leave your device and I do not receive it. The legal basis is § 25(2) no. 2 TDDDG: the storage is strictly necessary for the function you explicitly use. You can delete it with “Start over” in the review or through your browser's site data. The CSV and JSON exports are also created on your device only.</p>
+
+    <h3>No health data</h3>
+    <p>Everything in the simulation concerns fictional people. The site does not ask for real glucose, insulin or meal values and has no input field for them.</p>
+
+    <h3>Your rights</h3>
+    <p>You have the right of access (Art. 15 GDPR), rectification (Art. 16), erasure (Art. 17), restriction of processing (Art. 18) and objection (Art. 21). You can lodge a complaint with a data protection authority (Art. 77), for example the State Commissioner for Data Protection and Freedom of Information of North Rhine-Westphalia. I do not store any data about you myself; the access data is held by GitHub.</p>
+  </section>
+
+  <section id="lizenzen">
+    <h2>Licenses and provenance</h2>
+    <h3>Program and texts</h3>
+    <p>Source code, interface and texts of nebel. are under the <a href="../lizenzen/Apache-2.0.txt">Apache License 2.0</a>. Source code: <a href="https://github.com/NojoMcDybo/nebel">github.com/NojoMcDybo/nebel</a>.</p>
+
+    <h3>The ten bodies</h3>
+    <p>The model parameters of the ten people (<a href="../personen-daten.js">personen-daten.js</a>) come from the 20 virtual patients of the library <a href="https://github.com/illinoistech-itm/py-mgipsim/tree/{{PYMGIPSIM_REF}}">py-mgipsim</a> (Illinois Institute of Technology), version <code>{{PYMGIPSIM_REF_SHORT}}</code>. They are under the <a href="../lizenzen/GPL-3.0.txt">GNU General Public License v3</a> and are passed on here as a separate file under that license. Only the form was changed: ten of the twenty data sets were selected and the required fields were transferred from JSON to JavaScript. The values themselves are unchanged. Where nebel. deviates from them (sensor delay, insulin absorption), this happens only during calculation and is documented in the source code. The names, ages and looks of the people are invented.</p>
+
+    <h3>Model</h3>
+    <p>The physiology follows the extended Hovorka model by Hobbs et al. (2019), <i>Computers &amp; Chemical Engineering</i>, and Siket, Rashid &amp; Cinar (2025), <i>Journal of Diabetes Science and Technology</i>. The equations were implemented from the publications, not taken from the code of py-mgipsim. Fat, protein and sensor error are own additions, documented with sources in the <a href="https://github.com/NojoMcDybo/nebel/tree/main/docs">project folder docs/</a> (in German).</p>
+
+    <h3>Fonts</h3>
+    <p>DM Mono (The DM Mono Project Authors) and Plus Jakarta Sans (The Plus Jakarta Sans Project Authors), both under the SIL Open Font License 1.1: <a href="../fonts/OFL-DM-Mono.txt">DM Mono</a>, <a href="../fonts/OFL-Plus-Jakarta-Sans.txt">Plus Jakarta Sans</a>.</p>
+  </section>
+
+  <p><small>This page as of: {{BUILD_DATE}}</small></p>
+  <a class="back" href="./">← back to the simulation</a>
+</main>
+</body>
+</html>

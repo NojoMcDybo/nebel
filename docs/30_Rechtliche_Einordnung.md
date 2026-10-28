@@ -169,6 +169,10 @@ Außerdem möchten die Autorinnen und Autoren den Link wissen, sobald die Seite 
   - Betroffenenrechte, Beschwerde bei der LDI NRW.
 - Die Texte sind eine sorgfältige Vorlage, **keine Rechtsberatung**. Vor einer breiten Verbreitung einmal von der Rechtsabteilung der Uni oder der Verbraucherzentrale ansehen lassen (siehe Vorbemerkung).
 
+### 7.3a Englische Fassung (28.10.2026)
+
+Die App gibt es zusätzlich unter `/en/`, mit englischem Hinweisfenster, englischem Impressum- und Datenschutztext (`en/legal.html`) und eigenem Browser-Speicher (Schlüssel mit `nebel.en.`), damit die Bestätigung des Hinweises pro Sprache gilt. Die englische Rechtsseite ist eine Übersetzung zur Orientierung, verbindlich bleibt die deutsche. Die Texte stehen in `engine/scripts/i18n-en.mjs`; Impressumsangaben kommen wie bisher aus den Repository-Variablen.
+
 ### 7.4 Hosting
 
 - **GitHub Pages über eine GitHub Action** (`.github/workflows/pages.yml`). Bei jedem Push auf `main`:
