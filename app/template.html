@@ -67,6 +67,10 @@ body{
 
 /* ─── Pager: zwei nebeneinanderliegende Seiten ─────────────────── */
 #pager{position:fixed; inset:0; overflow:hidden; touch-action:pan-y}
+/* touch-action gilt nur bis zum naechsten Scroll-Container. Die Seiten scrollen
+   selbst, also muss pan-y hier stehen, sonst nimmt der Browser waagerechte
+   Zuege in der Mitte der Seite fuer sich und nur der Rand wischt. */
+.page{touch-action:pan-y}
 body.dragging, body.dragging *{
   user-select:none!important; -webkit-user-select:none!important;
   cursor:grabbing!important;
@@ -115,8 +119,13 @@ body.dragging, body.dragging *{
 }
 #topbar .col{
   width:100%; max-width:460px; padding:calc(14px + env(safe-area-inset-top)) 20px 0;
-  display:flex; justify-content:flex-end;
+  display:flex; justify-content:flex-end; align-items:center; gap:2px;
 }
+.lang{
+  pointer-events:auto; font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-decoration:none;
+  color:var(--ink3); opacity:.7; padding:10px 8px; transition:color .3s var(--spring), opacity .3s var(--spring);
+}
+.lang:hover, .lang:focus-visible{color:var(--ink); opacity:1}
 .tgl{
   pointer-events:auto; position:relative; width:70px; height:36px; padding:0; border:0;
   border-radius:99px; cursor:pointer; background:var(--card);
@@ -676,9 +685,9 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   .btn:hover{opacity:.9}
   .swipe:hover{transform:translateX(-3px)}
 }
-/* Begruessung einer neu geoeffneten Ebene: Bloecke steigen gestaffelt auf. */
-.page.greet .inner > *{animation:greetIn .72s var(--spring) both; animation-delay:calc(var(--gi,0) * 48ms)}
-@keyframes greetIn{from{opacity:0; transform:translateY(18px) scale(.985)}to{opacity:1; transform:none}}
+/* Begruessung einer neu geoeffneten Ebene: Bloecke gleiten von links oben nach rechts unten ein. */
+.gi{animation:greetIn 1.25s cubic-bezier(.2,.75,.25,1) both; animation-delay:var(--gd,0ms)}
+@keyframes greetIn{from{opacity:0; transform:translate3d(-26px,-18px,0) scale(.985)}to{opacity:1; transform:none}}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation:none!important}}
 :focus-visible{outline:2.5px solid var(--ink); outline-offset:3px}
 @media (max-width:350px){.hero h1{font-size:48px} .value{font-size:72px}}
@@ -701,6 +710,11 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     <div class="hero">
       <h1>nebel.</h1>
     </div>
+
+    <div class="eyebrow row"><span>Wer bist du heute?</span><span class="act" id="actTag"></span></div>
+    <div class="people" id="people" role="radiogroup" aria-label="Person wählen"></div>
+    <div class="person" id="personCard"></div>
+    <p class="selfhint">Du hast selbst Typ-1-Diabetes? Such dir die Person, die dir am nächsten kommt, und zeig sie deinem Umfeld.</p>
 
     <div class="eyebrow">Fünf Regeln</div>
     <div class="stack" id="facts">
@@ -740,11 +754,6 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
         <div class="mark"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v13M1 7.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
       </div>
     </div>
-
-    <div class="eyebrow row"><span>Wer bist du heute?</span><span class="act" id="actTag"></span></div>
-    <div class="people" id="people" role="radiogroup" aria-label="Person wählen"></div>
-    <div class="person" id="personCard"></div>
-    <p class="selfhint">Du hast selbst Typ-1-Diabetes? Such dir die Person, die dir am nächsten kommt, und zeig sie deinem Umfeld.</p>
 
     <div class="warnbox"><b>Lernwerkzeug, kein Medizinprodukt.</b> Die Werte sind simuliert und taugen nicht für reale Therapieentscheidungen. Kein Bolusrechner.</div>
     <p class="legal"><a href="rechtliches.html">Impressum · Datenschutz · Lizenzen</a> · <a href="en/" lang="en" hreflang="en">English</a></p>
@@ -926,6 +935,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
 </div>
 
 <div id="topbar"><div class="col">
+  <a class="lang" id="lang" href="en/" lang="en" hreflang="en" aria-label="English">EN</a>
   <button id="theme" class="tgl" role="switch" aria-label="Dunkelmodus" aria-pressed="false">
     <span class="knob"></span>
     <svg class="i sun" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3.7" stroke="currentColor" stroke-width="1.8"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 1.4v1.9M10 16.7v1.9M18.6 10h-1.9M3.3 10H1.4M16.1 3.9l-1.4 1.4M5.3 14.7l-1.4 1.4M16.1 16.1l-1.4-1.4M5.3 5.3L3.9 3.9"/></g></svg>
@@ -1207,7 +1217,7 @@ function snapTo(target){
   // Nur eine neu geoeffnete Ebene begruesst mit Bewegung, nicht der Rueckweg.
   if (page > from && !quiet()){
     const cvs = page === 1 ? [$("chart")] : page === 2 ? [$("revChart"), $("revFx")] : [];
-    cvs.forEach(cv => { cv._rvId = (cv._rvId || 0) + 1; cv.style.clipPath = "inset(0 100% 0 0)"; });
+    cvs.forEach(cv => { cv._rvId = (cv._rvId || 0) + 1; cv.style.clipPath = HIDE_CLIP; });
     setTimeout(() => {
       if (page === target) greetPage(page);
       else cvs.forEach(cv => { cv._rvId = (cv._rvId || 0) + 1; cv.style.clipPath = ""; });
@@ -1298,6 +1308,7 @@ function endDrag(){
   if (v >  0.22 || d < -0.22) return snapTo(base - 1);
   snapTo(base);
 }
+pager.addEventListener("touchmove", e => { if (drag && drag.lock === "x" && e.cancelable) e.preventDefault(); }, { passive:false });
 pager.addEventListener("pointerup", endDrag);
 pager.addEventListener("pointercancel", endDrag);
 pager.addEventListener("lostpointercapture", endDrag);
@@ -1306,6 +1317,7 @@ $("rail").onclick = e => {
 };
 const root = document.documentElement;
 $("theme").setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
+$("lang").href += "#person=" + personId;   // die andere Sprache beginnt mit derselben Person
 /* Die Karten blenden per CSS in einer halben Sekunde um. Die Diagramme sind
    Canvas — die kennen keine Uebergaenge. Deshalb werden ihre Farben hier in
    derselben Zeit mitgemischt und jedes Bild neu gezeichnet. */
@@ -1361,35 +1373,51 @@ applyProg(0);
    sich von links auf, die Zahlen der Auswertung zaehlen hoch. Alles laeuft
    ueber CSS-Klassen und clip-path, die Zeichenfunktionen bleiben unberuehrt. */
 const quiet = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* Reihenfolge von links oben nach rechts unten: Wartezeit aus der Lage im Fenster. */
+const GREET_SPLIT = ".people, .statlist, .strip, .actions, .row2";
+const gdOf = el => parseInt((el.closest(".gi") || el).style.getPropertyValue("--gd")) || 0;
 function greetPage(i){
   if (quiet()) return;
   const el = PAGES[i];
-  [...el.firstElementChild.children].forEach((c, k) => c.style.setProperty("--gi", Math.min(k, 14)));
-  el.classList.remove("greet"); void el.offsetWidth; el.classList.add("greet");
-  clearTimeout(el._gt); el._gt = setTimeout(() => el.classList.remove("greet"), 1500);
-  if (i === 1){ startReveal($("chart")); const bg = $("bg"); bg.classList.remove("pulse"); void bg.offsetWidth; bg.classList.add("pulse"); }
-  if (i === 2){ startReveal($("revChart")); startReveal($("revFx")); revGreet = true; updateReview(); }
+  clearTimeout(el._gt);
+  (el._gi || []).forEach(t => { t.classList.remove("gi"); t.style.removeProperty("--gd"); });
+  const ts = el._gi = [];
+  for (const c of el.firstElementChild.children)
+    c.matches(GREET_SPLIT) && c.children.length > 1 ? ts.push(...c.children) : ts.push(c);
+  const vw = innerWidth, vh = innerHeight;
+  ts.forEach(t => {
+    const r = t.getBoundingClientRect();
+    const x = clamp((r.left + r.width/2)/vw, 0, 1), y = clamp(r.top/vh, 0, 1.6);
+    t.style.setProperty("--gd", Math.round((y*.72 + x*.28)*1100) + "ms");
+  });
+  void el.offsetWidth; ts.forEach(t => t.classList.add("gi"));
+  el._gt = setTimeout(() => ts.forEach(t => { t.classList.remove("gi"); t.style.removeProperty("--gd"); }), 3600);
+  if (i === 1){ startReveal($("chart"), gdOf($("chart")) + 150); const bg = $("bg"); bg.classList.remove("pulse"); void bg.offsetWidth; bg.classList.add("pulse"); }
+  if (i === 2){ startReveal($("revChart"), gdOf($("revChart")) + 150); startReveal($("revFx"), gdOf($("revFx")) + 150); revGreet = true; updateReview(); }
 }
-function startReveal(cv){
-  cv._rv0 = performance.now();
+const HIDE_CLIP = "inset(0 100% 100% 0)";
+function startReveal(cv, delay = 0){
+  cv._rv0 = performance.now() + delay;
   const id = cv._rvId = (cv._rvId || 0) + 1;
   const step = now => {
     if (cv._rvId !== id) return;
-    const k = Math.min(1, (now - cv._rv0) / 1000), e = 1 - Math.pow(1 - k, 3);
-    cv.style.clipPath = k < 1 ? `inset(0 ${((1 - e) * 100).toFixed(2)}% 0 0)` : "";
+    const k = clamp((now - cv._rv0) / 1700, 0, 1), e = 1 - Math.pow(1 - k, 3);
+    const r = ((1 - e) * 100).toFixed(2);
+    cv.style.clipPath = k < 1 ? `inset(0 ${r}% ${r}% 0)` : "";
     if (k < 1) requestAnimationFrame(step);
   };
-  cv.style.clipPath = "inset(0 100% 0 0)";
+  cv.style.clipPath = HIDE_CLIP;
   requestAnimationFrame(step);
 }
 let revGreet = false;
-function countUp(el){
+function countUp(el, delay = 0){
   const m = el.textContent.match(/^(\D*?)(\d+(?:\.\d+)?)(.*)$/); if (!m) return;
-  const to = +m[2], dec = (m[2].split(".")[1] || "").length, t0 = performance.now();
+  const to = +m[2], dec = (m[2].split(".")[1] || "").length, t0 = performance.now() + delay;
   const id = el._cu = (el._cu || 0) + 1;
+  el.textContent = m[1] + (0).toFixed(dec) + m[3];
   const tick = now => {
     if (el._cu !== id) return;
-    const k = Math.min(1, (now - t0) / 800), e = 1 - Math.pow(1 - k, 3);
+    const k = clamp((now - t0) / 1300, 0, 1), e = 1 - Math.pow(1 - k, 3);
     el.textContent = m[1] + (to * e).toFixed(dec) + m[3];
     if (k < 1) requestAnimationFrame(tick);
   };
@@ -2234,7 +2262,7 @@ function updateReview(){
   $("rFault").textContent = faults.length ? faults.length + "×" : "0";
   if (revGreet){
     revGreet = false;
-    ["rTir","rLow","rAvg","rDec","rEmg","rMard","rAlarm","rFault"].forEach(id => countUp($(id)));
+    ["rTir","rLow","rAvg","rDec","rEmg","rMard","rAlarm","rFault"].forEach(id => countUp($(id), gdOf($(id)) + 250));
   }
   $("legFault").hidden = !faults.length;
   const lastF = faults[faults.length-1];

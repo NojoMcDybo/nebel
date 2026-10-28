@@ -340,6 +340,8 @@ export const PAIRS = [
   ['line:"arbeitet im Buchhandel"', 'line:"works in a bookshop"'],
   ['line:"studiert BWL"', 'line:"studies business administration"'],
 
+  ['<a class="lang" id="lang" href="en/" lang="en" hreflang="en" aria-label="English">EN</a>', '<a class="lang" id="lang" href="../" lang="de" hreflang="de" aria-label="Deutsch">DE</a>'],
+
   // ── Nachtraege ──
   ["Ein simulierter Tag ist kein Leben mit Diabetes. Es fehlen die Jahre Übung, die Routinen, die Abkürzungen — und alles, was außerhalb des Körpers passiert. Wer danach glaubt, er wisse jetzt wie es ist, hat das Gegenteil gelernt.",
    "A simulated day is not a life with diabetes. The years of practice, the routines, the shortcuts are missing — and everything that happens outside the body. Whoever thinks afterwards that they now know what it is like has learned the opposite."],
