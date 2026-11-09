@@ -30,6 +30,9 @@ export const PAIRS = [
    "<b>nebel. is an educational system, not a medical device.</b> The values are simulated and are not suitable for insulin dosing or any other therapy decision. That is what your diabetes care team is for."],
   ['<span class="t">Verstanden</span>', '<span class="t">Got it</span>'],
   ['<a href="rechtliches.html">Impressum · Datenschutz · Lizenzen</a> · <a href="en/" lang="en" hreflang="en">English</a>', '<a href="legal.html">Imprint · Privacy · Licenses</a> · <a href="../" lang="de" hreflang="de">Deutsch</a>'],
+  ['<p class="legal"><a href="rechtliches.html">Impressum · Datenschutz · Lizenzen</a></p>', '<p class="legal"><a href="legal.html">Imprint · Privacy · Licenses</a></p>'],
+  ['<nav class="glang" aria-label="Sprache"><b aria-current="true">DE</b><a id="gateLang" href="en/" lang="en" hreflang="en">EN</a></nav>',
+   '<nav class="glang" aria-label="Language"><a id="gateLang" href="../" lang="de" hreflang="de">DE</a><b aria-current="true">EN</b></nav>'],
 
   // ── Startseite ──
   ['>Fünf Regeln<', '>Five rules<'],

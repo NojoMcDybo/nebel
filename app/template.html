@@ -11,7 +11,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href='data:application/manifest+json,{"name":"nebel","short_name":"nebel","display":"standalone","start_url":"./","background_color":"%23EDF1F1","theme_color":"%23EDF1F1"}'>
-<script>document.documentElement.dataset.theme = "light";</script>
+<script>document.documentElement.dataset.theme = "light";
+/* Bloecke bis zur Begruessung verbergen, sonst stehen sie einen Frame lang fertig da.
+   Bricht das Skript ab, gibt der Fehler-Handler sie wieder frei. */
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches){
+  document.documentElement.classList.add("pre");
+  addEventListener("error", () => document.documentElement.classList.remove("pre"));
+}</script>
 <style>
 /* Schriften liegen neben der Seite (fonts/), nicht bei Google: Ein Abruf von
    fonts.googleapis.com schickt die IP jedes Besuchers an Google (LG Muenchen I,
@@ -217,6 +223,12 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 @keyframes gateRise{from{opacity:0; transform:translateY(34px) scale(.94)}to{opacity:1; transform:none}}
 @keyframes gateAway{to{opacity:0; transform:translateY(-28px) scale(.96)}}
 .gate h2{font-size:22px; font-weight:800; letter-spacing:-.03em; margin:0 0 10px}
+.gate .ghd{display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 10px}
+.gate .ghd h2{margin:0}
+.glang{display:flex; flex:none; padding:3px; border-radius:999px; background:var(--sink); font-family:var(--mono); font-size:11px; letter-spacing:.12em}
+.glang b, .glang a{padding:7px 10px; border-radius:999px; font-weight:500; color:var(--ink3); text-decoration:none; transition:color .3s var(--spring)}
+.glang b{background:var(--card); color:var(--ink); box-shadow:var(--sh)}
+.glang a:hover, .glang a:focus-visible{color:var(--ink)}
 .gate p{font-size:14px; line-height:1.55; color:var(--ink2); margin:0 0 18px}
 .gate b{color:var(--ink)}
 .gate button{position:relative; width:100%; height:50px; font:inherit; font-weight:700; font-size:15px; color:var(--paper); background:var(--ink);
@@ -688,6 +700,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
 /* Begruessung einer neu geoeffneten Ebene: Bloecke gleiten von links oben nach rechts unten ein. */
 .gi{animation:greetIn 1.25s cubic-bezier(.2,.75,.25,1) both; animation-delay:var(--gd,0ms)}
 @keyframes greetIn{from{opacity:0; transform:translate3d(-26px,-18px,0) scale(.985)}to{opacity:1; transform:none}}
+.pre .page > .inner{opacity:0}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation:none!important}}
 :focus-visible{outline:2.5px solid var(--ink); outline-offset:3px}
 @media (max-width:350px){.hero h1{font-size:48px} .value{font-size:72px}}
@@ -697,10 +710,10 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
 
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateT" hidden>
   <div class="box">
-    <h2 id="gateT">Bevor es losgeht</h2>
+    <div class="ghd"><h2 id="gateT">Bevor es losgeht</h2><nav class="glang" aria-label="Sprache"><b aria-current="true">DE</b><a id="gateLang" href="en/" lang="en" hreflang="en">EN</a></nav></div>
     <p><b>nebel. ist ein Lernsystem, kein Medizinprodukt.</b> Die Werte sind simuliert und taugen nicht für Insulindosierung oder andere Therapieentscheidungen. Dafür ist dein Diabetesteam da.</p>
     <button type="button" id="gateOk"><span class="t">Verstanden</span><span class="ck"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
-    <p class="legal"><a href="rechtliches.html">Impressum · Datenschutz · Lizenzen</a> · <a href="en/" lang="en" hreflang="en">English</a></p>
+    <p class="legal"><a href="rechtliches.html">Impressum · Datenschutz · Lizenzen</a></p>
   </div>
 </div>
 
@@ -1317,7 +1330,7 @@ $("rail").onclick = e => {
 };
 const root = document.documentElement;
 $("theme").setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
-$("lang").href += "#person=" + personId;   // die andere Sprache beginnt mit derselben Person
+["lang", "gateLang"].forEach(id => $(id).href += "#person=" + personId);   // die andere Sprache beginnt mit derselben Person
 /* Die Karten blenden per CSS in einer halben Sekunde um. Die Diagramme sind
    Canvas — die kennen keine Uebergaenge. Deshalb werden ihre Farben hier in
    derselben Zeit mitgemischt und jedes Bild neu gezeichnet. */
@@ -1391,6 +1404,7 @@ function greetPage(i){
     t.style.setProperty("--gd", Math.round((y*.72 + x*.28)*1100) + "ms");
   });
   void el.offsetWidth; ts.forEach(t => t.classList.add("gi"));
+  document.documentElement.classList.remove("pre");      // im selben Schritt, kein Frame dazwischen
   el._gt = setTimeout(() => ts.forEach(t => { t.classList.remove("gi"); t.style.removeProperty("--gd"); }), 3600);
   if (i === 1){ startReveal($("chart"), gdOf($("chart")) + 150); const bg = $("bg"); bg.classList.remove("pulse"); void bg.offsetWidth; bg.classList.add("pulse"); }
   if (i === 2){ startReveal($("revChart"), gdOf($("revChart")) + 150); startReveal($("revFx"), gdOf($("revFx")) + 150); revGreet = true; updateReview(); }
