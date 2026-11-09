@@ -236,7 +236,7 @@ export const PAIRS = [
   ['" — zu hoch, das wird verschoben"', '" — too high, this will be postponed"'],
   ['" — jetzt wäre die Zeit zu entscheiden"', '" — now is the time to decide"'],
   ['"Nachwirkung";', '"Aftereffect";'],
-  ['"Nach der Belastung wirkt Insulin stärker. Hält Stunden an."', '"After exercise, insulin works stronger. It lasts for hours."'],
+  ["`Insulin wirkt gerade ${a.pct} % stärker. Klingt erst über viele Stunden ab, auch nachts.`", "`Insulin is working ${a.pct} % stronger right now. It fades only over many hours, also at night.`"],
   ['"Du planst selbst" : "Nichts geplant"', '"You plan it yourself" : "Nothing planned"'],
   ['"Trag deine Einheit ein, wenn sie stattfindet. Alltagsbewegung kommt weiter von allein."', '"Log your session when it happens. Everyday movement keeps coming on its own."'],
   ['"Alltagsbewegung kündigt sich nicht an."', '"Everyday movement does not announce itself."'],

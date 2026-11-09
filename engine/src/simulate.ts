@@ -11,6 +11,7 @@ import { sensorTrace, type SensorConfig } from "./observation.js";
 import { derivatives, glucoseFrom, initialState, type ModelInputs } from "./model.js";
 import { eulerStep, rk4Step } from "./solver.js";
 import { mealInputsAt } from "./nutrition.js";
+import { afterEffectFactor } from "./afterEffect.js";
 
 export interface SimulationConfig {
   durationMin: number;
@@ -84,7 +85,7 @@ export const simulate = (cfg: SimulationConfig): SimulationResult => {
       uFastCarbs: meal.uFastCarbs,
       uSlowCarbs: meal.uSlowCarbs,
       uProteinGlucose: meal.uProteinGlucose,
-      siFactor: meal.siFactor,
+      siFactor: meal.siFactor * afterEffectFactor(now, events, p),
       uHR: heartRateAt(now, events, p.HRrest),
       uInsulin: insulinInputAt(now, cfg.stepMin, cfg.pump, events),
     };

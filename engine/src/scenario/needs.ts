@@ -70,14 +70,16 @@ export type ReserveLabel =
 
 /**
  * Anzeigetext. Logik und Schwellen aus dem Prototyp uebernommen.
- * hourOfDay in Stunden [0, 24), recentLoad ist EElong.
+ * hourOfDay in Stunden [0, 24). afterEffect ist die Nachwirkung der Bewegung,
+ * afterEffectFactor − 1: Nach Belastung fuellt der Koerper seine Speicher
+ * wieder auf, und genau das macht Insulin in dieser Zeit wirksamer.
  */
 export const reserveLabel = (
-  reserve: Reserve, hourOfDay: number, recentLoad: number,
+  reserve: Reserve, hourOfDay: number, afterEffect: number,
 ): ReserveLabel => {
   if (reserve < 0.30) return "Reserven · iss etwas";
   if (hourOfDay >= 6 && hourOfDay < 10.5 && reserve < 0.70) return "Reserven · hungrig aufgewacht";
-  if (recentLoad > 0.22 && reserve < 0.62) return "Reserven · nachtanken";
+  if (afterEffect > 0.06 && reserve < 0.62) return "Reserven · nachtanken";
   if (hourOfDay >= 11 && hourOfDay < 14.5 && reserve < 0.60) return "Reserven · Mittagszeit";
   if (hourOfDay >= 17.5 && hourOfDay < 21 && reserve < 0.55) return "Reserven · Abendessen";
   return "Reserven";

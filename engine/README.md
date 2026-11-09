@@ -52,6 +52,7 @@ Damit sind auch die Groessenordnungen bestaetigt, nicht nur das qualitative Verh
 | `realtime.ts` | fertig — Nachholintegration, Append-only, Sandbox-Fork |
 | `scenario/needs.ts` | fertig — Reserven und Hunger, Szenarioschicht |
 | `nutrition.ts` | fertig — Fett und Eiweiss als Eingaenge ohne neuen Zustand: Magenverzoegerung, Fett-Insulinresistenz (`siFactor`), spaete Glukose aus Eiweiss (`uProteinGlucose`), Essdauer. Ohne diese Angaben exakt die Quelle. `../docs/11_Fett_und_Eiweiss.md` |
+| `afterEffect.ts` | fertig — lange Nachwirkung der Bewegung als Eingang ohne neuen Zustand: abklingende Belastungssumme aus der Herzfrequenzspur hebt `siFactor` (τ 600 min, an DirecNet 2005 kalibriert). Ohne Herzfrequenz exakt die Quelle. Registry Abschnitt 9 |
 | `scenario/nutrition-check.ts` | fertig — Studienszenarien Wolpert, Paterson, Smart, O'Connell zur Kalibrierung und Gegenprobe |
 
 ## Bekannte Eigenheiten

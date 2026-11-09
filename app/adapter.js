@@ -59,6 +59,10 @@ const ALLTAG = [
 /* Unter oder ueber diesem Sensorwert startet niemand ein geplantes Training.
    Die Bewegungskarte warnt mit denselben Grenzen. */
 const TRAIN_LOW = 80, TRAIN_HIGH = 280;
+/* Nachwirkung (engine/src/afterEffect.ts): ab 3 % staerkerer Insulinwirkung
+   zeigt die Karte sie an, ab 6 % sagen die Reserven „nachtanken". 45 min
+   Dauerlauf: rund 12 h sichtbar, davon gut 5 h nachtanken. */
+const AFTER_SHOW = 0.03, AFTER_REFUEL = 0.06;
 const TRAINING = [
   {n:"Basketballtraining",  i:0.75, d:[80,100], w:[35,50]},
   {n:"Krafttraining",       i:0.58, d:[55,75],  w:[30,45]},
@@ -356,9 +360,12 @@ class Engine {
      die Vorhersage eine andere Vergangenheit nach, als gelaufen ist. */
   _u(t, ev){
     const m = N.mealInputsAt(t, 1, ev);
+    /* Insulinsensitivitaet: Fett senkt sie, Bewegung hebt sie fuer Stunden.
+       siFat bleibt fuer die Zerlegung der Vorhersage getrennt. */
     return {
       uFastCarbs: m.uFastCarbs, uSlowCarbs: m.uSlowCarbs,
-      uProteinGlucose: m.uProteinGlucose, siFactor: m.siFactor,
+      uProteinGlucose: m.uProteinGlucose, siFat: m.siFactor,
+      siFactor: m.siFactor * N.afterEffectFactor(t, ev, this.p),
       uHR: N.heartRateAt(t, ev, this.p.HRrest),
       uInsulin: N.insulinInputAt(t, 1, this.pump, ev),
     };
@@ -391,7 +398,8 @@ class Engine {
     this.s.G = toMgdl(G);
     this.s.Gi = toMgdl(N.get(this.z, "IG"));
     this.s.gly = this._reserve;
-    this.s.Z = N.get(this.z, "EElong");
+    /* Nachwirkung: um wie viel Insulin gerade staerker wirkt (0,1 = 10 %). */
+    this.s.Z = N.afterEffectFactor(this.s.t, this.input, this.p) - 1;
     this.s.basalEff = this.s.basalSet;
     this.kombi = {};
   }
@@ -526,7 +534,7 @@ class Engine {
       if (t >= end) break;
       const si = N.sensitivityFactor(G, p), I = N.get(z, "I");
       d = rk(d, u.uInsulin - basalMU, si * u.siFactor);
-      const gap = si * I * (1 - u.siFactor);
+      const gap = si * I * (u.siFactor / u.siFat) * (1 - u.siFat);   // nur der Fettanteil
       dx2 = dx2*e2 + p.kb2*gap/p.ka2*(1 - e2);
       dx3 = dx3*e3 + p.kb3*gap/p.ka3*(1 - e3);
       z = N.rk4Step(N.derivatives, z, t, 1, p, u);
@@ -544,7 +552,7 @@ class Engine {
     if (next) return { mode:"soon", name:next.name, inten:next.inten,
                        inMin:next.start - t, dur:next.dur,
                        done:1 - (next.start - t)/next.warn };
-    if (this.s.Z > 0.10) return { mode:"after" };
+    if (this.s.Z >= AFTER_SHOW) return { mode:"after", pct: Math.round(this.s.Z*100) };
     return { mode:"idle" };
   }
 
@@ -553,7 +561,8 @@ class Engine {
     if (this.reality) out.push({ k:"reality", v:1, txt:"Echtzeit", kombi:true });
     if (this.s.asleep) out.push({ k:"schlaf2", v:1, txt:"Schlaf" });
     if (h >= 23 || h < 6) out.push({ k:"nacht", v:1, txt:"Nacht" });
-    if (this.s.Z > 0.10) out.push({ k:"nach1", v:Math.min(1, this.s.Z), txt:"Nachwirkung" });
+    if (!this._act && this.s.Z >= AFTER_SHOW)
+      out.push({ k:"nach1", v:Math.min(1, this.s.Z/0.15), txt:"Nachwirkung" });
     if (N.get(this.z, "EEhigh") > 0.15)
       out.push({ k:"nach2", v:Math.min(1, N.get(this.z, "EEhigh")), txt:"Harte Belastung" });
     /* Nur Anzeige, keine Physiologie (docs/08_Beduerfnisse_und_Hunger.md). */

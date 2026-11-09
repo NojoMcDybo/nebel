@@ -1853,7 +1853,7 @@ function paintReserve(){
   let label = "Reserven", cls = "";
   if (g < 0.30){ label = "Reserven · iss etwas"; cls = " low"; }
   else if (h >= 6 && h < 10.5 && g < 0.70){ label = "Reserven · hungrig aufgewacht"; cls = " hungry"; }
-  else if (eng.s.Z > 0.22 && g < 0.62){ label = "Reserven · nachtanken"; cls = " hungry"; }
+  else if (eng.s.Z > AFTER_REFUEL && g < 0.62){ label = "Reserven · nachtanken"; cls = " hungry"; }
   else if (h >= 11 && h < 14.5 && g < 0.60){ label = "Reserven · Mittagszeit"; cls = " hungry"; }
   else if (h >= 17.5 && h < 21 && g < 0.55){ label = "Reserven · Abendessen"; cls = " hungry"; }
   const key = pct + cls;
@@ -1884,7 +1884,7 @@ function paintMove(){
   let cls = "move", beat = false, bar = -1;
   // Nur schreiben, wenn sich etwas geaendert hat. Vorher lief bei jedem
   // Einzelbild ein innerHTML-Schreibvorgang -- das allein hat gestottert.
-  const stamp = key + "|" + (a.left|0) + "|" + (a.inMin|0);
+  const stamp = key + "|" + (a.left|0) + "|" + (a.inMin|0) + "|" + (a.pct|0);
   const fresh = stamp !== lastMoveHTML;
   lastMoveHTML = stamp;
 
@@ -1909,8 +1909,8 @@ function paintMove(){
   } else if (a.mode === "after"){
     if (fresh){
       $("mvName").textContent = "Nachwirkung";
-      $("mvWhen").textContent = "";
-      $("mvSub").textContent = "Nach der Belastung wirkt Insulin stärker. Hält Stunden an.";
+      $("mvWhen").textContent = `+${a.pct} %`;
+      $("mvSub").textContent = `Insulin wirkt gerade ${a.pct} % stärker. Klingt erst über viele Stunden ab, auch nachts.`;
     }
   } else {
     if (fresh){

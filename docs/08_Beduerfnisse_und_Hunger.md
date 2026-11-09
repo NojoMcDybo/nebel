@@ -18,7 +18,7 @@ Der Prototyp führt einen Reservezustand `gly` (Leberglykogen, 0 bis 1) und leit
 |---|---|
 | `gly < 0.30` | „Reserven · iss etwas" |
 | morgens 6–10:30 Uhr und `gly < 0.70` | „Reserven · hungrig aufgewacht" |
-| nach Belastung (`Z > 0.22`) und `gly < 0.62` | „Reserven · nachtanken" |
+| nach Belastung (Nachwirkung über 6 %, seit 09.11.2026; vorher `EElong > 0.22`) und `gly < 0.62` | „Reserven · nachtanken" |
 | mittags 11–14:30 Uhr und `gly < 0.60` | „Reserven · Mittagszeit" |
 | abends 17:30–21 Uhr und `gly < 0.55` | „Reserven · Abendessen" |
 | Belastung `> 0.35` bei `gly < 0.28` | Kombinationsfaktor „Heißhunger" |
@@ -41,7 +41,7 @@ Folgen hat es nur in Kombination:
 
 | Situation | Folge in ExtHovorka | belegt? |
 |---|---|---|
-| Hunger + Bewegung | Glukose fällt über `p3`/`p4`, Nacheffekt über `EElong` | ja, im Modell enthalten |
+| Hunger + Bewegung | Glukose fällt über `p3`/`p4`, Nacheffekt über `EElong` und über Stunden über `afterEffectFactor` | ja, im Modell enthalten; der lange Teil ist Nebel-Kalibrierung (Registry Abschnitt 9) |
 | Hunger + bereits abgegebener Bolus | Hypo, weil die Kohlenhydrate fehlen | ja |
 | Hunger + falsch gesetzte Basalrate | Drift nach unten | ja |
 | Leere Reserven → schwächere Gegenregulation | **nicht im Modell** | nein, bräuchte den 17. Zustand |

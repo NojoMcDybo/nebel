@@ -62,6 +62,14 @@ ok("Harte Belastung hebt bei schwachem Responder", eng.s.G >= gSport - 1,
    `${gSport.toFixed(0)} → ${eng.s.G.toFixed(0)} mg/dL, p3 ${eng.p.p3.toFixed(1)}`);
 ok("Reserven sinken", eng.s.gly < gly0, `${gly0.toFixed(3)} → ${eng.s.gly.toFixed(3)}`);
 ok("Nachwirkung aktiv", eng.s.Z > 0.05, "Z="+eng.s.Z.toFixed(3));
+{ const c = new Engine(20260812, 0); c.acts = [];
+  c.startActivity(0.55, 45);
+  for (let i = 0; i < 45 + 6*60; i++){ c.acts = []; c.step(); }
+  const a = c.activity();
+  ok("Nachwirkung haelt Stunden", a.mode === "after" && c.states().some(s => s.txt === "Nachwirkung"),
+     `6 h nach 45 min Dauerlauf: +${a.pct} %`);
+  for (let i = 0; i < 9*60; i++){ c.acts = []; c.step(); }
+  ok("… und klingt ab", c.activity().mode === "idle", `nach 15 h Z=${c.s.Z.toFixed(3)}`); }
 { const c = new Engine(20260812, 0);
   const tr = c.acts.find(a => a.warn);
   while (c.s.t < tr.start - tr.warn) c.step();

@@ -88,9 +88,11 @@ Abgeleitet: `G = Q1 / VG` [mmol/L].
 | `uHR` | bpm | Herzfrequenz — der Bewegungstreiber |
 | `uInsulin` | mU/min | Basalrate + Bolus, kombiniert |
 | `uProteinGlucose` | mmol/min | *Nebel-Erweiterung, optional, Standard 0.* Glukose aus Eiweiß, direkt ins Plasma. `engine/src/nutrition.ts` |
-| `siFactor` | – | *Nebel-Erweiterung, optional, Standard 1.* Faktor auf die Insulinsensitivität aller drei Pfade, nach fettreichen Mahlzeiten < 1 |
+| `siFactor` | – | *Nebel-Erweiterung, optional, Standard 1.* Faktor auf die Insulinsensitivität aller drei Pfade, nach fettreichen Mahlzeiten < 1, nach Bewegung > 1 |
 
 Die beiden Erweiterungen (26.09.2026) kommen aus der Mahlzeit, nicht aus einem Zustand: `mealInputsAt(t, dt, events)` rechnet aus Kohlenhydraten, Fett, Eiweiß und Essdauer die vier Nahrungseingänge. Fehlen Fett, Eiweiß und Essdauer, ist alles exakt wie in der Quelle — der Orakelabgleich bleibt unberührt. Herleitung, Kalibrierung und Grenzen: `11_Fett_und_Eiweiss.md`, Parameter: Registry Abschnitt 8.
+
+Seit 09.11.2026 wirkt auch Bewegung über `siFactor`: `afterEffectFactor(t, events, p)` rechnet aus der Herzfrequenzspur die lange Nachwirkung (Abschnitt 6.10). `simulate` und der Adapter multiplizieren beide Faktoren. Ohne Herzfrequenzereignisse ist der Faktor exakt 1. Parameter: Registry Abschnitt 9.
 
 ## 6. Gleichungen
 
@@ -170,6 +172,13 @@ dEEhigh/dt = p8 · (HRRhigh − EEhigh)
 dEElong/dt = p6 · EEfast − p7 · EElong
 ```
 `VT_HRR` ist die individuelle ventilatorische Schwelle als Anteil der Herzfrequenzreserve. Erst oberhalb davon greift der hochintensive Pfad.
+
+`EElong` klingt mit `1/p7 = 10 min` ab. Damit ist die Nachwirkung der Quelle eine halbe Stunde nach der Belastung vorbei; nach einer Stunde Training um 16 Uhr liegt die Nacht im Median nur 1 mg/dL tiefer. Gemessen sind es 23 mg/dL (DirecNet 2005). Nebel ergänzt deshalb einen langen Teil als Eingang, ohne die Gleichungen oben zu ändern (`engine/src/afterEffect.ts`, seit 09.11.2026):
+```
+L(t)     = ∫ HRR(s) · e^(−(t−s)/600) ds          Belastungsminuten, abklingend
+siFactor = siFactor_Fett · (1 + 0,0045 · L)
+```
+Die Herzfrequenzspur wird stückweise exakt integriert und am Anfang jedes Rechenschritts ausgewertet. Der Abfall während der Belastung bleibt bei `p3`, `p4`, `p5` der Quelle.
 
 ### 6.11 Numerische Schutzgrenzen (keine Physiologie)
 ```
@@ -270,7 +279,7 @@ Testfälle vor der Implementierung:
 | Mahlzeit | Verzögerter Anstieg, kein Sprung |
 | Bolus | Verzögerte Senkung, dann Erholung |
 | Timing Mahlzeit/Bolus | Andere Reihenfolge, anderer Verlauf |
-| Bewegung moderat | Abfall über `p3/p4`, Nacheffekt über `EElong` |
+| Bewegung moderat | Abfall über `p3/p4`, Nacheffekt über `EElong`, über Stunden über `afterEffectFactor` |
 | Bewegung hochintensiv | Anstieg über `p2 · EEhigh` in der EGP |
 | CGM bei schneller Änderung | `Gsensor` läuft `G` hinterher |
 | Renale Schwelle | Ab 9 mmol/L zusätzliche Elimination |

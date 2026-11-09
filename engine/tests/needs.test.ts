@@ -67,7 +67,8 @@ describe("Anzeige", () => {
   });
 
   it("erkennt den Bedarf nach Belastung", () => {
-    expect(reserveLabel(0.5, 17, 0.4)).toBe("Reserven · nachtanken");
+    expect(reserveLabel(0.5, 17, 0.1)).toBe("Reserven · nachtanken");
+    expect(reserveLabel(0.5, 17, 0.04)).toBe("Reserven");     // Spaziergang: noch kein Nachtanken
   });
 
   it("erkennt die Mittagszeit", () => {

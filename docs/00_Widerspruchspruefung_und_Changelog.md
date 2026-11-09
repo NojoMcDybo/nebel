@@ -384,3 +384,18 @@ Kalibriert an Wolpert 2013 (Fett) und Paterson 2016 (Eiweiß), im Mittel der 20 
 - Keine Skalierung mehr, kürzerer Weg (12/8 px statt 26/18 px), die Bewegung endet bei 70 % der Dauer. Skalierter Text war bis zum Ende unscharf, der lange Auslauf ließ Text in Bruchteilen eines Pixels zittern.
 - Der Inhalt einer neuen Ebene bleibt beim Hereinziehen verborgen und startet sofort beim Loslassen. Vorher stand er beim Hereinschieben fertig da, verschwand nach 260 ms und blendete neu ein.
 - Diagramme decken sich über Web Animations auf statt über eine eigene Bildschleife.
+
+## 19. Nachtrag 09.11.2026 — Lange Nachwirkung der Bewegung kalibriert
+
+**Befund:** Die Karte „Nachwirkung“ verschwand rund 30 min nach dem Training. Das lag nicht an der Anzeige, sondern am Modell: `EElong` klingt mit `1/p7 = 10 min` ab (py-mgipsim, für alle Subjekte gleich). Nach 60 min bei 55 % der Herzfrequenzreserve um 16 Uhr lag die Nacht (22–6 Uhr) im Median nur 1 mg/dL tiefer als ohne Training. Gemessen sind es 23 mg/dL: DirecNet 2005, Nachtmittel 131 statt 154 mg/dL nach Nachmittagstraining ([DOI](https://doi.org/10.1016/j.jpeds.2005.04.065)).
+
+**Entscheidung:** `p7` bleibt Quelle. Eine längere Abklingzeit in `EElong` hätte auch den Abfall *während* der Bewegung verändert, und der ist über `p3`–`p5` an Daten gefittet. Stattdessen kommt der lange Teil als Eingang dazu, nach dem Muster der Fettresistenz: `engine/src/afterEffect.ts` rechnet aus der Herzfrequenzspur eine abklingende Belastungssumme `L` und hebt `siFactor` um `1 + 0,0045 · L`. Kein neuer Zustand, ohne Herzfrequenz exakt die Quelle, der Orakelabgleich bleibt unberührt.
+
+- **Abklingzeit 600 min:** Dalla Man, Breton, Cobelli 2009, Tabelle 1 (`T_ex`) ([DOI](https://doi.org/10.1177/193229680900300107)); Breton 2008 legt seine Werte so, dass der Unterschied nach 20 h noch signifikant ist ([DOI](https://doi.org/10.1177/193229680800200127)).
+- **Stärke 0,0045 je Belastungsminute,** kalibriert an DirecNet: Nebel −22 mg/dL im Median. Gegenprobe Taplin 2010 ([DOI](https://doi.org/10.1016/j.jpeds.2010.06.004)): 20 % weniger Basal über 6 h hebt die Nacht um +20 mg/dL und gleicht die Nachwirkung damit zu gut 80 % aus (Quelle allein: +29 gegen −1). Gerechnet mit den 10 Subjekten, die am Nachmittag nicht unter 70 fallen. Die anderen hätten gegessen; unbehandelt bestimmt ihr Tief die Nacht.
+- **Grenzen:** Beide Studien messen Kinder und Jugendliche, die Subjekte sind Erwachsene. Die Nachwirkung wächst linear mit Dauer × Intensität, ohne Sättigung. Status N, Richtung und Größenordnung, keine Dosis.
+- **Folgen:** 60 min moderat heben die Insulinwirkung um 14 %. Nach 45 min Dauerlauf zeigt die Karte rund 12 h „Nachwirkung“ mit der aktuellen Stärke in Prozent, davon gut 5 h „Reserven · nachtanken“, solange die Reserven unter 62 % liegen (vorher an `EElong` gekoppelt, also nur Minuten). Nächte nach dem Training fallen jetzt öfter tief, wie in den Studien. Die Vorhersage rechnet die Nachwirkung mit; ihre Fettzerlegung nutzt nur den Fettanteil.
+- **Profiltabelle** (Registry Abschnitt 4) neu gerechnet: „Sport moderat“ bis zu 8 mg/dL tiefer, „Hart“ bis zu 6 mg/dL weniger Anstieg.
+- **Gesehen, nicht geändert:** Fünf der 20 Subjekte fallen bei 60 min moderat ohne Kohlenhydrate auf den numerischen Boden (18 mg/dL), zehn unter 70. Das kommt aus der Quelle (`p3`–`p5`), nicht aus der Nachwirkung, und gehört zur offenen Frage, ob die starken Responder realistisch sind.
+
+**Abgesichert:** `tests/afterEffect.test.ts`: Neutralität, exakte Integration gegen ein numerisches Integral, Reihenfolge, Halbwertszeit, Kalibrierung gegen DirecNet und Taplin. `check:adapter`: „Nachwirkung hält Stunden … und klingt ab“, Nachrechnen weiter bitgleich.
