@@ -202,6 +202,28 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .fact .mark{will-change:transform; backface-visibility:hidden}
 .fact .mark svg{display:block}
 .person .fact:active{transform:none}
+/* Texte zur Entstehung: Kurzfassung zum Aufklappen, darunter der Weg zur ausfuehrlichen Seite */
+.story{background:var(--card); border-radius:18px; box-shadow:var(--sh); overflow:hidden}
+.story .fact{border-radius:0; box-shadow:none; background:transparent; padding:14px 16px}
+.story .fact:active{transform:none; background:rgba(var(--rgb-ink),.04)}
+.story .fact[aria-expanded="true"]{box-shadow:none}
+.story small{display:block; font-size:12.5px; color:var(--ink3); margin-top:2px; font-weight:400}
+.story .body{display:grid; grid-template-rows:0fr; transition:grid-template-rows .42s var(--spring)}
+.story.open .body{grid-template-rows:1fr}
+.story .body > div{overflow:hidden}
+.md{padding:0 16px 10px; font-size:13.5px; color:var(--ink2); line-height:1.55}
+.md h2{font-size:14.5px; font-weight:700; color:var(--ink); margin:16px 0 6px; letter-spacing:-.01em}
+.md p{margin:0 0 9px}
+.md ul, .md ol{margin:0 0 9px; padding-left:20px}
+.md li{margin:0 0 4px}
+.md strong{color:var(--ink)}
+.md a{color:var(--ink); text-underline-offset:2px; overflow-wrap:anywhere}
+.md h2:last-of-type ~ ol{font-size:12px; color:var(--ink3)}
+.story .more{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px;
+  border-top:1px solid var(--hair); color:var(--ink); text-decoration:none}
+.story .more b{font-size:15.5px; font-weight:700; letter-spacing:-.01em}
+.story .more:active{background:rgba(var(--rgb-ink),.04)}
+.story .more svg{flex:none; color:var(--ink3)}
 .warnbox{
   background:var(--card); border-radius:18px; padding:16px 18px; margin-top:9px;
   font-size:13px; color:var(--ink2); line-height:1.55;
@@ -778,6 +800,16 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
         </div>
         <div class="mark"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v13M1 7.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
       </div>
+    </div>
+
+    <div class="eyebrow">Wie nebel. entstanden ist</div>
+    <div class="story" id="story">
+      <div class="fact" tabindex="0" role="button" aria-expanded="false" aria-controls="storyBody">
+        <div><h3>Kurz erklärt</h3><small>Entstehung, Faktoren und Quellen in fünf Minuten</small></div>
+        <div class="mark"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v13M1 7.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="body" id="storyBody" inert><div><div class="md"><!--ENTSTEHUNG_KURZ--></div></div></div>
+      <a class="more" href="entstehung.html"><span><b>Ausführlich, mit allen Quellen</b><small>Modell, Kalibrierung, Sensor und Recht. Rund 35 Minuten.</small></span><svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M1.5 1.5L7 7.5l-5.5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
 
     <div class="warnbox"><b>Lernwerkzeug, kein Medizinprodukt.</b> Die Werte sind simuliert und taugen nicht für reale Therapieentscheidungen. Kein Bolusrechner.</div>
@@ -1673,6 +1705,19 @@ $("facts").addEventListener("keydown", e => {
   e.preventDefault();
   f.setAttribute("aria-expanded", String(f.getAttribute("aria-expanded") !== "true"));
 });
+/* Kurzfassung: nur der Kopf klappt, Links im Text bleiben Links. Zu heisst inert,
+   damit die Tab-Taste nicht in verborgenen Links landet. */
+{
+  const st = $("story"), hd = st.querySelector(".fact");
+  const toggle = () => {
+    const open = !st.classList.contains("open");
+    st.classList.toggle("open", open);
+    hd.setAttribute("aria-expanded", String(open));
+    $("storyBody").inert = !open;
+  };
+  hd.addEventListener("click", toggle);
+  hd.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); toggle(); } });
+}
 
 /* ─── Chart ───────────────────────────────────────────────────── */
 function drawChart(cv, pts, hours, tNow, opts={}){

@@ -69,7 +69,7 @@ Open `engine/dist/site/index.html` in a browser. The viewer is a developer tool 
 
 - **Code and documentation:** Apache License 2.0, see `LICENSE`.
 - **Model:** implemented from the publications, not from code:
-  - Hobbs et al. (2019), *Computers & Chemical Engineering*
+  - Rashid et al. (2019), *Computers & Chemical Engineering*
   - Siket, Rashid & Cinar (2025), *Journal of Diabetes Science and Technology*
 - **py-mgipsim:** The reference implementation [py-mgipsim](https://github.com/illinoistech-itm/py-mgipsim) (GPL-3.0) serves as a numerical oracle in the test suite.
   - No code was copied from it.

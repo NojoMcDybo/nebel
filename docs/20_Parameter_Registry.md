@@ -151,7 +151,7 @@ Zwei Modelle im Code, eines in der Anwendung:
 
 ### 5.1 G6-Labormodell (Vettoretti 2019)
 
-Quelle: Vettoretti et al. (2019), *Modeling the error of factory-calibrated continuous glucose monitoring sensors: application to Dexcom G6 sensor data*, Sensors 19(23):5320, Tabelle 1, Mediane der zweistufigen Identifikation. https://www.mdpi.com/1424-8220/19/23/5320
+Quelle: Vettoretti et al. (2019), *Development of an error model for a factory-calibrated continuous glucose monitoring sensor with 10-day lifetime*, Sensors 19(23):5320, Tabelle 1, Mediane der zweistufigen Identifikation. https://www.mdpi.com/1424-8220/19/23/5320
 
 Modell: `CGM(t) = a(t) · IG(t) + b0 + v(t)`, mit `a(t) = a0 + a1·t + a2·t²` und `v(k) = α1·v(k−1) + α2·v(k−2) + w(k)`.
 

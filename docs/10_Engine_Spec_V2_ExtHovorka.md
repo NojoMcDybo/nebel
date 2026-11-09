@@ -321,7 +321,7 @@ Die Referenzimplementierung py-mgipsim steht unter GPL-3.0. Nebel implementiert 
 
 ## 17. Literatur
 
-- Hobbs et al. (2019). Simulation software for assessment of nonlinear and adaptive multivariable control algorithms: Glucose–insulin dynamics in Type 1 diabetes. *Computers & Chemical Engineering*. https://pubmed.ncbi.nlm.nih.gov/32863472/
+- Rashid et al. (2019). Simulation software for assessment of nonlinear and adaptive multivariable control algorithms: Glucose–insulin dynamics in Type 1 diabetes. *Computers & Chemical Engineering*. https://pubmed.ncbi.nlm.nih.gov/32863472/
 - Siket, Rashid & Cinar (2025). py-mgipsim: An Open-Source Python Library for Simulating Type 1 Diabetes With Diverse Meals and Physical Activities. *J Diabetes Sci Technol*. https://pubmed.ncbi.nlm.nih.gov/40110887/
 - Repository: https://github.com/illinoistech-itm/py-mgipsim
 - Hovorka et al. (2004). Nonlinear model predictive control of glucose concentration in subjects with type 1 diabetes.

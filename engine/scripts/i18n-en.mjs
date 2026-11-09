@@ -51,6 +51,12 @@ export const PAIRS = [
   ['<h3>Es läuft weiter</h3>', '<h3>It keeps running</h3>'],
   ["Der Körper rechnet auch, wenn du auf dieser Seite bist. Nachts, bei anderen Aufgaben, immer. Es gibt keinen Pausenknopf, nur Tempo.",
    "The body keeps going while you are on this page. At night, during other tasks, always. There is no pause button, only speed."],
+  // Texte zur Entstehung (der Text selbst kommt aus docs/41_Entstehung_kompakt.en.md)
+  ['<div class="eyebrow">Wie nebel. entstanden ist</div>', '<div class="eyebrow">How nebel. came about</div>'],
+  ['<h3>Kurz erklärt</h3><small>Entstehung, Faktoren und Quellen in fünf Minuten</small>',
+   '<h3>In brief</h3><small>How it came about, factors and sources in five minutes</small>'],
+  ['<a class="more" href="entstehung.html"><span><b>Ausführlich, mit allen Quellen</b><small>Modell, Kalibrierung, Sensor und Recht. Rund 35 Minuten.</small></span>',
+   '<a class="more" href="making-of.html"><span><b>In detail, with all sources</b><small>Model, calibration, sensor and law. About 35 minutes.</small></span>'],
   ['<span>Wer bist du heute?</span>', '<span>Who are you today?</span>'],
   ['aria-label="Person wählen"', 'aria-label="Choose a person"'],
   ["Du hast selbst Typ-1-Diabetes? Such dir die Person, die dir am nächsten kommt, und zeig sie deinem Umfeld.",

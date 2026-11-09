@@ -29,6 +29,7 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 import { PAIRS } from "./i18n-en.mjs";
+import { markdown } from "./md.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const oracle = resolve(root, "vendor/py-mgipsim/pymgipsim/VirtualPatient/Models/T1DM/ExtHovorka/Patients");
@@ -143,8 +144,26 @@ if (existsSync(appTpl)) {
   if (html.includes("__SUBJECTS__")) { console.error("app/template.html bettet die Parametersaetze ein — sie gehoeren nach personen-daten.js."); process.exit(1); }
   if (!html.includes('<script src="personen-daten.js"></script>')) { console.error("app/template.html laedt personen-daten.js nicht."); process.exit(1); }
   checkScripts(html, "index.html");
-  checkNoExternal(html, "index.html");
-  writeFileSync(resolve(site, "index.html"), html, "utf8");
+
+  /* Texte zur Entstehung. Quelle bleibt docs/40 und docs/41 (deutsch) bzw. *.en.md.
+     Die Kurzfassung steht aufklappbar auf der Startseite, die ausfuehrliche
+     Fassung als eigene Seite. Links zwischen den beiden .md werden zu Seitenlinks. */
+  const docs = resolve(root, "../docs");
+  const readDoc = (f) => existsSync(resolve(docs, f)) ? readFileSync(resolve(docs, f), "utf8") : (problem(`docs/${f} fehlt`), "");
+  const TEXT = {
+    de: { lang: "de", kurz: "41_Entstehung_kompakt.md", lang40: "40_Entstehung_ausfuehrlich.md", long: "entstehung.html",
+          out: "entstehung.html", root: "", title: "nebel. ausführlich", back: "← zur Simulation" },
+    en: { lang: "en", kurz: "41_Entstehung_kompakt.en.md", lang40: "40_Entstehung_ausfuehrlich.en.md", long: "making-of.html",
+          out: "en/making-of.html", root: "../", title: "nebel. in detail", back: "← back to the simulation" },
+  };
+  const hrefFor = (t) => (h) => /^4[01]_Entstehung_/.test(h) ? (h.startsWith("40_") ? t.long : "./") : h;
+  const kurzHtml = (t) => markdown(readDoc(t.kurz).replace(/^# .*\n/, ""), { href: hrefFor(t) });
+  const PH = "<!--ENTSTEHUNG_KURZ-->";
+  if (!html.includes(PH)) problem("app/template.html: Platzhalter fuer die Kurzfassung fehlt");
+
+  const htmlDe = html.replace(PH, () => kurzHtml(TEXT.de));
+  checkNoExternal(htmlDe, "index.html");
+  writeFileSync(resolve(site, "index.html"), htmlDe, "utf8");
 
   /* en/index.html — dieselbe App, jeder Text Eins zu Eins aus i18n-en.mjs.
      Fehlt ein Schluessel im Quelltext, ist ein deutscher Text umgezogen. */
@@ -154,6 +173,7 @@ if (existsSync(appTpl)) {
     if (!htmlEn.includes(de)) { problem(`en: Quelltext nicht gefunden: ${de.slice(0, 70)}`); continue; }
     htmlEn = htmlEn.split(de).join(en);
   }
+  htmlEn = htmlEn.replace(PH, () => kurzHtml(TEXT.en));
   checkScripts(htmlEn, "en/index.html");
   checkNoExternal(htmlEn, "en/index.html");
   writeFileSync(resolve(site, "en/index.html"), htmlEn, "utf8");
@@ -237,6 +257,20 @@ window.SUBJECTS = ${JSON.stringify(chosen, null, 1)};
     writeFileSync(resolve(site, out), legal, "utf8");
   } else problem(`${legalTpl} fehlt`);
   }
+
+  /* Ausfuehrliche Fassung als eigene Seite, deutsch und englisch */
+  const shellPath = resolve(root, "../app/text.html");
+  if (existsSync(shellPath)) {
+    const shell = readFileSync(shellPath, "utf8");
+    for (const t of [TEXT.de, TEXT.en]) {
+      const page = shell.replaceAll("{{LANG}}", t.lang).replaceAll("{{TITLE}}", t.title)
+        .replaceAll("{{ROOT}}", t.root).replaceAll("{{BACK}}", t.back)
+        .replace("{{BODY}}", () => markdown(readDoc(t.lang40), { href: hrefFor(t) }));
+      if (/\{\{[A-Z_]+\}\}/.test(page)) problem(`${t.out}: unbekannter Platzhalter`);
+      checkNoExternal(page, t.out);
+      writeFileSync(resolve(site, t.out), page, "utf8");
+    }
+  } else problem("app/text.html fehlt");
 
   writeFileSync(resolve(site, ".nojekyll"), "", "utf8");
   /* Alter Doppelklick-Pfad bleibt gueltig */

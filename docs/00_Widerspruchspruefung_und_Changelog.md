@@ -3,7 +3,7 @@
 Stand: 2026-09-22
 Geprüfte Dokumente: `Nebel_Scientific_Engine_Foundation (1).docx` (14.09.), `Nebel_Equation_and_Parameter_Specification_V1_v2.docx` (14.09.), `Nebel_Engine_Content_Risk_Review_V1.docx` (14.09.)
 
-Anlass: Die Entscheidung **Engine-Kern = ExtHovorka (Hobbs/Cinar, 16 Zustände, herzfrequenzgetrieben)** fiel am 15.09. — also **nach** allen drei Dokumenten. Die Dokumente beschreiben daher eine andere Engine, als inzwischen beschlossen ist.
+Anlass: Die Entscheidung **Engine-Kern = ExtHovorka (Rashid et al. 2019, AG Cinar, 16 Zustände, herzfrequenzgetrieben)** fiel am 15.09. — also **nach** allen drei Dokumenten. Die Dokumente beschreiben daher eine andere Engine, als inzwischen beschlossen ist.
 
 Die Originaldokumente bleiben unverändert als historischer Stand liegen. Korrigierter Stand: `10_Engine_Spec_V2_ExtHovorka.md`.
 
@@ -99,7 +99,7 @@ Die Angabe „16 Zustände, herzfrequenzgetrieben" trifft exakt zu und wurde an 
 
 - Repository: https://github.com/illinoistech-itm/py-mgipsim
 - Paper: Siket, Rashid & Cinar (2025), *J Diabetes Sci Technol* — https://pubmed.ncbi.nlm.nih.gov/40110887/
-- Ursprungspaper des Simulators: Hobbs et al. (2019), *Computers & Chemical Engineering* — https://pubmed.ncbi.nlm.nih.gov/32863472/
+- Ursprungspaper des Simulators: Rashid et al. (2019), *Computers & Chemical Engineering* — https://pubmed.ncbi.nlm.nih.gov/32863472/
 
 Damit liegen vor: alle 16 Zustandsgleichungen, alle 35 Parameter, **20 virtuelle Patienten** als JSON (inkl. Basalrate, KE-Faktor, Korrekturfaktor, Ruhepuls, HbA1c, Körpermaße), Euler- und RK4-Solver.
 
@@ -364,6 +364,16 @@ Kalibriert an Wolpert 2013 (Fett) und Paterson 2016 (Eiweiß), im Mittel der 20 
 - Mail an die Autorinnen und Autoren von py-mgipsim senden.
 - Die Texte vor breiter Verbreitung einmal juristisch ansehen lassen.
 
+## 16a. Nachtrag 28.10.2026 — Öffentlich, Hinweisfenster, englische Fassung (nachgetragen am 10.11.)
+
+Dieser Tag stand bisher nur in `30_Rechtliche_Einordnung.md` (Abschnitte 7.1 und 7.3a) und im Git-Log. Nachgetragen nach der Regel, jede Entscheidung mit Datum hier und in `README.md` festzuhalten.
+
+- **Antwort der py-mgipsim-Autoren** (Ali Cinar, 28.10.): keine Einwände gegen die Weitergabe der zehn Parametersätze. Zwei Bitten, beide umgesetzt: Die App sagt ausdrücklich, dass sie nur ein Lernsystem ist, kein Medizinprodukt und nicht für Insulindosierung, und das ist das Erste, was man bestätigt. Außerdem möchten sie den Link, sobald die Seite online ist.
+- **Hinweisfenster „Bevor es losgeht“** vor der ersten Nutzung (`nebel.hinweis.v1`, `3413035`). Ohne Bestätigung bleibt die App gesperrt. Seit 09.11. mit Sprachwahl DE|EN (`1e5caba`).
+- **Öffentlich:** Repository öffentlich, Pages über die Action, Release `v1.0.0`. Von den offenen Punkten aus Nachtrag 16 sind Impressumsvariablen, Freischaltung und Mail erledigt, die juristische Durchsicht nicht.
+- **Englische Fassung** unter `/en/` mit englischem Hinweis- und Rechtstext (`en/legal.html`) und eigenem Browser-Speicher (`nebel.en.`), Release `v1.1.0` (`8b29a9f`). Die Quelle bleibt deutsch, der Bau ersetzt jeden Text über `engine/scripts/i18n-en.mjs` und meldet Lücken.
+- **Startseite aufgeräumt** (`7b1c68d`): Hero-Text und Kachel „Deine Therapiewerte“ entfernt, KE-Faktor und Korrektur stehen nur noch auf der Personenkarte. Aktive Person markiert, Ziehen leichter, Begrüßungsanimationen. Danach die Regeln unter die Personenwahl, Wischen auch in der Bildmitte (`352f56a`).
+
 ## 17. Nachtrag 09.11.2026 — Reserven füllen sich beim Essen
 
 **Behoben:**
@@ -408,3 +418,16 @@ Kalibriert an Wolpert 2013 (Fett) und Paterson 2016 (Eiweiß), im Mittel der 20 
 - **Unruhige Geschwindigkeit.** Statt aus zwei einzelnen Bewegungen kommt der Schwung wie bei Embla Carousel aus einem gleitenden Fenster von etwa 170 ms, mit den Zeitstempeln der Ereignisse. Länger als 170 ms verharren heißt kein Wisch, ein Wisch gegen die Zugrichtung führt zurück. Gezeichnet wird höchstens einmal pro Bild.
 
 **Geprüft** im Vorschaubrowser mit nachgestellter Touch-Bindung und gesteuerten Zügen. Auf einem echten iPhone noch nicht. Nicht übernommen: Swipers Sperre der Randgeste per `preventDefault` auf `touchstart`, weil unklar ist, ob sie Safaris Zurück-Wischen verhindert, und sie Antippen am Rand schlucken würde.
+
+## 21. Nachtrag 10.11.2026 — Texte zur Entstehung in der App, Quellenangaben korrigiert
+
+**Texte zur Entstehung:**
+- `40_Entstehung_ausfuehrlich.md` (mit Formeln und 38 Quellen) und `41_Entstehung_kompakt.md` (ohne Formeln), beide auch englisch als `*.en.md`. Sprachlich überarbeitet: keine Gedankenstriche, keine Figuren nach dem Muster „nicht X, sondern Y“, Spannen als „bis“. Literaturtitel und Seitenangaben bleiben wie im Original.
+- **Startseite:** Karte „Wie nebel. entstanden ist“ unter den fünf Regeln. „Kurz erklärt“ klappt die Kurzfassung auf, „Ausführlich, mit allen Quellen“ öffnet `entstehung.html` (englisch `en/making-of.html`). Die ausführliche Fassung hat eine eigene Seite, weil ihre breiten Tabellen und Formeln im Pager nicht seitlich scrollen könnten: Waagerechte Züge gehören dort dem Wischen.
+- **Eine Quelle:** Der Bau setzt das Markdown um (`engine/scripts/md.mjs`, nur die Teilmenge dieser Texte), die App enthält keine Kopie. Links zwischen den beiden Texten werden zu Seitenlinks. `tests/md.test.mjs` prüft den Umwandler und dass in keinem der vier Texte Markdown-Reste stehen. Jetzt 149 Tests.
+- Zugeklappt ist die Kurzfassung `inert`, damit die Tab-Taste nicht in verborgenen Links landet.
+
+**Quellenangaben korrigiert:**
+- Das Simulator-Paper von 2019 hat laut PubMed Rashid als Erstautor, Hobbs ist Mitautor ([DOI](https://doi.org/10.1016/j.compchemeng.2019.106565)). Bisher stand „Hobbs et al.“. Korrigiert im Root-`README.md`, in `README.md` dieses Ordners, Spec §17, an zwei Stellen in diesem Dokument und auf beiden Rechtsseiten.
+- Vettoretti 2019 heißt laut PubMed „Development of an error model for a factory-calibrated continuous glucose monitoring sensor with 10-day lifetime“ ([DOI](https://doi.org/10.3390/s19235320)). Korrigiert in der Registry, Abschnitt 5.1.
+- **Offen:** Smart 2013. Der PubMed-Abstract nennt für die eiweißreiche Mahlzeit 2,4 gegen 0,5 mmol/L, die Gegenprobe in Doc 11 führt +2,4 als Differenz. Am Original prüfen.
