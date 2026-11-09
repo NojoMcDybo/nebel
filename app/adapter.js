@@ -56,6 +56,9 @@ const ALLTAG = [
   {n:"Bus verpasst",        i:0.68, d:[4,8]},
   {n:"Spaziergang",         i:0.22, d:[30,55]},
 ];
+/* Unter oder ueber diesem Sensorwert startet niemand ein geplantes Training.
+   Die Bewegungskarte warnt mit denselben Grenzen. */
+const TRAIN_LOW = 80, TRAIN_HIGH = 280;
 const TRAINING = [
   {n:"Basketballtraining",  i:0.75, d:[80,100], w:[35,50]},
   {n:"Krafttraining",       i:0.58, d:[55,75],  w:[30,45]},
@@ -262,7 +265,7 @@ class Engine {
       }
       if (t !== a.start) continue;
       const busy = !!this._act;
-      const v = this.lastSensor, tief = v < 80, hoch = v > 280;
+      const v = this.lastSensor, tief = v < TRAIN_LOW, hoch = v > TRAIN_HIGH;
       if (busy && !a.warn){ a.dead = true; continue; }
       if (busy || (a.warn && (tief || hoch))){
         a.tries = (a.tries || 0) + 1;
@@ -280,6 +283,22 @@ class Engine {
       a.logged = true;
       this._beginActivity(a.name, a.inten, a.dur);
     }
+  }
+
+  /* Das angekuendigte Training absagen: weil der Wert nicht passt oder man
+     sich heute nicht traut. Auch das gehoert zum Alltag mit Diabetes. */
+  cancelPlanned(){
+    const a = this._nextPlanned();
+    if (!a) return null;
+    a.dead = true;
+    this.events.push({ kind:"state", t:this.s.t, sev:"ok", name:`${a.name} abgesagt — deine Entscheidung` });
+    return a.name;
+  }
+  _nextPlanned(){
+    const t = this.s.t; let next = null;
+    for (const a of this.acts)
+      if (a.warn && !a.dead && !a.logged && t < a.start && t >= a.start - a.warn && (!next || a.start < next.start)) next = a;
+    return next;
   }
 
   sleepAlarm(kind, value, snoozed){
@@ -521,9 +540,7 @@ class Engine {
     if (this._act){ const a = this._act;
       return { mode:"live", name:a.name, inten:a.inten,
                left:a.start + a.dur - t, done:(t - a.start)/a.dur }; }
-    let next = null;
-    for (const a of this.acts)
-      if (a.warn && t < a.start && t >= a.start - a.warn && (!next || a.start < next.start)) next = a;
+    const next = this._nextPlanned();      // abgesagte nicht mehr ankuendigen
     if (next) return { mode:"soon", name:next.name, inten:next.inten,
                        inMin:next.start - t, dur:next.dur,
                        done:1 - (next.start - t)/next.warn };

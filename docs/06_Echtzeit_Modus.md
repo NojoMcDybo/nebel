@@ -59,7 +59,7 @@ Empfehlung: **B**, mit einem Tagesplan, der zwischen den Durchläufen variiert, 
 
 **Entschieden am 22.09.2026 — keine der beiden Optionen, sondern ein Bedürfnismodell.** Die simulierte Person wird hungrig; der Nutzer muss reagieren, auch in die positive Richtung. Damit läuft nichts hinter seinem Rücken ab, und Wegschauen hat trotzdem Folgen. Siehe `08_Beduerfnisse_und_Hunger.md`. Ein Tagesplan bleibt optional für geführte Szenarien.
 
-**Präzisiert am 24.09.2026 (W13):** Das gilt für Mahlzeiten. Bewegung kommt wie im Prototyp aus einem Tagesplan — Training angekündigt, Alltagsbewegung ohne Ankündigung. Zur Bestätigung offen.
+**Präzisiert am 24.09.2026 (W13):** Das gilt für Mahlzeiten. Bewegung kommt wie im Prototyp aus einem Tagesplan — Training angekündigt, Alltagsbewegung ohne Ankündigung. Bestätigt am 09.11.2026.
 
 Die Engine bleibt davon unberührt: sie bekommt Events, egal wer sie erzeugt hat.
 

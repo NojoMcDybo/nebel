@@ -88,7 +88,7 @@ Die Angabe „16 Zustände, herzfrequenzgetrieben" trifft exakt zu und wurde an 
 ### W13 — Tagesplan: entschieden dagegen, im Prototyp vorhanden, im Adapter halb (24.09.2026)
 `06_Echtzeit_Modus.md` und `08_Beduerfnisse_und_Hunger.md` halten fest: kein vorgegebener Tagesablauf, ein Bedürfnismodell statt eines Plans, „nichts passiert hinter seinem Rücken". Der Prototyp dagegen hat Bewegung aus einem Tagesplan: angekündigtes Training, unangekündigte Alltagsbewegung. Der Adapter erzeugte den Plan und zählte in der Anzeige auf das Training herunter, führte ihn aber nie aus. Drei Aussagen, und die Anwendung zeigte etwas an, das nie passierte.
 
-**Korrektur:** Die Entscheidung in 06/08 betrifft die Mahlzeiten. Die entstehen weiter nur aus dem Bedürfnis, nicht aus einem Drehbuch. Bewegung kommt wieder aus dem Plan, wie im Prototyp: Training wird angekündigt, damit man sich vorbereiten kann, und bei einem Sensorwert unter 80 oder über 280 verschoben, nach drei Versuchen abgesagt. Alltagsbewegung passiert ohne Ankündigung. Das widerspricht dem Satz „nichts passiert hinter seinem Rücken" bewusst: Der Bus wartet auch im echten Leben nicht. **Zur Bestätigung durch den Projektinhaber offen.** Zurücknehmen heißt: `_runPlan` im Adapter entfernen und den Plan nicht mehr anzeigen.
+**Korrektur:** Die Entscheidung in 06/08 betrifft die Mahlzeiten. Die entstehen weiter nur aus dem Bedürfnis, nicht aus einem Drehbuch. Bewegung kommt wieder aus dem Plan, wie im Prototyp: Training wird angekündigt, damit man sich vorbereiten kann, und bei einem Sensorwert unter 80 oder über 280 verschoben, nach drei Versuchen abgesagt. Alltagsbewegung passiert ohne Ankündigung. Das widerspricht dem Satz „nichts passiert hinter seinem Rücken" bewusst: Der Bus wartet auch im echten Leben nicht. **Bestätigt am 09.11.2026** mit Nojos Auftrag, die offenen Punkte des Bewegungssystems umzusetzen. Zurücknehmen hieße: `_runPlan` im Adapter entfernen und den Plan nicht mehr anzeigen.
 
 ---
 
@@ -371,4 +371,16 @@ Kalibriert an Wolpert 2013 (Fett) und Paterson 2016 (Eiweiß), im Mittel der 20 
 - **„Heißhunger“ erschien nie.** `isHeisshunger()` war geschrieben, aber nicht angeschlossen. Jetzt erscheint es als Hinweis in der Zustandsleiste, wenn Belastung (`EEfast > 0.35`) auf fast leere Reserven (`< 0.28`) trifft. Nur Anzeige, keine Physiologie: Der Multiplikator des Prototyps bleibt gestrichen.
 - **App und Engine zeigten verschiedene Hinweise.** Die App kannte „Reserven · Abendessen“ (17:30–21 Uhr unter 0.55) aus dem Prototyp, `reserveLabel()` und `08_Beduerfnisse_und_Hunger.md` nicht. Ergänzt und getestet.
 
-**Offen:** W13 (Bewegung aus dem Tagesplan) wartet weiter auf Bestätigung.
+## 18. Nachtrag 09.11.2026 — Bewegungssystem abgeglichen, ruhigere Begrüßung
+
+**Bewegung:**
+- **W13 bestätigt.** Bewegung kommt aus dem Tagesplan, Mahlzeiten aus dem Bedürfnis.
+- **Gleiche Grenzen.** Die Bewegungskarte warnte bei unter 90 und über 260, verschoben wurde erst unter 80 und über 280. Beide lesen jetzt `TRAIN_LOW`/`TRAIN_HIGH` im Adapter.
+- **Training absagen.** Die Karte sagte „jetzt wäre die Zeit zu entscheiden“, bot aber nichts an. Ein angekündigtes Training lässt sich jetzt absagen, das Protokoll vermerkt „abgesagt — deine Entscheidung“. `check:adapter` prüft Ankündigung, Absage und dass die Einheit dann nicht stattfindet.
+- **Abgesagte Trainings wurden weiter angekündigt.** `activity()` übersprang erledigte Einheiten nicht. Betraf auch den Reality-Modus, der geplante Trainings streicht.
+- **Veraltete Texte.** Das Reality-Blatt nannte Dawn-Phänomen, Schlaf und Stress als weiterlaufend, die es in V1 nicht gibt. Der als veraltet markierte Prototyp-Kommentarblock am Ende der Vorlage ist entfernt, er bleibt in der Git-Geschichte.
+
+**Begrüßung:**
+- Keine Skalierung mehr, kürzerer Weg (12/8 px statt 26/18 px), die Bewegung endet bei 70 % der Dauer. Skalierter Text war bis zum Ende unscharf, der lange Auslauf ließ Text in Bruchteilen eines Pixels zittern.
+- Der Inhalt einer neuen Ebene bleibt beim Hereinziehen verborgen und startet sofort beim Loslassen. Vorher stand er beim Hereinschieben fertig da, verschwand nach 260 ms und blendete neu ein.
+- Diagramme decken sich über Web Animations auf statt über eine eigene Bildschleife.

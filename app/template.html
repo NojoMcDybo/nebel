@@ -559,6 +559,11 @@ canvas{width:100%; height:206px; display:block; touch-action:pan-y}
 .bar{height:4px; border-radius:99px; background:var(--sink); margin-top:12px; overflow:hidden}
 .bar b{display:block; height:100%; border-radius:99px; background:var(--ink); transition:width .5s linear}
 .move.soon .bar b{background:var(--high)}
+.move .mvx{display:block; margin-top:12px; padding:9px 14px; border:0; border-radius:12px; cursor:pointer;
+  font:inherit; font-size:13px; font-weight:700; color:var(--ink); background:var(--sink);
+  transition:transform .22s var(--spring), opacity .3s var(--spring)}
+.move .mvx:active{transform:scale(.96)}
+.move .mvx[hidden]{display:none}
 
 /* ─── Schnellwahl im Essen-Menü ─── */
 .quick{
@@ -699,9 +704,15 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   .swipe:hover{transform:translateX(-3px)}
 }
 /* Begruessung einer neu geoeffneten Ebene: Bloecke gleiten von links oben nach rechts unten ein. */
-.gi{animation:greetIn 1.25s cubic-bezier(.2,.75,.25,1) both; animation-delay:var(--gd,0ms)}
-@keyframes greetIn{from{opacity:0; transform:translate3d(-26px,-18px,0) scale(.985)}to{opacity:1; transform:none}}
-.pre .page > .inner{opacity:0}
+/* Nur Verschiebung und Deckkraft, keine Skalierung: skalierter Text wird bis
+   zum Ende unscharf gerastert und rastet dann sichtbar ein. Der Weg ist kurz
+   und schon bei 70 % fertig, sonst kriecht Text in Bruchteilen eines Pixels
+   und zittert. Die Bewegung von links oben kommt aus der Staffelung. */
+.gi{animation:greetIn 1.1s cubic-bezier(.25,.8,.3,1) both; animation-delay:var(--gd,0ms)}
+@keyframes greetIn{0%{opacity:0; transform:translate3d(-12px,-8px,0)} 70%{transform:none} 100%{opacity:1; transform:none}}
+/* Bis die Begruessung startet, ist der Inhalt verborgen: beim Laden (.pre)
+   und auf einer Ebene, die gerade hereingezogen wird (.hold). */
+.pre .page > .inner, .page.hold > .inner{opacity:0}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation:none!important}}
 :focus-visible{outline:2.5px solid var(--ink); outline-offset:3px}
 @media (max-width:350px){.hero h1{font-size:48px} .value{font-size:72px}}
@@ -869,6 +880,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
       </div>
       <div class="sub" id="mvSub">Bewegung kommt, wie sie kommt.</div>
       <div class="bar" id="mvBarWrap" style="display:none"><b id="mvBar" style="width:0%"></b></div>
+      <button class="mvx" id="mvCancel" type="button" hidden>Training absagen</button>
     </div>
 
     <div style="margin-top:18px">
@@ -1065,7 +1077,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   <h3>Echtzeit</h3>
   <p style="font-size:15.5px;line-height:1.5;margin:0 0 16px">Eine Minute ist eine Minute. Willst du im Reality-Modus weitermachen?</p>
   <p class="hint">Dann plant der Simulator keine Trainingseinheiten mehr für dich. Du trägst ein, was du wirklich isst und wirklich trainierst, wenn es passiert.</p>
-  <p class="hint">Alles andere läuft weiter: Alltagsbewegung, Dawn-Phänomen, Schlaf, Stress, Sensorfehler. Die planst du ohnehin nicht.</p>
+  <p class="hint">Alles andere läuft weiter: Alltagsbewegung und Sensorfehler. Die planst du ohnehin nicht.</p>
   <div class="row2">
     <button class="btn soft" id="realityNo">Nur langsamer</button>
     <button class="btn" id="realityYes">Reality starten</button>
@@ -1225,18 +1237,13 @@ function snapTo(target){
   PAGES.forEach(el => el.classList.add("snap"));
   FOGS.forEach(f => f && f.classList.add("snap"));
   applyProg(page);
-  if (page === 2) setTimeout(updateReview, 590);
+  // Nur eine neu geoeffnete Ebene begruesst mit Bewegung, nicht der Rueckweg.
+  // Sofort: der Inhalt kommt mit der Ebene an, statt erst fertig dazustehen.
+  const greet = page > from && !quiet();
+  if (page === 2 && !greet) setTimeout(updateReview, 590);
   clearTimeout(snapTo._t);
   snapTo._t = setTimeout(endSnap, 580);
-  // Nur eine neu geoeffnete Ebene begruesst mit Bewegung, nicht der Rueckweg.
-  if (page > from && !quiet()){
-    const cvs = page === 1 ? [$("chart")] : page === 2 ? [$("revChart"), $("revFx")] : [];
-    cvs.forEach(cv => { cv._rvId = (cv._rvId || 0) + 1; cv.style.clipPath = HIDE_CLIP; });
-    setTimeout(() => {
-      if (page === target) greetPage(page);
-      else cvs.forEach(cv => { cv._rvId = (cv._rvId || 0) + 1; cv.style.clipPath = ""; });
-    }, page === 2 ? 600 : 260);
-  }
+  if (greet) greetPage(page);
 }
 /* Sichtbarer Fortschritt mitten in einer laufenden Animation: aus der
    tatsaechlichen Position der Ebenen, nicht aus dem Ziel. */
@@ -1292,6 +1299,11 @@ pager.addEventListener("pointermove", e => {
   let p = drag.p0 - dx/pager.clientWidth;
   if (p < 0) p = p*0.32;                        // Gummiband an den Raendern
   if (p > 1) p = 1 + (p-1)*0.32;
+  // Zieht der Finger eine neue Ebene herein, bleibt ihr Inhalt verborgen,
+  // bis sie losgelassen wird und die Begruessung startet.
+  if (!drag.held && p > drag.base && Math.abs(drag.p0 - drag.base) < .002 && drag.base < LAST && !quiet()){
+    drag.held = true; PAGES[drag.base + 1].classList.add("hold");
+  }
   applyProg(clamp(p, -0.12, LAST + 0.12));
 });
 
@@ -1383,9 +1395,9 @@ addEventListener("keydown", e => {
 applyProg(0);
 
 /* ─── Begruessung: neue Ebene, neue Bewegung ──────────────────────
-   Beim Oeffnen steigen die Bloecke gestaffelt auf, die Diagramme zeichnen
-   sich von links auf, die Zahlen der Auswertung zaehlen hoch. Alles laeuft
-   ueber CSS-Klassen und clip-path, die Zeichenfunktionen bleiben unberuehrt. */
+   Beim Oeffnen gleiten die Bloecke gestaffelt ein, die Diagramme decken sich
+   diagonal auf, die Zahlen der Auswertung zaehlen hoch. Alles laeuft ueber
+   CSS-Klassen und Web Animations, die Zeichenfunktionen bleiben unberuehrt. */
 const quiet = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 /* Reihenfolge von links oben nach rechts unten: Wartezeit aus der Lage im Fenster. */
 const GREET_SPLIT = ".people, .statlist, .strip, .actions, .row2";
@@ -1398,31 +1410,26 @@ function greetPage(i){
   const ts = el._gi = [];
   for (const c of el.firstElementChild.children)
     c.matches(GREET_SPLIT) && c.children.length > 1 ? ts.push(...c.children) : ts.push(c);
-  const vw = innerWidth, vh = innerHeight;
+  // Lage relativ zur Ebene: beim Hereinschieben liegt sie noch rechts daneben.
+  const pr = el.getBoundingClientRect(), vw = pr.width || innerWidth, vh = pr.height || innerHeight;
   ts.forEach(t => {
     const r = t.getBoundingClientRect();
-    const x = clamp((r.left + r.width/2)/vw, 0, 1), y = clamp(r.top/vh, 0, 1.6);
-    t.style.setProperty("--gd", Math.round((y*.72 + x*.28)*1100) + "ms");
+    const x = clamp((r.left - pr.left + r.width/2)/vw, 0, 1), y = clamp((r.top - pr.top)/vh, 0, 1.6);
+    t.style.setProperty("--gd", Math.round(120 + (y*.72 + x*.28)*1000) + "ms");
   });
   void el.offsetWidth; ts.forEach(t => t.classList.add("gi"));
-  document.documentElement.classList.remove("pre");      // im selben Schritt, kein Frame dazwischen
+  el.classList.remove("hold");                            // im selben Schritt, kein Frame dazwischen
+  document.documentElement.classList.remove("pre");
   el._gt = setTimeout(() => ts.forEach(t => { t.classList.remove("gi"); t.style.removeProperty("--gd"); }), 3600);
-  if (i === 1){ startReveal($("chart"), gdOf($("chart")) + 150); const bg = $("bg"); bg.classList.remove("pulse"); void bg.offsetWidth; bg.classList.add("pulse"); }
-  if (i === 2){ startReveal($("revChart"), gdOf($("revChart")) + 150); startReveal($("revFx"), gdOf($("revFx")) + 150); revGreet = true; updateReview(); }
+  if (i === 1){ reveal($("chart")); const bg = $("bg"); bg.classList.remove("pulse"); void bg.offsetWidth; bg.classList.add("pulse"); }
+  if (i === 2){ reveal($("revChart")); reveal($("revFx")); revGreet = true; updateReview(); lastRev = performance.now(); }
 }
-const HIDE_CLIP = "inset(0 100% 100% 0)";
-function startReveal(cv, delay = 0){
-  cv._rv0 = performance.now() + delay;
-  const id = cv._rvId = (cv._rvId || 0) + 1;
-  const step = now => {
-    if (cv._rvId !== id) return;
-    const k = clamp((now - cv._rv0) / 1700, 0, 1), e = 1 - Math.pow(1 - k, 3);
-    const r = ((1 - e) * 100).toFixed(2);
-    cv.style.clipPath = k < 1 ? `inset(0 ${r}% ${r}% 0)` : "";
-    if (k < 1) requestAnimationFrame(step);
-  };
-  cv.style.clipPath = HIDE_CLIP;
-  requestAnimationFrame(step);
+/* Diagramme decken sich diagonal auf, kurz nach ihrer Karte. Web Animations
+   statt eigener Schleife: der Browser taktet, fill haelt sie in der Wartezeit verdeckt. */
+function reveal(cv){
+  if (cv._rv) cv._rv.cancel();
+  cv._rv = cv.animate([{ clipPath:"inset(0 100% 100% 0)" }, { clipPath:"inset(0 0% 0% 0)" }],
+    { duration:1500, delay:gdOf(cv) + 150, easing:"cubic-bezier(.22,1,.36,1)", fill:"backwards" });
 }
 let revGreet = false;
 function countUp(el, delay = 0){
@@ -1894,8 +1901,8 @@ function paintMove(){
       $("mvName").textContent = a.name;
       $("mvWhen").textContent = `in ${Math.ceil(a.inMin)} min`;
         const v = eng.lastSensor;
-      const risk = v < 90 ? " — bei diesem Wert startest du nicht"
-                 : v > 260 ? " — zu hoch, das wird verschoben"
+      const risk = v < TRAIN_LOW ? " — bei diesem Wert startest du nicht"
+                 : v > TRAIN_HIGH ? " — zu hoch, das wird verschoben"
                  : " — jetzt wäre die Zeit zu entscheiden";
       $("mvSub").innerHTML = `<span class="load">${LOADBARS(lvl(a.inten))}</span> &nbsp;${word(a.inten)} · ${a.dur} min${risk}`;
     }
@@ -1921,6 +1928,7 @@ function paintMove(){
     if (a.mode === "live" || a.mode === "soon") card.classList.add("fresh");
   }
   card.className = cls + (card.classList.contains("fresh") ? " fresh" : "");
+  $("mvCancel").hidden = a.mode !== "soon";
   $("mvBeat").style.display = beat ? "block" : "none";
   $("mvBarWrap").style.display = bar >= 0 ? "block" : "none";
   if (bar >= 0) $("mvBar").style.width = clamp(bar, 0, 100).toFixed(1) + "%";
@@ -2052,6 +2060,11 @@ $("btnMove").onclick = guarded(() => {
   $("sheetMove").classList.add("on");
   requestAnimationFrame(() => moveKnob($("moveInt")));
 });
+$("mvCancel").onclick = () => {
+  const name = eng.cancelPlanned();
+  if (name) toast("move", `${name} abgesagt`, $("moveCard"));
+  paintMove();
+};
 $("moveOK").onclick = () => {
   const dur = +$("moveDur").value;
   eng.startActivity(moveInt, dur);
@@ -2587,192 +2600,6 @@ document.addEventListener("visibilitychange", () => {
 addEventListener("pagehide", saveState);
 setInterval(saveState, 20000);
 requestAnimationFrame(loop);
-
-/* ══════════════════════════════════════════════════════════════════
-   VERALTET — gehoert zur alten Prototyp-Engine (Faktorsystem), nicht zu
-   ExtHovorka. Die Zahlen unten gelten fuer die heutige Engine NICHT.
-   Aktuelle Referenzwerte: engine/tests, docs/20_Parameter_Registry.md
-   (Abschnitt 4 Verhalten, Abschnitt 8 Fett und Eiweiss). Bleibt nur als
-   Beleg der Prototyp-Geschichte stehen.
-
-   VALIDIERUNG — Referenzwerte der kalibrierten Engine
-   Erzeugt mit identischen Gleichungen in Python, Rauschen deaktiviert,
-   Start 110 mg/dL sofern nicht anders angegeben. Diese Tabelle ist der
-   Test-Oracle fuer den Swift-Port: gleiche Parameter, gleiche Szenarien,
-   dieselben Zahlen -- sonst ist der Port falsch.
-
-   Szenario                         Maximum       Minimum      nach 5 h
-   ---------------------------------------------------------------------
-   nuechtern, nur Basal             112           110          112
-   1 U ab 110                       110            73 @160'     91
-   1 U ab 250                       250           121          126
-   3 U ab 250  (Ueberkorrektur)     250            68 @219'     78
-   50 g schnell, kein Insulin       314 @147'     110          254
-   50 g + 5 U zeitgleich            186 @ 88'     104          105
-   50 g + 5 U Prebolus -15 min      165 @114'     106          111
-   50 g + 5 U verspaetet +20 min    217 @ 83'      96           97
-   80 g fettig, 45 min, + 8 U       199 @156'      88 @ 54'    160
-   50 g + 8 U  (Ueberdosis)         159            66 @255'     69
-   50 g + 5 U, dann 2 U nach 60'    185            68 @281'     68
-   15 g Traubenzucker ab 55          --            55          158
-   30 g ab 60 (Ueberbehandlung)     221 @169'      60          204
-
-   Abgeleitete Therapiegroessen: ISF 38.7 mg/dL/U bei 110 · 62.3 bei 250
-                                 KE-Faktor 10 g/U (Kalibrierungsvorgabe)
-
-   Didaktisch entscheidend und korrekt abgebildet:
-     · Prebolus 165  <  zeitgleich 186  <  verspaetet 217
-       Das Timing schlaegt die Dosis.
-     · Fettige Mahlzeit: Fruehabsturz auf 88, Spaetgipfel nach 2.5 h,
-       nach 7 h immer noch 149. Der Pizza-Effekt.
-     · Ueberdosis und Stacking fuehren beide in echte Hypoglykaemien.
-       Die Gegenregulation faengt flache Dellen ab, nicht diese.
-     · Ueberbehandlung einer Hypo mit 30 g endet bei 221.
-
-   Alle Zahlen unten sind gegen die hier laufende Engine gemessen, mit
-   deaktiviertem Rauschen, Start 110 mg/dL und gefuellten Reserven, sofern
-   nicht anders angegeben. Format: Maximum@Minute  Minimum@Minute, dann
-   die Werte nach 1, 2, 4 und 6 Stunden.
-
-   MAHLZEITEN (13 Uhr)               max@min   min@min    1h   2h   4h   6h
-   ----------------------------------------------------------------------
-   50 g schnell, kein Insulin        348@ 85  110@  0    328  333  251  203
-   50 g schnell + 5 U                267@ 60   76@275    267  187   79   82
-   55 g gemischt + 5.5 U             187@100  105@419    164  184  127  106
-   80 g fettig + 8 U                 205@402   95@ 49     96  119  172  203
-   80 g fettig + 10 U, 50/50, 120'   134@419  101@ 43    104  126  123  127
-   50 g + 8 U (Ueberdosis)           252@ 55   33@223    251  143   94   85
-   15 g Traubenzucker ab 55          149@112   55@  0    103  136  149  144
-
-   Der fettige Fall zeigt beide Hebel: acht Einheiten auf einmal enden
-   nach sieben Stunden bei 203, zehn Einheiten haelftig ueber zwei Stunden
-   verteilt bei 127. Fett braucht mehr Insulin UND spaeter -- keins von
-   beidem allein reicht. Referenz: Wolpert et al. 2013, Diabetes Care
-   36(4):810.
-
-   TAGESZEIT -- identisch 55 g gemischt mit 5.5 U
-   ----------------------------------------------------------------------
-   07 Uhr   Maximum 207   nach 4 h 151        Die Insulinempfindlichkeit
-   12 Uhr   Maximum 189   nach 4 h 130        schwankt zirkadian um rund
-   17 Uhr   Maximum 182   nach 4 h 122        dreissig Prozent. Dasselbe
-   22 Uhr   Maximum 191   nach 4 h 141        Fruehstueck braucht mehr.
-
-   BEWEGUNG -- 45 min ab 140 mg/dL, ohne Insulin
-   ----------------------------------------------------------------------
-   Belastung 28 %   nach 1 h 120   nach 2 h 104
-   Belastung 50 %   nach 1 h 108   nach 2 h  85
-   Belastung 72 %   nach 1 h 114   nach 2 h  93
-   Belastung 92 %   nach 1 h 139   nach 2 h 131
-
-   Moderate Dauerbelastung senkt am staerksten. Oberhalb etwa sechzig
-   Prozent verschiebt sich der Stoffwechsel ins Anaerobe und Katecholamine
-   wirken dagegen -- deshalb steigt der Wert bei hoher Intensitaet sogar.
-   Die zweite Nachwirkungswelle hat ihr Maximum acht bis elf Stunden
-   spaeter. Referenz: McMahon et al. 2007; Iscoe & Riddell 2011.
-
-   Geplante Einheiten finden nicht bedingungslos statt: unter 80 oder
-   ueber 280 mg/dL werden sie um 25 Minuten verschoben, nach drei
-   Versuchen abgesagt. Alltagsbewegung laeuft immer -- zur Uni muss man
-   auch bei 60, und der Bus wartet nicht.
-
-   INSULIN
-   ----------------------------------------------------------------------
-   Wirkmaximum nach Dosis:   2 U 70'   5 U 76'   10 U 85'   15 U 94'
-   Wirkmaximum bei Belastung: ohne 78'   moderat 69'   hart 67'
-   ISF isoliert gemessen: 38.7 mg/dL pro Einheit bei 110, 67.9 bei 250
-
-   Grosse Depots absorbieren langsamer, weil das Volumen unter der Haut
-   schneller waechst als seine Oberflaeche. Belastung dreht es um. Wer
-   kurz vor dem Training bolust, bekommt beides gleichzeitig.
-
-   BASALRATE -- nuechtern 13 bis 19 Uhr, ausserhalb des Dawn-Fensters
-   ----------------------------------------------------------------------
-   0.55 U/h   +1.5 mg/dL pro Stunde   steigt langsam und dauerhaft
-   0.70 U/h    0.0                    stabil
-   0.90 U/h   -1.4                    Ausgangswert
-   1.15 U/h   -8.7                    Hypoglykaemie innerhalb eines Tages
-
-   Die Umstellung folgt der eingestellten Rate mit drei Stunden Zeit-
-   konstante. Eine gesetzte Basalrate laesst sich nicht zurueckholen.
-
-   DAWN-PHAENOMEN -- nuechtern, korrekte Basalrate
-   ----------------------------------------------------------------------
-   01h 109   03h 108   05h 122   07h 147   09h 144
-   02h 109   04h 112   06h 136   08h 150
-
-   Anstieg vom naechtlichen Tiefpunkt bis zum Maximum: +42 mg/dL.
-   Daraus folgt der Zielkonflikt: wer die Basalrate auf den Morgen
-   einstellt, kauft sich naechtliche Hypoglykaemien ein. Es gibt keine
-   Rate, die beides loest.
-
-   MESSUNG
-   ----------------------------------------------------------------------
-   Im Tiefen gleicht sich das Gewebe langsamer an, die Verzoegerung
-   waechst von 5 auf bis zu 8 Minuten. Der Sensorfehler steigt
-   zusaetzlich im Hypobereich, bei schneller Aenderung sowie am ersten
-   und ab dem achten Tragetag.
-
-   Drucktief -- wer auf dem Sensor liegt, presst das Gewebe leer:
-
-     02:30  Sensor 108     02:50  Sensor  67  Alarm
-     02:35  Sensor  92     03:00  Sensor  79
-     02:40  Sensor  79     03:10  Sensor 108     Blut konstant 108 mg/dL
-
-   Deshalb misst man einen ploetzlichen naechtlichen Tiefalarm nach,
-   statt sofort zu essen.
-
-   FAKTORSYSTEM -- alle Groessen wirken multiplikativ aufeinander
-   ----------------------------------------------------------------------
-   Grundverbrauch im Wachzustand, Leberglykogen, zwei Nachwirkungswellen,
-   Hypo-Gedaechtnis, Schlafqualitaet, Stress, Krankheit, Alkohol,
-   Fettresistenz, zirkadiane Empfindlichkeit, Sensoralter, Depotgroesse,
-   Injektionsstelle.
-
-   KOMBINATIONEN -- entstehen nur aus dem Zusammentreffen mehrerer
-   Faktoren: Heisshunger, Doppelrisiko, Morgenwand, Ketonrisiko,
-   Blindflug, Stressspirale. Belegt am Doppelrisiko, gleiche Mahlzeiten
-   und Dosen, Tiefstwert der Nacht:
-
-     ohne alles 107 -- Nachmittagstraining 85 -- Alkohol abends 87
-     beides zusammen 38 mg/dL, Bewusstlosigkeit
-
-   Keiner der beiden Faktoren ist fuer sich gefaehrlich.
-
-   SPIELBARKEIT -- drei Tage, drei Mahlzeiten taeglich, Traubenzucker
-   unter 80: Zeit im Ziel 69 bis 89 Prozent je nach Seed, einzelne Tage
-   deutlich schlechter. Mit 20 Prozent zu hohem Bolus: 6 bis 38 Prozent
-   unter 70 und mehrere Notfaelle.
-
-   SCHLAFEN -- nachts sieht man nichts. Der Sensor ist die einzige
-   Verbindung zum eigenen Koerper. Alarmschwellen 70 und 250 mg/dL,
-   Ton und Vibration. Wer weiterschlaeft, zahlt weniger Schlafschuld,
-   riskiert aber mehr. Gleiche Nacht, gleiches Abendessen mit 6 U,
-   Nachmittagstraining plus Alkohol ab 21 Uhr:
-
-     weitergeschlafen ... 6 Alarme, Tiefstwert 39 mg/dL, Schlafschuld 0.42
-     aufgestanden ....... 1 Alarm,  Tiefstwert 69 mg/dL, Schlafschuld 0.13
-
-   Auf den ersten Alarm zu reagieren macht aus einer gefaehrlichen Nacht
-   eine beherrschbare. Die Schlafschuld wirkt erst am Folgetag: bei
-   voller Schuld liegt derselbe Fruehstuecksverlauf nach vier Stunden
-   15 mg/dL hoeher.
-
-   REALITY-MODUS -- bei einfacher Geschwindigkeit waehlbar. Der Simulator
-   plant dann keine Trainingseinheiten mehr; Mahlzeiten und Einheiten
-   traegt der Nutzer ein, wenn sie wirklich stattfinden. Alltagsbewegung,
-   Dawn-Phaenomen, Schlaf, Stress und Sensorfehler laufen unveraendert
-   weiter -- die plant ohnehin niemand.
-
-   Beim Start wird die Simulationsuhr auf die echte Tageszeit gestellt --
-   nicht durch Springen, sondern durch Vorrechnen, damit Physiologie und
-   Uhrzeit zusammenpassen. Danach haengt die Uhr an der Systemzeit statt
-   an den Einzelbildern. Sonst bliebe der Simulator stehen, sobald der
-   Tab in den Hintergrund geht, und genau dann laesst man ihn ja laufen.
-
-   NICHT ENTHALTEN (bewusst, Phase 3): Herzfrequenz aus HealthKit statt
-   simulierter Ereignisse, Koffein, Dehydratation, Pumpenmodus,
-   Benachrichtigungen, Basalanpassung, Absagen einer geplanten Einheit.
-   ══════════════════════════════════════════════════════════════════ */
 </script>
 </body>
 </html>
