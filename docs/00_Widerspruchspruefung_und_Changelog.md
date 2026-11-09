@@ -399,3 +399,12 @@ Kalibriert an Wolpert 2013 (Fett) und Paterson 2016 (Eiweiß), im Mittel der 20 
 - **Gesehen, nicht geändert:** Fünf der 20 Subjekte fallen bei 60 min moderat ohne Kohlenhydrate auf den numerischen Boden (18 mg/dL), zehn unter 70. Das kommt aus der Quelle (`p3`–`p5`), nicht aus der Nachwirkung, und gehört zur offenen Frage, ob die starken Responder realistisch sind.
 
 **Abgesichert:** `tests/afterEffect.test.ts`: Neutralität, exakte Integration gegen ein numerisches Integral, Reihenfolge, Halbwertszeit, Kalibrierung gegen DirecNet und Taplin. `check:adapter`: „Nachwirkung hält Stunden … und klingt ab“, Nachrechnen weiter bitgleich.
+
+## 20. Nachtrag 10.11.2026 — Wischgeste auf dem iPhone
+
+**Befund:** Auf dem iPhone reagierte das Wischen oft nicht oder ruckelig. Drei Ursachen in `app/template.html`:
+- **Zug endete nach dem ersten Bild.** Auf Touchgeräten hängt der Finger zuerst implizit am berührten Element (W3C Pointer Events, „implicit pointer capture“). Beim Umhängen auf den Pager meldet das Element `lostpointercapture`, das Ereignis blubbert zum Pager hoch und beendete den Zug. Nur ein schneller erster Ruck schaltete noch um. Jetzt zählt nur der Verlust am Pager selbst.
+- **Gummiband ab Seite 1.** Aus der Zeit mit zwei Ebenen: Die Auswertung folgte dem Finger nur mit 32 % Tempo. Jetzt federt nur der echte Rand.
+- **Unruhige Geschwindigkeit.** Statt aus zwei einzelnen Bewegungen kommt der Schwung wie bei Embla Carousel aus einem gleitenden Fenster von etwa 170 ms, mit den Zeitstempeln der Ereignisse. Länger als 170 ms verharren heißt kein Wisch, ein Wisch gegen die Zugrichtung führt zurück. Gezeichnet wird höchstens einmal pro Bild.
+
+**Geprüft** im Vorschaubrowser mit nachgestellter Touch-Bindung und gesteuerten Zügen. Auf einem echten iPhone noch nicht. Nicht übernommen: Swipers Sperre der Randgeste per `preventDefault` auf `touchstart`, weil unklar ist, ob sie Safaris Zurück-Wischen verhindert, und sie Antippen am Rand schlucken würde.

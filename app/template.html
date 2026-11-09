@@ -1272,8 +1272,9 @@ pager.addEventListener("pointerdown", e => {
      tatsaechlichen Position weiterziehen. */
   const vp = PAGES.some(el => el.classList.contains("snap")) ? visualProg() : prog;
   if (vp !== prog){ endSnap(); applyProg(vp); }
-  drag = {x:e.clientX, y:e.clientY, t:performance.now(), lock:null,
-          base:page, p0:vp, last:e.clientX, v:0, moved:false};
+  const s = {x:e.clientX, t:e.timeStamp};
+  drag = {x:e.clientX, y:e.clientY, lock:null, base:page, p0:vp, p:vp,
+          w:pager.clientWidth || 1, s, l:s, raf:0, moved:false};
 });
 
 pager.addEventListener("pointermove", e => {
@@ -1292,19 +1293,23 @@ pager.addEventListener("pointermove", e => {
   if (drag.lock !== "x") return;
   e.preventDefault();
   drag.moved = true;
-  const now = performance.now();
-  // Geglaettet: ein kurzes Verharren vor dem Loslassen soll den Schwung nicht loeschen.
-  drag.v = .35*drag.v + .65*(e.clientX - drag.last)/Math.max(1, now - drag.t);
-  drag.last = e.clientX; drag.t = now;
-  let p = drag.p0 - dx/pager.clientWidth;
+  /* Schwung wie bei Embla aus einem gleitenden Fenster von etwa 170 ms, mit den
+     Zeitstempeln der Ereignisse: auf dem iPhone kommen Bewegungen gebuendelt an,
+     der Abstand zwischen zwei einzelnen ist dort nur Rauschen. */
+  if (e.timeStamp - drag.s.t > 170) drag.s = drag.l;
+  drag.l = {x:e.clientX, t:e.timeStamp};
+  let p = drag.p0 - dx/drag.w;
   if (p < 0) p = p*0.32;                        // Gummiband an den Raendern
-  if (p > 1) p = 1 + (p-1)*0.32;
+  if (p > LAST) p = LAST + (p-LAST)*0.32;
   // Zieht der Finger eine neue Ebene herein, bleibt ihr Inhalt verborgen,
   // bis sie losgelassen wird und die Begruessung startet.
   if (!drag.held && p > drag.base && Math.abs(drag.p0 - drag.base) < .002 && drag.base < LAST && !quiet()){
     drag.held = true; PAGES[drag.base + 1].classList.add("hold");
   }
-  applyProg(clamp(p, -0.12, LAST + 0.12));
+  // Hoechstens einmal pro Bild zeichnen, auch wenn mehrere Bewegungen ankommen.
+  drag.p = clamp(p, -0.12, LAST + 0.12);
+  const d = drag;
+  if (!d.raf) d.raf = requestAnimationFrame(() => { d.raf = 0; if (drag === d) applyProg(d.p); });
 });
 
 /* Endet ein Zug auf einer Karte oder einem Knopf, soll der folgende
@@ -1316,9 +1321,10 @@ document.addEventListener("click", e => {
   e.stopPropagation(); e.preventDefault();
 }, true);
 
-function endDrag(){
+function endDrag(e){
   if (!drag) return;
-  const wasX = drag.lock === "x", moved = drag.moved, v = drag.v, base = drag.base;
+  const {moved, base, s, l} = drag, wasX = drag.lock === "x", d = drag.p - base;
+  cancelAnimationFrame(drag.raf);
   drag = null;
   document.body.classList.remove("dragging");
   if (!wasX) return;
@@ -1328,16 +1334,22 @@ function endDrag(){
     const sel = getSelection();
     if (sel && !sel.isCollapsed) sel.removeAllRanges();
   }
-  // Ein Viertel der Breite oder ein kurzer Wisch genuegt.
-  const d = prog - base;
-  if (v < -0.22 || d >  0.22) return snapTo(base + 1);
-  if (v >  0.22 || d < -0.22) return snapTo(base - 1);
-  snapTo(base);
+  /* Ein kurzer Wisch oder ein knappes Viertel der Breite genuegt. Wer vor dem
+     Loslassen laenger als 170 ms verharrt, wischt nicht mehr; ein Wisch gegen
+     die Zugrichtung fuehrt zurueck, nicht eine Ebene weiter. */
+  const dt = e.timeStamp - s.t;
+  const v = dt > 0 && e.timeStamp - l.t < 170 ? (l.x - s.x)/dt : 0;
+  const fl = Math.abs(v) > .15 ? -Math.sign(v) : 0;          // +1 = zur naechsten Ebene
+  snapTo(base + (fl ? (fl*d >= 0 ? fl : 0) : Math.abs(d) > .22 ? Math.sign(d) : 0));
 }
 pager.addEventListener("touchmove", e => { if (drag && drag.lock === "x" && e.cancelable) e.preventDefault(); }, { passive:false });
 pager.addEventListener("pointerup", endDrag);
 pager.addEventListener("pointercancel", endDrag);
-pager.addEventListener("lostpointercapture", endDrag);
+/* Nur wenn der Pager selbst den Finger verliert. Auf Touchgeraeten haengt der
+   Finger zuerst implizit am beruehrten Element; dessen lostpointercapture beim
+   Umhaengen auf den Pager blubbert hier hoch und beendete jeden Zug nach dem
+   ersten Bild. */
+pager.addEventListener("lostpointercapture", e => { if (e.target === pager) endDrag(e); });
 $("rail").onclick = e => {
   const b = e.target.closest("button[data-p]"); if (b) snapTo(+b.dataset.p);
 };
