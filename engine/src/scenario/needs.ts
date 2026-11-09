@@ -65,7 +65,8 @@ export type ReserveLabel =
   | "Reserven · iss etwas"
   | "Reserven · hungrig aufgewacht"
   | "Reserven · nachtanken"
-  | "Reserven · Mittagszeit";
+  | "Reserven · Mittagszeit"
+  | "Reserven · Abendessen";
 
 /**
  * Anzeigetext. Logik und Schwellen aus dem Prototyp uebernommen.
@@ -78,6 +79,7 @@ export const reserveLabel = (
   if (hourOfDay >= 6 && hourOfDay < 10.5 && reserve < 0.70) return "Reserven · hungrig aufgewacht";
   if (recentLoad > 0.22 && reserve < 0.62) return "Reserven · nachtanken";
   if (hourOfDay >= 11 && hourOfDay < 14.5 && reserve < 0.60) return "Reserven · Mittagszeit";
+  if (hourOfDay >= 17.5 && hourOfDay < 21 && reserve < 0.55) return "Reserven · Abendessen";
   return "Reserven";
 };
 

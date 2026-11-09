@@ -249,7 +249,7 @@ Lesart:
 | `exerciseDrainPerMin` | Reserven | N | Zusatzverbrauch bei voller Belastung, vorläufig 3/600 |
 | `afterEffectDrainPerMin` | Reserven | N | Zusatzverbrauch aus dem Nacheffekt, vorläufig 1/600 |
 | `refillPerMmolCarb` | Reserven | N | Auffüllung pro mmol KH, vorläufig 1/280 |
-| Anzeigeschwellen Reserven | Reserven | N | 0.30 / 0.70 / 0.62 / 0.60 sowie Heißhunger bei 0.28 — aus dem Prototyp übernommen |
+| Anzeigeschwellen Reserven | Reserven | N | 0.30 / 0.70 / 0.62 / 0.60 / 0.55 (Abendessen) sowie Heißhunger bei 0.28 — aus dem Prototyp übernommen |
 
 Die Reserven-Parameter gehören zur Erlebnisschicht und dürfen nie als physiologische Werte ausgegeben werden. Sie sind bewusst grob und werden nach den ersten Testsitzungen nach Gefühl kalibriert — das ist bei einem Bedürfnismodell zulässig, bei einem physiologischen Parameter nicht.
 

@@ -363,3 +363,12 @@ Kalibriert an Wolpert 2013 (Fett) und Paterson 2016 (Eiweiß), im Mittel der 20 
 - Repository öffentlich schalten und Pages aktivieren.
 - Mail an die Autorinnen und Autoren von py-mgipsim senden.
 - Die Texte vor breiter Verbreitung einmal juristisch ansehen lassen.
+
+## 17. Nachtrag 09.11.2026 — Reserven füllen sich beim Essen
+
+**Behoben:**
+- **Essen füllte die Reserven nicht auf.** `eat()` aus `scenario/needs.ts` war getestet, aber im Adapter nie aufgerufen. Die Reserve fiel deshalb nur, war nach rund 10 Stunden leer und zeigte ab dann dauerhaft „iss etwas“. Jetzt füllt `logMeal` sie mit der tatsächlich gegessenen Menge, nicht mit der Schätzung. Neu in `check:adapter`: „Essen füllt die Reserven“.
+- **„Heißhunger“ erschien nie.** `isHeisshunger()` war geschrieben, aber nicht angeschlossen. Jetzt erscheint es als Hinweis in der Zustandsleiste, wenn Belastung (`EEfast > 0.35`) auf fast leere Reserven (`< 0.28`) trifft. Nur Anzeige, keine Physiologie: Der Multiplikator des Prototyps bleibt gestrichen.
+- **App und Engine zeigten verschiedene Hinweise.** Die App kannte „Reserven · Abendessen“ (17:30–21 Uhr unter 0.55) aus dem Prototyp, `reserveLabel()` und `08_Beduerfnisse_und_Hunger.md` nicht. Ergänzt und getestet.
+
+**Offen:** W13 (Bewegung aus dem Tagesplan) wartet weiter auf Bestätigung.

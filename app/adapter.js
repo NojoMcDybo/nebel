@@ -177,6 +177,8 @@ class Engine {
     const fEst = fatEst ?? gEst * mt.fat, pEst = protEst ?? gEst * mt.protein;
     const gReal = gEst * err, fReal = fEst * err, pReal = pEst * err;
     const slowG = gReal * mt.slow, fastG = gReal - slowG;
+    /* Reserven fuellt, was wirklich gegessen wurde, nicht die Schaetzung. */
+    this._reserve = this.s.gly = N.eat(this._reserve, N.gCarbsToMmol(gReal));
     const t = this.s.t, eat = Math.max(1, Math.round(dur) || 1);
     this.input.push({ kind:"meal", t, fastCarbsG: fastG, slowCarbsG: slowG,
                       fatG: fReal, proteinG: pReal, durationMin: eat });
@@ -537,6 +539,9 @@ class Engine {
     if (this.s.Z > 0.10) out.push({ k:"nach1", v:Math.min(1, this.s.Z), txt:"Nachwirkung" });
     if (N.get(this.z, "EEhigh") > 0.15)
       out.push({ k:"nach2", v:Math.min(1, N.get(this.z, "EEhigh")), txt:"Harte Belastung" });
+    /* Nur Anzeige, keine Physiologie (docs/08_Beduerfnisse_und_Hunger.md). */
+    if (N.isHeisshunger(this._reserve, N.get(this.z, "EEfast")))
+      out.push({ k:"hunger", v:1, txt:"Heißhunger" });
     return out;
   }
 

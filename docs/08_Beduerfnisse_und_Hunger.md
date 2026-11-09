@@ -20,6 +20,7 @@ Der Prototyp führt einen Reservezustand `gly` (Leberglykogen, 0 bis 1) und leit
 | morgens 6–10:30 Uhr und `gly < 0.70` | „Reserven · hungrig aufgewacht" |
 | nach Belastung (`Z > 0.22`) und `gly < 0.62` | „Reserven · nachtanken" |
 | mittags 11–14:30 Uhr und `gly < 0.60` | „Reserven · Mittagszeit" |
+| abends 17:30–21 Uhr und `gly < 0.55` | „Reserven · Abendessen" |
 | Belastung `> 0.35` bei `gly < 0.28` | Kombinationsfaktor „Heißhunger" |
 
 Entscheidend ist aber nicht die Anzeige, sondern die Rückkopplung: `gly` moduliert im Prototyp sowohl die endogene Glukoseproduktion als auch die Gegenregulation. Leere Reserven heißt dort: die Leber kann bei einer Hypo schlechter retten.
@@ -50,8 +51,8 @@ Folgen hat es nur in Kombination:
 **Hunger wird als Bedürfnis in der Erlebnisschicht geführt, nicht als physiologischer Zustand.**
 
 - Ein Hungerzustand baut sich über die Zeit seit der letzten Kohlenhydratzufuhr und über den aufsummierten Energieverbrauch auf. Der Energieverbrauch kommt aus `EEfast` und `EElong` — die stehen bereits im Modell und sind belegt.
-- Essen senkt den Hungerzustand proportional zur aufgenommenen Kohlenhydratmenge.
-- Die Anzeige übernimmt die Logik des Prototyps (morgens, mittags, nach Belastung), weil die dort gut getroffen ist.
+- Essen senkt den Hungerzustand proportional zur tatsächlich gegessenen Kohlenhydratmenge, nicht zur geschätzten.
+- Die Anzeige übernimmt die Logik des Prototyps (morgens, mittags, abends, nach Belastung), weil die dort gut getroffen ist. „Heißhunger“ erscheint als Hinweis in der Zustandsleiste, ohne den Multiplikator des Prototyps.
 - Die physiologischen Folgen entstehen ausschließlich über die echten Kopplungen der Tabelle oben. Es wird kein zusätzlicher Effekt erfunden.
 - Alle Zeitkonstanten des Hungeraufbaus sind **Nebel-Annahmen** und in der Registry als solche geführt.
 

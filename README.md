@@ -32,7 +32,7 @@ The physiology is the extended Hovorka model (ExtHovorka): 16 states, with exerc
 - **Validated** numerically against the reference implementation py-mgipsim. Derivatives agree to better than 1e-12 relative over 120 random states and three subjects. A 24-hour trajectory with a meal, bolus and exercise agrees to better than 1e-9 mmol/L.
 - **Calibrated** where source values demonstrably don't match reality: sensor delay 5 min, insulin absorption 50 min. Both corrections live in one place, `engine/src/calibration.ts`, with their evidence.
 - **Extended** with a CGM error model and with fat and protein. Fat delays gastric emptying and lowers insulin sensitivity for hours. Protein adds late glucose from the liver. These parts are calibrated against published studies (Wolpert 2013, Paterson 2016) and checked against two more (Smart 2013, O'Connell 2021).
-- **Tests:** 133, including the numerical comparison with the reference.
+- **Tests:** 134, including the numerical comparison with the reference.
 
 All design decisions, sources, calibrations and known limits are documented in `docs/` (in German). Start with `docs/README.md`.
 

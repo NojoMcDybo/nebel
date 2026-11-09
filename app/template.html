@@ -487,7 +487,7 @@ canvas{width:100%; height:206px; display:block; touch-action:pan-y}
 /* ─── Zustandschips ─── */
 .chips{
   list-style:none; margin:0; padding:0;
-  gap:6px; overflow-x:auto; padding:11px 0 3px;
+  display:flex; gap:6px; overflow-x:auto; padding:11px 0 3px;
   scrollbar-width:none; -ms-overflow-style:none;
 }
 .chips::-webkit-scrollbar{display:none}
@@ -501,6 +501,7 @@ canvas{width:100%; height:206px; display:block; touch-action:pan-y}
 .chip i{width:5px; height:5px; border-radius:99px; background:currentColor}
 .chip.kombi{background:var(--ink); color:var(--paper)}
 .chip.nacht{background:transparent; box-shadow:inset 0 0 0 1.3px var(--hair); color:var(--ink3)}
+.chip.hunger{background:transparent; box-shadow:inset 0 0 0 1.3px var(--low); color:var(--low)}
 
 /* ─── Reserven ─── */
 .reserve{
@@ -1841,6 +1842,7 @@ function paintReserve(){
   const g = eng.s.gly, pct = Math.round(g*100), h = (eng.s.t/60) % 24;
   // Der Speicher ist morgens am tiefsten, weil die Leber die halbe Nacht
   // gearbeitet hat. Die Beschriftung sagt, was das gerade bedeutet.
+  // Schwellen wie reserveLabel in engine/src/scenario/needs.ts, dort getestet.
   let label = "Reserven", cls = "";
   if (g < 0.30){ label = "Reserven · iss etwas"; cls = " low"; }
   else if (h >= 6 && h < 10.5 && g < 0.70){ label = "Reserven · hungrig aufgewacht"; cls = " hungry"; }

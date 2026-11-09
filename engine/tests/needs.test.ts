@@ -74,6 +74,11 @@ describe("Anzeige", () => {
     expect(reserveLabel(0.55, 12, 0)).toBe("Reserven · Mittagszeit");
   });
 
+  it("erkennt den Abend", () => {
+    expect(reserveLabel(0.5, 19, 0)).toBe("Reserven · Abendessen");
+    expect(reserveLabel(0.5, 21.5, 0)).toBe("Reserven");
+  });
+
   it("schweigt, wenn nichts anliegt", () => {
     expect(reserveLabel(0.85, 16, 0)).toBe("Reserven");
   });

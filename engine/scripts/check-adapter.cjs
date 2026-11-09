@@ -62,6 +62,8 @@ ok("Harte Belastung hebt bei schwachem Responder", eng.s.G >= gSport - 1,
    `${gSport.toFixed(0)} → ${eng.s.G.toFixed(0)} mg/dL, p3 ${eng.p.p3.toFixed(1)}`);
 ok("Reserven sinken", eng.s.gly < gly0, `${gly0.toFixed(3)} → ${eng.s.gly.toFixed(3)}`);
 ok("Nachwirkung aktiv", eng.s.Z > 0.05, "Z="+eng.s.Z.toFixed(3));
+const glyPre = eng.s.gly; eng.logMeal(40, "mixed");
+ok("Essen fuellt die Reserven", eng.s.gly > glyPre, `${glyPre.toFixed(3)} → ${eng.s.gly.toFixed(3)}`);
 
 const strong = new Engine(20260812, 13);           // Patient_14, p3 = 12.2
 for (let i=0;i<60;i++) strong.step();

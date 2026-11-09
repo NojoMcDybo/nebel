@@ -226,6 +226,7 @@ export const PAIRS = [
   ['"Reserven · nachtanken"', '"Reserves · refuel"'],
   ['"Reserven · Mittagszeit"', '"Reserves · lunchtime"'],
   ['"Reserven · Abendessen"', '"Reserves · dinner time"'],
+  ['txt:"Heißhunger"', 'txt:"Ravenous"'],
   ["`Basalrate · ${set.toFixed(2)} U/h`", "`Basal rate · ${set.toFixed(2)} U/h`"],
   ["`Basalrate · ${eff.toFixed(2)} → ${set.toFixed(2)} U/h`", "`Basal rate · ${eff.toFixed(2)} → ${set.toFixed(2)} U/h`"],
   ["`noch ${Math.ceil(a.left)} min`", "`${Math.ceil(a.left)} min left`"],
