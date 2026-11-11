@@ -452,3 +452,9 @@ Neu hat jede Trainingsart außer dem Dauerlauf ein Muster aus Minuten und Anteil
 **Bewegung in der Wirkungskarte:** Die Karte „Wirkung“ auf der Analyse-Seite zeigt eine dunkle Linie mit Vorzeichen: zusätzliche Leberabgabe durch Belastung minus Aufnahme der Muskeln (`p4`, `p5`) minus die Nachwirkung auf alles Insulin. Die Nachwirkung zählt damit zur Bewegung, die Insulinlinie rechnet nur noch mit der Fettresistenz. Chip „Bewegung“ und Erklärsatz erscheinen nur, wenn im Fenster Bewegung wirkt.
 
 **Sensor ruhiger:** Kalibriercharakter `a0` Median 0,97 statt 0,95, Streuung 0,04 statt 0,059, Grenzen 0,89–1,05 statt 0,85–1,05, langsame Drift 3,5 statt 4 mg/dL. MARD gegen Blut über 20 Subjekte × 3 Tage 6,3 → 5,0 %, schlechtester Sensor 13,9 → 9,9 % (`scripts/cgm-calibration.cjs`). Begründung: Vettoretti 2019 beschreibt den G6, heutige Sensoren streuen weniger. Registry Abschnitt 5 nachgeführt.
+
+## 24. Nachtrag 11.11.2026 — Reserven am Morgen, kleine Layoutfehler
+
+**Reserven beim Aufwachen:** Der Tag begann um 7 Uhr mit vollen Reserven, obwohl die Leber die Nacht über gearbeitet hat. Neu startet die Reserve bei 55 %, die Karte sagt damit „hungrig aufgewacht“ (Schwelle 70 %). Szenarioschicht, keine Physiologie (docs/08).
+
+**Layout:** Die Bewegungskarte und die Reserven blenden beim Seitenwechsel wieder mit ein (das Neuzeichnen hatte die Klasse `.gi` überschrieben). „Sensorabweichung“ darf umbrechen, damit dreistellige Werte wie „12.4 %“ passen. Der Satz unter der 12-Stunden-Vorhersage hat eine feste Höhe von vier Zeilen, damit wechselnde Werte nichts darunter verschieben. Im Hinweisfenster stehen die Rechtslinks 18 px unter dem Button (`.gate p` hatte den Abstand auf 0 gesetzt).

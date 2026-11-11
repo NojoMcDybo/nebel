@@ -61,3 +61,4 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 | Trainingsarten | Belastungsmuster statt gleichmäßiger Linie: Intervalle, Kraft und Mannschaftssport wechseln hart und locker und senken etwa halb so stark wie ein Dauerlauf (Guelfi 2005, Yardley 2013) | 11.11.2026 |
 | Bewegung in der Analyse | Eigene Linie mit Vorzeichen in der Wirkungskarte, Nachwirkung zählt zur Bewegung | 11.11.2026 |
 | Sensorstreuung | `a0` 0,97 ± 0,04 (0,89–1,05), Drift 3,5 mg/dL; MARD 5,0 % statt 6,3 % | 11.11.2026 |
+| Reserven beim Aufwachen | Start um 7 Uhr mit 55 % statt 100 % („hungrig aufgewacht“) | 11.11.2026 |

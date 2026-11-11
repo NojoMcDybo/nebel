@@ -137,13 +137,14 @@ class Engine {
        Erst der Rueckblick zeigt diese Liste. */
     this.sensorFaults = [];
     this._fault = null;
-    this._reserve = 1;
+    /* Morgens ist der Speicher am tiefsten: unter 70 % zeigt die Karte „hungrig aufgewacht". */
+    this._reserve = 0.55;
 
     this.s = {
       t: 7*60, G: 0, Gi: 0,
       basalSet: this.therapy.basalRateUPerH,
       basalEff: this.therapy.basalRateUPerH,
-      asleep: false, gly: 1, Z: 0, emg: null,
+      asleep: false, gly: 0.55, Z: 0, emg: null,
     };
     this.pump = N.flatBasalProfile(this.therapy.basalRateUPerH);
     /* Zustand alle 30 min, damit die Vorhersage die letzten Stunden mit und

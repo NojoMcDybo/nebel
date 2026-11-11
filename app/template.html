@@ -271,6 +271,7 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .legal{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-align:center; margin:14px 0 0}
 .legal a{color:var(--ink3); text-decoration:none; padding:6px 4px}
 .legal a:hover, .legal a:focus-visible{color:var(--ink); text-decoration:underline}
+.gate .legal{margin:18px 0 -4px}  /* .gate p nahm sonst den Abstand zum Button weg */
 
 /* Personenwahl */
 .people{display:grid; grid-template-columns:repeat(5,1fr); gap:10px 8px}
@@ -686,10 +687,12 @@ input[type=range]::-moz-range-thumb{width:30px;height:30px;border:0;border-radiu
   border-top:1px solid var(--hair); min-width:0}
 .statlist > div:nth-child(-n+2){border-top:0}
 .statlist > div:nth-child(odd){border-right:1px solid var(--hair)}
-.statlist .k{font-family:var(--mono); font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink3); line-height:1.3}
+.statlist .k{min-width:0; hyphens:manual; font-family:var(--mono); font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink3); line-height:1.3}
 .statlist .v{font-size:16px; font-weight:700; letter-spacing:-.01em; font-variant-numeric:tabular-nums; white-space:nowrap}
 .fsub{font-size:13.5px; color:var(--ink2); margin:0 0 4px; line-height:1.5}
 .fcsum{font-size:13.5px; color:var(--ink2); line-height:1.55; margin:12px 2px 0}
+/* Feste Höhe für den wechselnden Satz, damit nichts darunter springt. */
+.fcsum .fcv{display:block; min-height:calc(1.55em * 4)}
 .fcsum b{color:var(--ink)} .fcsum .lo{color:var(--low); font-weight:600}
 .fcsum .hint{display:block; font-size:12px; color:var(--ink3); margin-top:6px}
 .chartcard.fx{margin-top:14px; padding:12px 8px 8px}
@@ -942,7 +945,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     <div><span class="k">Mittelwert</span><span class="v" id="rAvg">—</span></div>
     <div><span class="k">Entscheidungen</span><span class="v" id="rDec">—</span></div>
     <div><span class="k">Notfälle</span><span class="v" id="rEmg">—</span></div>
-    <div><span class="k">Sensorabweichung</span><span class="v" id="rMard">—</span></div>
+    <div><span class="k">Sensor&shy;abweichung</span><span class="v" id="rMard">—</span></div>
     <div><span class="k">Nachtalarme</span><span class="v" id="rAlarm">—</span></div>
     <div><span class="k">Sensor gedrückt</span><span class="v" id="rFault">—</span></div>
   </div>
@@ -1917,7 +1920,7 @@ function paintReserve(){
   const key = pct + cls;
   if (key === lastRes) return;
   lastRes = key;
-  $("reserve").className = "reserve" + cls;
+  $("reserve").className = "reserve" + cls + ($("reserve").classList.contains("gi") ? " gi" : "");
   $("resBar").style.width = pct + "%";
   $("resVal").textContent = pct + " %";
   $("resLabel").textContent = label;
@@ -1985,7 +1988,8 @@ function paintMove(){
     card.classList.remove("fresh"); void card.offsetWidth;
     if (a.mode === "live" || a.mode === "soon") card.classList.add("fresh");
   }
-  card.className = cls + (card.classList.contains("fresh") ? " fresh" : "");
+  // .gi behalten, sonst bricht das Neuzeichnen die Einblendung beim Seitenwechsel ab.
+  card.className = cls + ["fresh","gi"].filter(c => card.classList.contains(c)).map(c => " " + c).join("");
   $("mvCancel").hidden = a.mode !== "soon";
   $("mvBeat").style.display = beat ? "block" : "none";
   $("mvBarWrap").style.display = bar >= 0 ? "block" : "none";
@@ -2588,7 +2592,7 @@ function paintForecastText(F){
   const low = B[mi] < 70
     ? ` <span class="lo">Unter 70 ab ${at(B.findIndex(g => g < 70))}, tiefster Wert ${Math.round(B[mi])} um ${at(mi)}.</span>`
     : ` Tiefster Wert ${Math.round(B[mi])} um ${at(mi)}, höchster ${Math.round(B[ma])} um ${at(ma)}.`;
-  $("fcSum").innerHTML = `Wenn du nichts mehr tust: in zwölf Stunden etwa <b>${end} mg/dL</b>.${low}` +
+  $("fcSum").innerHTML = `<span class="fcv">Wenn du nichts mehr tust: in zwölf Stunden etwa <b>${end} mg/dL</b>.${low}</span>` +
     `<span class="hint">Diese Kurve kennt nur die Simulation. Im echten Leben sieht niemand voraus — dort gibt es nur den Sensor von eben.</span>`;
   /* Flach, aber lang: die Raten ueber das Fenster aufsummiert [mg/dL]. */
   const sum = a => a ? Math.round(a.reduce((x, v) => x + v, 0) * F.stride/60) : 0;
