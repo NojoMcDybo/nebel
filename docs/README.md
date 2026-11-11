@@ -58,3 +58,6 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 | Texte zur Entstehung | Kurzfassung aufklappbar auf der Startseite, ausführliche Fassung als eigene Seite, deutsch und englisch. Quelle sind `docs/40` und `docs/41`, der Bau setzt das Markdown um | 10.11.2026 |
 | Hell/Dunkel | Wahl gespeichert (`nebel.theme`) und auf allen Seiten beider Sprachen gültig, Standard hell. Statusleiste folgt über `theme-color` | 11.11.2026 |
 | Blutzuckeranzeige | Zahl mittig, Pfeil und Differenz rechts daneben. Keine Puls- oder Skalierungsanimation an der Zahl | 11.11.2026 |
+| Trainingsarten | Belastungsmuster statt gleichmäßiger Linie: Intervalle, Kraft und Mannschaftssport wechseln hart und locker und senken etwa halb so stark wie ein Dauerlauf (Guelfi 2005, Yardley 2013) | 11.11.2026 |
+| Bewegung in der Analyse | Eigene Linie mit Vorzeichen in der Wirkungskarte, Nachwirkung zählt zur Bewegung | 11.11.2026 |
+| Sensorstreuung | `a0` 0,97 ± 0,04 (0,89–1,05), Drift 3,5 mg/dL; MARD 5,0 % statt 6,3 % | 11.11.2026 |

@@ -699,7 +699,7 @@ input[type=range]::-moz-range-thumb{width:30px;height:30px;border:0;border-radiu
 .fxc{appearance:none; border:0; cursor:default; background:var(--sink); color:var(--ink); border-radius:99px; padding:6px 11px;
   font:600 12px var(--sans); display:inline-flex; align-items:center; gap:6px}
 .fxc i{width:10px; height:10px; border-radius:3px; display:inline-block}
-.fxc i.ins{background:var(--ins)} .fxc i.food{background:var(--high)}
+.fxc i.ins{background:var(--ins)} .fxc i.food{background:var(--high)} .fxc i.mv{background:var(--ink)}
 button.fxc{cursor:pointer; transition:transform .25s var(--spring), background .25s var(--spring)}
 button.fxc:active{transform:scale(.95)}
 button.fxc[aria-expanded="true"]{background:var(--ink); color:var(--paper)}
@@ -962,9 +962,10 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
       <span class="fxchips">
         <span class="fxc"><i class="ins"></i>Insulin</span>
         <button class="fxc" id="fxFood" aria-expanded="false"><i class="food"></i>Essen <span class="caret">▶</span></button>
+        <span class="fxc" id="fxMove" hidden><i class="mv"></i>Bewegung</span>
       </span>
     </div>
-    <canvas id="revFx" aria-label="Wirkung von Insulin und Essen auf den Blutzucker"></canvas>
+    <canvas id="revFx" aria-label="Wirkung von Insulin, Essen und Bewegung auf den Blutzucker"></canvas>
     <div class="fxsplit" id="fxSplit" hidden>
       <span><i style="background:var(--high)"></i>schnelle Kohlenhydrate</span>
       <span><i style="background:repeating-linear-gradient(90deg, var(--high) 0 5px, transparent 5px 8px)"></i>langsame Kohlenhydrate</span>
@@ -2529,6 +2530,12 @@ function drawEffects(cv, F, pastMin){
     : [{ v:F.food, col:C.high, dash:[] }];
   const down = [{ v:F.insulin, col:C.ins, dash:[] }];
   const idx0 = Math.max(0, Math.floor((f.t0 - F.from)/F.stride));
+  /* Bewegung mit Vorzeichen: hebt (Leber, Stresshormone) oder senkt (Muskeln, Nachwirkung). */
+  const mv = { v:F.move, col:C.ink, dash:[] };
+  const hasMove = F.move.some((v, i) => i >= idx0 && Math.abs(v) >= 1);
+  $("fxMove").hidden = !hasMove;
+  if (hasMove){ up.push({ v:F.move.map(v => Math.max(0, v)), col:C.ink, dash:[], skip:true });
+                down.push({ v:F.move.map(v => Math.max(0, -v)), col:C.ink, dash:[], skip:true }); }
   const maxOf = arr => { let m = 0; for (const s of arr) for (let i = idx0; i < s.v.length; i++) m = Math.max(m, s.v[i]); return m; };
   const nice = m => { const st = m > 300 ? 100 : m > 120 ? 50 : m > 40 ? 20 : 10; return Math.max(st, Math.ceil(m/st)*st); };
   const top = nice(maxOf(up)), bot = nice(maxOf(down));
@@ -2550,7 +2557,8 @@ function drawEffects(cv, F, pastMin){
     c.globalAlpha = 1; c.strokeStyle = s.col; c.lineWidth = 2; c.setLineDash(s.dash);
     c.beginPath(); pts.forEach(([x,y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); c.setLineDash([]);
   };
-  up.forEach(s => plot(s, 1)); down.forEach(s => plot(s, -1));
+  up.forEach(s => s.skip || plot(s, 1)); down.forEach(s => s.skip || plot(s, -1));
+  if (hasMove) plot(mv, 1);
   /* Fett und Eiweiss sind flach, aber lang — neben den steilen Kohlenhydraten
      gingen sie sonst unter. Beschriftet am eigenen Gipfel, nicht vergroessert:
      eine zweite Skala wuerde ihre Groesse falsch erzaehlen. */
@@ -2590,9 +2598,12 @@ function paintForecastText(F){
       [sF >= 5 ? `hält Fett etwa ${sF} mg/dL im Blut, die das Insulin sonst herausgenommen hätte` : "",
        sP >= 5 ? `bringt Eiweiß etwa ${sP} mg/dL` : ""].filter(Boolean).join(", ") + "."
     : "";
-  $("fxNote").textContent = fxSplit
+  const moveNote = F.move.some(v => Math.abs(v) >= 1)
+    ? " Die dunkle Linie ist Bewegung. Über null hebt sie den Wert, weil die Leber bei harter Belastung mehr Zucker abgibt. Unter null senkt sie ihn: Die Muskeln nehmen Zucker auf, und noch Stunden danach wirkt das Insulin stärker."
+    : "";
+  $("fxNote").textContent = (fxSplit
     ? "Schnelle Kohlenhydrate wirken früh und steil, langsame später und flacher. Fett bremst den Magen — die Kohlenhydrate kommen später — und macht das Insulin über Stunden schwächer: Die blaue gestrichelte Linie ist Zucker, den das Insulin sonst herausgenommen hätte. Aus Eiweiß macht die Leber spät etwas Zucker. Fett und Eiweiß sind an wenigen Studien kalibriert und streuen von Mensch zu Mensch stark." + lang
-    : "Wie viel Zucker dein Essen gerade ins Blut bringt und dein Insulin herausnimmt, in mg/dL pro Stunde. Der Wert bewegt sich nur um die Differenz. Tipp auf „Essen“, um es in Kohlenhydrate, Fett und Eiweiß aufzuteilen.";
+    : "Wie viel Zucker dein Essen gerade ins Blut bringt und dein Insulin herausnimmt, in mg/dL pro Stunde. Der Wert bewegt sich nur um die Differenz. Tipp auf „Essen“, um es in Kohlenhydrate, Fett und Eiweiß aufzuteilen.") + moveNote;
 }
 
 function toggleFxSplit(){

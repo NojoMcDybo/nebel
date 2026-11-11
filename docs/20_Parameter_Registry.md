@@ -181,10 +181,10 @@ Grundidee: Ein echter Sensor irrt **kohärent**. Er liegt über Stunden gleichm�
 
 | Baustein | Zeitskala | Wert | Status | Beleg |
 |---|---|---|---|---|
-| Kalibriercharakter `a0` | je Sensor fest | Median 0,95, Streuung 0,059, Grenzen 0,85–1,05 | Q (Median, IQR) + N (Normalverteilung, Grenzen) | Vettoretti 2019; Streuung = IQR / 1,349 |
+| Kalibriercharakter `a0` | je Sensor fest | Median 0,97, Streuung 0,04, Grenzen 0,89–1,05 | N, abgeleitet aus Q | Vettoretti 2019 (Median 0,95, Streuung 0,059 = IQR / 1,349). Am 11.11.2026 enger gestellt, weil heutige Sensoren weniger streuen als der G6 von 2019: MARD gegen Blut 6,3 → 5,0 %, schlechtester Sensor 13,9 → 9,9 % |
 | Kalibriercharakter `b0` | je Sensor fest | Median 0,14 mg/dL, Streuung 3,5 mg/dL | Q + N | dito |
 | Verstärkungsdrift `a1`, `a2` | Tage | 0,0039 · −0,000027 | Q ⚠ | Vettoretti 2019, Zeiteinheit erschlossen (5.1) |
-| Langsame Drift | Stunden | Streuung 4 mg/dL, Stützstellen alle 180 min | N | Struktur folgt der Beobachtung „kohärenter Fehler"; Stärke Nebel-Kalibrierung |
+| Langsame Drift | Stunden | Streuung 3,5 mg/dL (bis 11.11.2026: 4), Stützstellen alle 180 min | N | Struktur folgt der Beobachtung „kohärenter Fehler"; Stärke Nebel-Kalibrierung |
 | Zittern | 5–10 min | Streuung 1,2 mg/dL, AR(1) ρ = 0,5 | N, am Rand von Q | Camerlingo et al. 2023: Rauschvarianz in G6-Spuren 0,4–25 mg²/dL², also Streuung 0,6–5 mg/dL, Mittel zweier Beispielspuren 2,0 und 3,2 mg/dL |
 | Erster Tag nach dem Setzen | Stunden | ×2,5, klingt mit τ = 8 h ab | N | Richtung: Hanson et al. 2024, Libre 3 MARD Tag 1 12,8 %, Tag 2 8,6 % |
 | Bewegung | Minuten | Zuschlag 1,5 × `EEfast` | N | Richtung: Camerlingo 2023 nennt Aktivität als Rauschquelle, ohne sie zu beziffern |

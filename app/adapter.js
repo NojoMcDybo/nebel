@@ -63,12 +63,20 @@ const TRAIN_LOW = 80, TRAIN_HIGH = 280;
    zeigt die Karte sie an, ab 6 % sagen die Reserven „nachtanken". 45 min
    Dauerlauf: rund 12 h sichtbar, davon gut 5 h nachtanken. */
 const AFTER_SHOW = 0.03, AFTER_REFUEL = 0.06;
+/* p: Belastungsmuster [Minuten, Anteil der HF-Reserve], wiederholt bis zum Ende.
+   Fehlt es, bleibt die Belastung gleichmaessig bei i. Mit Muster ist i nur
+   die gefuehlte Belastung fuer die Anzeige.
+   Kalibriert ueber alle 20 Subjekte gegen 45 min Dauerlauf (-39 mg/dL):
+   Wechsel aus kurzen harten und lockeren Phasen senken weniger, Guelfi 2005
+   (doi 10.2337/diacare.28.6.1289): -2,9 statt -4,4 mmol/L. Kraft in Saetzen
+   senkt etwa halb so stark, Yardley 2013 (doi 10.2337/dc12-0963): -1,6 statt
+   -3,4 mmol/L. Eine gleichmaessig harte Linie hob den Wert dagegen an. */
 const TRAINING = [
-  {n:"Basketballtraining",  i:0.75, d:[80,100], w:[35,50]},
-  {n:"Krafttraining",       i:0.58, d:[55,75],  w:[30,45]},
+  {n:"Basketballtraining",  i:0.75, d:[80,100], w:[35,50], p:[[1,0.9],[3,0.6]]},
+  {n:"Krafttraining",       i:0.58, d:[45,60],  w:[30,45], p:[[1,0.8],[2,0.2]]},
   {n:"Dauerlauf",           i:0.55, d:[40,55],  w:[25,40]},
-  {n:"Intervalltraining",   i:0.92, d:[28,38],  w:[25,40]},
-  {n:"Punktspiel",          i:0.85, d:[70,90],  w:[40,60]},
+  {n:"Intervalltraining",   i:0.92, d:[28,38],  w:[25,40], p:[[1,0.9],[2,0.5]]},
+  {n:"Punktspiel",          i:0.85, d:[70,90],  w:[40,60], p:[[1,0.92],[3,0.65]]},
 ];
 
 /* Bleibt fuer die Oberflaeche bestehen, wird aber nicht mehr gefuellt:
@@ -167,7 +175,7 @@ class Engine {
        Alltagsbewegung laeuft weiter — die plant niemand. */
     if (!this.reality){
       const tr = pick(TRAINING, 200);
-      this.acts.push({ name:tr.n, inten:tr.i, start: base + 16*60 + Math.floor(u(210)*240),
+      this.acts.push({ name:tr.n, inten:tr.i, pat:tr.p, start: base + 16*60 + Math.floor(u(210)*240),
                        dur: Math.round(span(tr.d, 220)), warn: Math.round(span(tr.w, 230)) });
     }
     this.acts.sort((a,b) => a.start - b.start);
@@ -227,12 +235,15 @@ class Engine {
   }
 
   /* Eine Einheit beginnt JETZT — selbst gestartet oder aus dem Tagesplan. */
-  _beginActivity(name, inten, dur){
+  _beginActivity(name, inten, dur, pat){
     const t = this.s.t, d = Math.max(2, Math.round(dur));
-    const bpm = this.p.HRrest + inten*(this.p.HRmax - this.p.HRrest);
-    this._setHeartRate([
-      { t, bpm }, { t: t + d - 1, bpm }, { t: t + d, bpm: this.p.HRrest },
-    ]);
+    const hr = f => this.p.HRrest + f*(this.p.HRmax - this.p.HRrest);
+    const pts = [];
+    if (pat) for (let m = 0; m < d; ) for (const [len, f] of pat)
+      for (let k = 0; k < len && m < d; k++, m++) pts.push({ t: t + m, bpm: hr(f) });
+    else pts.push({ t, bpm: hr(inten) }, { t: t + d - 1, bpm: hr(inten) });
+    pts.push({ t: t + d, bpm: this.p.HRrest });
+    this._setHeartRate(pts);
     this.events.push({ kind:"move", t, name, dur: d, inten });
     this._act = { name, inten, start:t, dur:d };
   }
@@ -285,7 +296,7 @@ class Engine {
         continue;
       }
       a.logged = true;
-      this._beginActivity(a.name, a.inten, a.dur);
+      this._beginActivity(a.name, a.inten, a.dur, a.pat);
     }
   }
 
@@ -509,7 +520,7 @@ class Engine {
       return d.map((v,i) => v + (k1[i] + 2*k2[i] + 2*k3[i] + k4[i])/6);
     };
 
-    const full = [], insulin = [], food = [], fast = [], slow = [], protein = [], fat = [];
+    const full = [], insulin = [], food = [], fast = [], slow = [], protein = [], fat = [], move = [];
     let z = Float64Array.from(snap.z), d = [0,0,0,0,0];
     /* Fett: die Insulinwirkung, die wegen der fettbedingten Resistenz fehlt.
        Gerechnet wird direkt die Luecke dx = x(ohne Resistenz) − x(echt) fuer
@@ -530,16 +541,25 @@ class Engine {
         const ft = Math.max(0, (dx2*Q2 + p.EGP0*dx3) * perH);
         fast.push(f); slow.push(sl); protein.push(pr); fat.push(ft); food.push(f + sl + pr + ft);
         insulin.push((d[3]*Q2 + p.EGP0*d[4]) * perH);
+        /* Bewegung, mit Vorzeichen: Leber gibt mehr ab (hart: Stresshormone),
+           Muskeln nehmen auf, und die Nachwirkung laesst alles Insulin staerker
+           wirken. Die Nachwirkung steht deshalb hier und nicht beim Insulin. */
+        const EEf = N.get(z, "EEfast"), EEh = N.get(z, "EEhigh"), EEl = N.get(z, "EElong");
+        const x2 = N.get(z, "x2"), x3 = N.get(z, "x3"), ae = u.siFactor / u.siFat;
+        const liver = p.EGP0 * (1 - x3) * (p.p1*EEf + p.p2*EEh);
+        const muscle = p.p4*EEf + p.p5*x2*EEl;
+        const after = (x2*Q2 + p.EGP0*x3) * (1 - 1/ae);
+        move.push((liver - muscle - after) * perH);
       }
       if (t >= end) break;
       const si = N.sensitivityFactor(G, p), I = N.get(z, "I");
-      d = rk(d, u.uInsulin - basalMU, si * u.siFactor);
+      d = rk(d, u.uInsulin - basalMU, si * u.siFat);
       const gap = si * I * (u.siFactor / u.siFat) * (1 - u.siFat);   // nur der Fettanteil
       dx2 = dx2*e2 + p.kb2*gap/p.ka2*(1 - e2);
       dx3 = dx3*e3 + p.kb3*gap/p.ka3*(1 - e3);
       z = N.rk4Step(N.derivatives, z, t, 1, p, u);
     }
-    return { from: snap.t, now, end, stride, blood, full, insulin, food, fast, slow, protein, fat };
+    return { from: snap.t, now, end, stride, blood, full, insulin, food, fast, slow, protein, fat, move };
   }
 
   /* ── Anzeigezustaende ── */

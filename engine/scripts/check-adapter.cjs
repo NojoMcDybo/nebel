@@ -254,4 +254,20 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   const R = h2.forecast(360, 720, 5);
   ok("Vorhersage nach Neuladen identisch", R.blood.every((v, j) => v === lower.blood[j]) && R.insulin.every((v, j) => v === lower.insulin[j]));
 }
+{ /* Belastungsmuster: Intervalle wechseln die Herzfrequenz und heben den Wert
+     nicht wie eine gleichmaessig harte Linie. Bewegung erscheint in der Wirkung. */
+  const run = (name, inten, pat) => { const c = new Engine(20260812, 9); c.acts = [];
+    for (let i = 0; i < 60; i++){ c.acts = []; c.step(); }
+    const g0 = c.s.G; c._beginActivity(name, inten, 33, pat);
+    const hr = [0, 1, 2].map(k => N_hr(c, c.s.t + k));
+    const F = c.forecast(60, 120, 5);
+    for (let i = 0; i < 33; i++){ c.acts = []; c.step(); }
+    return { d: c.s.G - g0, hr, F }; };
+  const N_hr = (c, t) => window.Nebel.heartRateAt(t, c.input, c.p.HRrest);
+  const flat = run("flach", 0.92), iv = run("Intervalle", 0.92, [[1, 0.9], [2, 0.5]]);
+  ok("Intervalle wechseln die Herzfrequenz", iv.hr[0] > iv.hr[1] + 20 && Math.abs(iv.hr[1] - iv.hr[2]) < 1,
+     iv.hr.map(Math.round).join(" / ") + " bpm");
+  ok("… und heben weniger als eine harte Linie", iv.d < flat.d - 10, `${iv.d.toFixed(0)} statt ${flat.d.toFixed(0)} mg/dL`);
+  ok("Bewegung steht in der Wirkung", iv.F.move.some(v => Math.abs(v) > 5), "max " + Math.max(...iv.F.move.map(Math.abs)).toFixed(0) + " mg/dL/h");
+}
 function fmtClock(t){ return String(Math.floor(t/60)%24).padStart(2,"0") + ":" + String(t%60).padStart(2,"0"); }

@@ -234,11 +234,15 @@ export const NEBEL_SENSOR_V2: SensorModelV2 = {
   lifetimeDays: 10,
   startAgeDays: [2, 7],
   /* Vettoretti 2019, Tab. 1: a0 Median 0.95, IQR 0.91–0.99 → sd ≈ IQR/1.349;
-     b0 Median 0.14, IQR −2.19–2.54 mg/dL. Drift a1, a2 als Mediane. */
-  calib: { a0Median: 0.95, a0Sd: 0.059, a0Min: 0.85, a0Max: 1.05,
+     b0 Median 0.14, IQR −2.19–2.54 mg/dL. Drift a1, a2 als Mediane.
+     NEBEL-KALIBRIERUNG (11.11.2026): a0 enger um 0,97 (sd 0,04 statt 0,059,
+     0,89–1,05) und Drift 3,5 statt 4 mg/dL. Der G6 von 2019 streute weiter
+     als heutige Sensoren; MARD gegen Blut 6,3 → 5,0 %, schlechtester Sensor
+     13,9 → 9,9 % (scripts/cgm-calibration.cjs). */
+  calib: { a0Median: 0.97, a0Sd: 0.04, a0Min: 0.89, a0Max: 1.05,
            b0Median: 0.14, b0Sd: 3.5, a1: 0.0039, a2: -0.000027 },
   /* NEBEL-KALIBRIERUNG innerhalb der belegten Struktur. */
-  drift:   { sdMgdl: 4, knotMin: 180 },
+  drift:   { sdMgdl: 3.5, knotMin: 180 },
   /* Camerlingo et al. 2023 (Front Bioeng Biotechnol 11:1280233), G6-Spuren:
      Rauschvarianz 0,4–25 mg²/dL², also SD 0,6–5 mg/dL, Mittel 2,0–3,2.
      Nebel setzt den ruhigen Normalfall bewusst an den unteren Rand. */
