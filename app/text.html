@@ -7,15 +7,16 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230A0D0D'/%3E%3Ccircle cx='23' cy='22' r='3' fill='%23B8362B'/%3E%3Cpath d='M8 23V12.5c0-1.4 1.1-2.5 2.5-2.5h2c2.8 0 5 2.2 5 5V23' fill='none' stroke='%23EDF1F1' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E">
 <!-- Huelle fuer die Texte zur Entstehung. engine/scripts/build-viewer.mjs setzt den
      Text aus docs/40_*.md ein; Quelle bleibt das Markdown. -->
+<script>/* dasselbe Theme wie in der App (Schluessel nebel.theme) */
+try { if (localStorage.getItem("nebel.theme") === "dark") document.documentElement.dataset.theme = "dark"; } catch (e) {}</script>
 <style>
 @font-face{font-family:"DM Mono"; font-weight:400; font-display:swap; src:url("{{ROOT}}fonts/dm-mono-400.woff2") format("woff2")}
 @font-face{font-family:"Plus Jakarta Sans"; font-weight:200 800; font-display:swap; src:url("{{ROOT}}fonts/plus-jakarta-sans.woff2") format("woff2")}
 :root{--paper:#EDF1F1; --card:#FFFFFF; --ink:#0A0D0D; --ink2:#576262; --ink3:#5F6A6A; --hair:rgba(10,13,13,.11)}
-@media (prefers-color-scheme: dark){
-  :root{--paper:#0E1213; --card:#191E20; --ink:#E9EFEF; --ink2:#A3AEAE; --ink3:#7E8A8A; --hair:rgba(233,239,239,.14)}
-}
+:root[data-theme="dark"]{--paper:#0E1213; --card:#191E20; --ink:#E9EFEF; --ink2:#A3AEAE; --ink3:#7E8A8A; --hair:rgba(233,239,239,.14)}
 *{box-sizing:border-box}
-html{color-scheme:light dark}
+html{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
 body{margin:0; background:var(--paper); color:var(--ink); font:16px/1.6 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
 main{max-width:720px; margin:0 auto; padding:28px 16px 72px}
 a{color:inherit; text-underline-offset:3px; overflow-wrap:anywhere}

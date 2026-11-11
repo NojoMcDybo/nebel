@@ -231,6 +231,8 @@ window.SUBJECTS = ${JSON.stringify(chosen, null, 1)};
     ["@fontsource-variable/plus-jakarta-sans/LICENSE", "fonts/OFL-Plus-Jakarta-Sans.txt"],
   ].map(([a, b]) => [resolve(nm, a), b]);
   copies.push([resolve(root, "../LICENSE"), "lizenzen/Apache-2.0.txt"]);
+  // Homebildschirm-Icon fuer iOS; /en/ verweist relativ, braucht also eine eigene Kopie.
+  copies.push([resolve(root, "../app/apple-touch-icon.png"), "apple-touch-icon.png"], [resolve(root, "../app/apple-touch-icon.png"), "en/apple-touch-icon.png"]);
   copies.push([resolve(root, "vendor/py-mgipsim/LICENSE"), "lizenzen/GPL-3.0.txt"]);
   for (const [from, to] of copies) {
     if (existsSync(from)) copyFileSync(from, resolve(site, to));

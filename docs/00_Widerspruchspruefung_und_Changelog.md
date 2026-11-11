@@ -431,3 +431,12 @@ Dieser Tag stand bisher nur in `30_Rechtliche_Einordnung.md` (Abschnitte 7.1 und
 - Das Simulator-Paper von 2019 hat laut PubMed Rashid als Erstautor, Hobbs ist Mitautor ([DOI](https://doi.org/10.1016/j.compchemeng.2019.106565)). Bisher stand „Hobbs et al.“. Korrigiert im Root-`README.md`, in `README.md` dieses Ordners, Spec §17, an zwei Stellen in diesem Dokument und auf beiden Rechtsseiten.
 - Vettoretti 2019 heißt laut PubMed „Development of an error model for a factory-calibrated continuous glucose monitoring sensor with 10-day lifetime“ ([DOI](https://doi.org/10.3390/s19235320)). Korrigiert in der Registry, Abschnitt 5.1.
 - **Offen:** Smart 2013. Der PubMed-Abstract nennt für die eiweißreiche Mahlzeit 2,4 gegen 0,5 mmol/L, die Gegenprobe in Doc 11 führt +2,4 als Differenz. Am Original prüfen.
+
+## 22. Nachtrag 11.11.2026 — Web-App auf dem iPhone
+
+- **Icon:** `app/apple-touch-icon.png` (180 px, weißes n auf Schwarz mit rotem Punkt, aus dem Favicon gerechnet). Der Bau kopiert es nach `/` und `/en/`.
+- **Hell/Dunkel bleibt:** Schlüssel `nebel.theme` in `localStorage`, gemeinsam für Deutsch und Englisch. Die App, `entstehung.html`, `en/making-of.html` und beide Rechtsseiten lesen ihn vor dem ersten Bild. Ohne gespeicherte Wahl bleibt es hell, auch die Unterseiten folgen nicht mehr dem Systemmodus.
+- **Statusleiste:** `theme-color` wechselt mit dem Theme (`#EDF1F1` / `#0E1213`). Ob iOS die Leiste einer gespeicherten Web-App daraufhin umfärbt, ist auf dem Gerät zu prüfen.
+- **Kein Blinken mehr an der Zahl:** Der Puls bei jedem neuen Wert (kurz 50 % Deckkraft und Skalierung) und das Skalieren nach Aktionen sind entfernt. iOS rastert skalierten Text neu, das sah wie Flackern aus.
+- **Zahl mittig:** Pfeil und Differenz stehen in einer eigenen rechten Spalte, die Zahl in der Mitte der Zeile.
+- **Blätter wegwischen:** Alle unteren Blätter (Essen, Insulin, Bewegung, Basal, Realität) schließen per Zug nach unten, wenn ihr Inhalt oben steht. Ab 30 % Höhe oder mit Schwung, sonst gleiten sie zurück. Schieberegler sind ausgenommen.

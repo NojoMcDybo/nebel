@@ -9,15 +9,16 @@
 <!-- English translation of app/rechtliches.html. Placeholders in double curly
      braces are filled by engine/scripts/build-viewer.mjs. Paths are relative
      to en/. The German page is the legally binding version. -->
+<script>/* dasselbe Theme wie in der App (Schluessel nebel.theme) */
+try { if (localStorage.getItem("nebel.theme") === "dark") document.documentElement.dataset.theme = "dark"; } catch (e) {}</script>
 <style>
 @font-face{font-family:"DM Mono"; font-weight:400; font-display:swap; src:url("../fonts/dm-mono-400.woff2") format("woff2")}
 @font-face{font-family:"Plus Jakarta Sans"; font-weight:200 800; font-display:swap; src:url("../fonts/plus-jakarta-sans.woff2") format("woff2")}
 :root{--paper:#EDF1F1; --card:#FFFFFF; --ink:#0A0D0D; --ink2:#576262; --ink3:#5F6A6A; --hair:rgba(10,13,13,.11); --low:#B8362B}
-@media (prefers-color-scheme: dark){
-  :root{--paper:#0E1213; --card:#191E20; --ink:#E9EFEF; --ink2:#A3AEAE; --ink3:#7E8A8A; --hair:rgba(233,239,239,.14); --low:#FF7063}
-}
+:root[data-theme="dark"]{--paper:#0E1213; --card:#191E20; --ink:#E9EFEF; --ink2:#A3AEAE; --ink3:#7E8A8A; --hair:rgba(233,239,239,.14); --low:#FF7063}
 *{box-sizing:border-box}
-html{color-scheme:light dark}
+html{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
 body{margin:0; background:var(--paper); color:var(--ink); font:16px/1.6 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
 main{max-width:680px; margin:0 auto; padding:28px 16px 72px}
 a{color:inherit; text-underline-offset:3px}

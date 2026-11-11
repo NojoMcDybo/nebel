@@ -6,12 +6,15 @@
 <title>nebel. — Diabetes-Alltagssimulator</title>
 <meta name="theme-color" content="#EDF1F1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230A0D0D'/%3E%3Ccircle cx='23' cy='22' r='3' fill='%23B8362B'/%3E%3Cpath d='M8 23V12.5c0-1.4 1.1-2.5 2.5-2.5h2c2.8 0 5 2.2 5 5V23' fill='none' stroke='%23EDF1F1' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="nebel">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href='data:application/manifest+json,{"name":"nebel","short_name":"nebel","display":"standalone","start_url":"./","background_color":"%23EDF1F1","theme_color":"%23EDF1F1"}'>
-<script>document.documentElement.dataset.theme = "light";
+<script>/* Hell/Dunkel gilt fuer alle Seiten und beide Sprachen; die Statusleiste der Web-App folgt ueber theme-color. */
+try { document.documentElement.dataset.theme = localStorage.getItem("nebel.theme") === "dark" ? "dark" : "light"; } catch (e) { document.documentElement.dataset.theme = "light"; }
+document.querySelector('meta[name="theme-color"]').content = document.documentElement.dataset.theme === "dark" ? "#0E1213" : "#EDF1F1";
 /* Bloecke bis zur Begruessung verbergen, sonst stehen sie einen Frame lang fertig da.
    Bricht das Skript ab, gibt der Fehler-Handler sie wieder frei. */
 if (!matchMedia("(prefers-reduced-motion: reduce)").matches){
@@ -385,13 +388,14 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .seg.tall button{height:40px; font-family:var(--sans); font-size:13.5px; font-weight:600}
 
 .readout{padding:26px 0 10px; text-align:center; filter:blur(calc(var(--fade)*3.4px)); transition:filter 1.1s linear}
-.valrow{display:flex; align-items:center; justify-content:center; gap:12px}
+/* drei Spalten: links leer, Mitte Zahl, rechts Pfeil und Differenz, damit die Zahl mittig steht */
+.valrow{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px}
+.valrow .value{grid-column:2}
+.side{grid-column:3; display:flex; align-items:center; gap:12px; justify-self:start}
 .value{
   font-size:88px; font-weight:800; letter-spacing:-.06em; line-height:.85;
   font-variant-numeric:tabular-nums; transition:color 1.2s linear;
 }
-.value.pulse{animation:tick .6s var(--spring)}
-@keyframes tick{0%{transform:scale(1);opacity:.5}36%{transform:scale(1.04);opacity:1}100%{transform:scale(1)}}
 .arrowbox{display:flex; align-items:center; justify-content:center; gap:0; height:32px}
 .arw{
   width:32px; height:32px; flex:0 0 auto;
@@ -493,12 +497,6 @@ canvas{width:100%; height:206px; display:block; touch-action:pan-y}
 .toast.on{transform:translate(-50%, 0) scale(1); opacity:1}
 .toast svg{width:15px; height:15px; flex:0 0 auto}
 
-@keyframes ping{
-  0%{transform:scale(1)}
-  28%{transform:scale(1.055)}
-  100%{transform:scale(1)}
-}
-.ping{animation:ping .7s var(--spring)}
 @keyframes edge{
   0%{box-shadow:inset 0 0 0 0 var(--ink), var(--sh)}
   30%{box-shadow:inset 0 0 0 2px var(--ink), var(--sh)}
@@ -857,7 +855,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
       </div>
       <div class="valrow">
         <span class="value" id="bg">110</span>
-        <span class="arrowbox" id="arrowbox">
+        <span class="side"><span class="arrowbox" id="arrowbox">
           <svg class="arw" viewBox="0 0 32 32" fill="none" aria-hidden="true">
             <path d="M16 26V7M16 7l-6.5 6.5M16 7l6.5 6.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -865,7 +863,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
             <path d="M16 26V7M16 7l-6.5 6.5M16 7l6.5 6.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </span>
-        <span class="delta" id="bgDelta" title="Differenz zum vorigen Messwert"></span>
+        <span class="delta" id="bgDelta" title="Differenz zum vorigen Messwert"></span></span>
       </div>
       <div class="unit">mg/dL · Sensor</div>
       <div class="behind" id="behind">dein Körper vor etwa einer Weile</div>
@@ -1406,10 +1404,13 @@ const mixC = (a, b, k) => {
   return out;
 };
 let themeTw = 0;
+$("theme").setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
 $("theme").onclick = () => {
   const from = { ...C };
   root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
   $("theme").setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
+  try { localStorage.setItem("nebel.theme", root.dataset.theme); } catch (e) {}
+  document.querySelector('meta[name="theme-color"]').content = root.dataset.theme === "dark" ? "#0E1213" : "#EDF1F1";
   requestAnimationFrame(() => {
     readTheme(); const to = { ...C }, t0 = performance.now(), id = ++themeTw;
     C = from;                                         // kein Zwischenbild in der Zielfarbe
@@ -1465,7 +1466,7 @@ function greetPage(i){
   el.classList.remove("hold");                            // im selben Schritt, kein Frame dazwischen
   document.documentElement.classList.remove("pre");
   el._gt = setTimeout(() => ts.forEach(t => { t.classList.remove("gi"); t.style.removeProperty("--gd"); }), 3600);
-  if (i === 1){ reveal($("chart")); const bg = $("bg"); bg.classList.remove("pulse"); void bg.offsetWidth; bg.classList.add("pulse"); }
+  if (i === 1){ reveal($("chart")) }
   if (i === 2){ reveal($("revChart")); reveal($("revFx")); revGreet = true; updateReview(); lastRev = performance.now(); }
 }
 /* Diagramme decken sich diagonal auf, kurz nach ihrer Karte. Web Animations
@@ -1823,7 +1824,6 @@ function paint(tNow){
   if (eng.trace.length !== lastCount){
     lastCount = eng.trace.length;
     el.textContent = v;
-    el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse");
     renderLog();
   }
   const tone = v < 70 ? C.low : v > 180 ? C.high : C.ink;
@@ -2052,8 +2052,6 @@ function toast(kind, text, cell){
   if (cell){
     cell.classList.remove("edge"); void cell.offsetWidth; cell.classList.add("edge");
   }
-  const v = $("bg");
-  v.classList.remove("ping"); void v.offsetWidth; v.classList.add("ping");
 }
 
 /* Einmaliger Hinweis: ohne Bestaetigung bleibt die App dahinter gesperrt.
@@ -2078,6 +2076,37 @@ const GATE_KEY = "nebel.hinweis.v1";
 const closeSheets = () => document.querySelectorAll(".sheet").forEach(s => s.classList.remove("on"));
 document.querySelectorAll("[data-close]").forEach(b => b.onclick = closeSheets);
 document.querySelectorAll(".sheet").forEach(s => s.onclick = e => { if (e.target === s) closeSheets(); });
+/* Blatt nach unten wegwischen. Nur wenn der Inhalt ganz oben steht, sonst scrollt er.
+   Schieberegler bleiben ausgenommen. Weit genug (30 %) oder schnell genug schliesst. */
+document.querySelectorAll(".sheet .panel").forEach(p => {
+  let y0 = null, x0 = 0, dy = 0, drag = false, t0 = 0;
+  p.addEventListener("touchstart", e => {
+    y0 = e.touches.length === 1 && !e.target.closest("input[type=range]") ? e.touches[0].clientY : null;
+    x0 = y0 == null ? 0 : e.touches[0].clientX; dy = 0; drag = false;
+  }, { passive: true });
+  p.addEventListener("touchmove", e => {
+    if (y0 == null) return;
+    const d = e.touches[0].clientY - y0, dx = Math.abs(e.touches[0].clientX - x0);
+    if (!drag){
+      if (d <= 0 || dx > d || p.scrollTop > 0){ if (Math.abs(d) > 6 || dx > 6) y0 = null; return; }
+      e.preventDefault();                     // kein Gummiband des Panels, solange noch offen ist, wer zieht
+      if (d < 6) return;
+      drag = true; y0 += d; t0 = performance.now(); p.style.transition = "none";
+    }
+    e.preventDefault();
+    dy = Math.max(0, e.touches[0].clientY - y0);
+    p.style.transform = `translateY(${dy}px)`;
+  }, { passive: false });
+  const end = () => {
+    if (drag){
+      const fast = dy / Math.max(1, performance.now() - t0) > 0.6;
+      p.style.transition = ""; p.style.transform = "";  // gleitet von hier aus zu oder zurueck
+      if (dy > p.offsetHeight * 0.3 || (fast && dy > 30)) closeSheets();
+    }
+    drag = false; y0 = null;
+  };
+  p.addEventListener("touchend", end); p.addEventListener("touchcancel", end);
+});
 
 /* Hypoglykaemie verlangsamt die Bedienung. Das ist kein Effekt,
    das ist das Symptom. */

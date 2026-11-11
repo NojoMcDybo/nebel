@@ -56,3 +56,5 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 | Lange Nachwirkung der Bewegung | Eingang `engine/src/afterEffect.ts` ohne neuen Zustand, `p7` bleibt Quelle. Abklingzeit 600 min, Stärke an DirecNet 2005 kalibriert | 09.11.2026 |
 | Wischgeste | Ein Zug endet nur beim Verlust am Pager selbst, Schwung aus einem 170-ms-Fenster wie bei Embla, keine Sperre der Randgeste | 10.11.2026 |
 | Texte zur Entstehung | Kurzfassung aufklappbar auf der Startseite, ausführliche Fassung als eigene Seite, deutsch und englisch. Quelle sind `docs/40` und `docs/41`, der Bau setzt das Markdown um | 10.11.2026 |
+| Hell/Dunkel | Wahl gespeichert (`nebel.theme`) und auf allen Seiten beider Sprachen gültig, Standard hell. Statusleiste folgt über `theme-color` | 11.11.2026 |
+| Blutzuckeranzeige | Zahl mittig, Pfeil und Differenz rechts daneben. Keine Puls- oder Skalierungsanimation an der Zahl | 11.11.2026 |
