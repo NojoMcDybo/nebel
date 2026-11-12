@@ -1,0 +1,58 @@
+# Baut die iPhone-App (mobile/) als unsignierte nebel.ipa. Signiert wird später auf dem Handy (SideStore).
+# Phase 1 braucht die Engine noch nicht; ab Phase 2 kommt npm ci in engine/ dazu.
+name: iPhone-App bauen
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - mobile/**
+      - engine/src/**
+      - app/adapter.js
+      - app/personas.js
+      - .github/workflows/mobile.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ipa:
+    runs-on: macos-26
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Abhaengigkeiten
+        run: npm ci
+      - name: Tests und Typen
+        run: |
+          npm test
+          npm run typecheck
+      - name: Web-Teil bauen und ins iOS-Projekt kopieren
+        run: npm run sync
+      - name: Archiv bauen (ohne Signatur)
+        run: |
+          xcodebuild archive \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+      - name: ipa packen
+        run: |
+          mkdir -p "$RUNNER_TEMP/ipa/Payload"
+          cp -R "$RUNNER_TEMP/App.xcarchive/Products/Applications/App.app" "$RUNNER_TEMP/ipa/Payload/"
+          (cd "$RUNNER_TEMP/ipa" && zip -qr "$GITHUB_WORKSPACE/nebel.ipa" Payload)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nebel-ipa
+          path: nebel.ipa
+          if-no-files-found: error

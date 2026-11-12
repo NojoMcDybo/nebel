@@ -490,3 +490,11 @@ Erweiterter Rechtscheck der veröffentlichten Seite, Bericht in `31_Rechtscheck_
 **MDCG 2019-11:** Verweise in Doc 30, 40 und 41 (DE/EN) zeigen auf rev.1 vom Juni 2025 statt auf die Fassung von 2019/2020.
 
 Geprüft: Veröffentlichungsbau ohne Probleme, Typen sauber, Tests 144 grün, 4 übersprungen, 1 rot (Orakel-Referenzwerte fehlen lokal, braucht numpy, unverändert). Rechtsseiten, Fußlinks und MDCG-Links im Vorschaubrowser kontrolliert.
+
+## 27. Nachtrag 12.11.2026 — iPhone-App und echter Puls
+
+Der Echtzeit-Modus (Doc 06) braucht ein Gerät, das im Alltag mitläuft, und Alarme in der Nacht. Safari auf dem iPhone kann weder im Hintergrund rechnen noch zu einer berechneten Uhrzeit benachrichtigen noch Bluetooth. Darum entsteht eine eigenständige iPhone-App. Plan in `50_App_Plan.md`.
+
+**Getrennt, aber im selben Repo:** Die App liegt in `mobile/`, baut über einen eigenen Workflow und teilt mit der Website nur die Engine (`engine/src`) und die Logik in `app/adapter.js` und `app/personas.js`. Die Website bleibt unverändert; `pages.yml` baut bei Änderungen nur in `mobile/` nicht neu. Ein eigenes Repo hätte die Engine kopiert, und Kalibrierung und Tests wären auseinandergelaufen.
+
+**Ausnahme von „keine echten Werte“:** Puls ist ab jetzt als echte Eingabe erlaubt, nur in der App. Er steuert ausschließlich die Bewegung der simulierten Person über das vorhandene Ereignis `heartRate` (Doc 10, Nachwirkung in Nachtrag 19). Er wird nicht als Messwert der Nutzerin oder des Nutzers ausgewertet und verlässt das Gerät nicht. Glukose-, Insulin- und Bolus-Eingaben bleiben ausgeschlossen. Die Einordnung als Lernsystem ohne medizinische Zweckbestimmung (Doc 30) ändert sich dadurch nicht, weil aus dem Puls keine Aussage über die Person abgeleitet wird. Der Datenschutztext der App muss die Pulsdaten nennen, bevor die App an andere geht.

@@ -14,6 +14,9 @@ name: Seite veroeffentlichen
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - mobile/**
+      - .github/workflows/mobile.yml
   workflow_dispatch:
 
 # Der Bau liest nur. Schreibrechte fuer Pages bekommt allein der Schritt, der veroeffentlicht.

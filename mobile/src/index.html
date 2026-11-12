@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>nebel.</title>
+<style>
+  :root { color-scheme: light dark; --fg: #1b1b1f; --bg: #f5f5f7; --mut: #6b6b73; --acc: #3a6df0; }
+  @media (prefers-color-scheme: dark) { :root { --fg: #f2f2f5; --bg: #111114; --mut: #9a9aa3; } }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font: 16px/1.4 -apple-system, system-ui, sans-serif; }
+  main { min-height: 100%; box-sizing: border-box; padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; }
+  #bpm { font-size: 96px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+  #unit { color: var(--mut); margin-top: -8px; }
+  #dev, #last, #msg { color: var(--mut); min-height: 1.4em; }
+  button { margin-top: 16px; padding: 14px 28px; font: inherit; font-weight: 600; color: #fff; background: var(--acc); border: 0; border-radius: 14px; }
+  button:disabled { opacity: .5; }
+</style>
+</head>
+<body>
+<main>
+  <div id="bpm">–</div>
+  <div id="unit">Schläge pro Minute</div>
+  <div id="dev">Kein Pulsgurt verbunden</div>
+  <div id="last"></div>
+  <div id="msg"></div>
+  <button id="connect">Pulsgurt verbinden</button>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

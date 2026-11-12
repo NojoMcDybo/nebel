@@ -66,3 +66,5 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 | Blätter als Dialoge | Geschlossene Blätter sind unsichtbar und nicht fokussierbar; offen ruht die Seite dahinter, der Fokus kehrt zum Knopf zurück | 11.11.2026 |
 | Zeichnen nach Bedarf | Die Verlaufskurve wird nur gezeichnet, wenn sich ein Pixel ändert; Avatare ruhen unter einer aufgelegten Ebene | 11.11.2026 |
 | Rechtsgrundlage Impressum | § 18 Abs. 1 MStV, vorsorglich § 5 DDG; Datenschutz- und Änderungsdatum fest statt Baudatum (Rechtscheck, Doc 31) | 12.11.2026 |
+| iPhone-App | Eigenständige App im selben Repo (`mobile/`), Website bleibt unverändert; Plan in Doc 50 | 12.11.2026 |
+| Echter Puls | Einzige erlaubte echte Eingabe: Puls, nur in der App, steuert nur die Bewegung der simulierten Person, bleibt auf dem Gerät. Glukose, Insulin, Bolus weiter verboten | 12.11.2026 |
