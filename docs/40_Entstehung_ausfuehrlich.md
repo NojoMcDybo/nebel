@@ -50,6 +50,7 @@ Am Anfang standen ein interaktiver Prototyp (`index.html`) mit einer eigenen, ve
 | 28.10.2026 | Antwort der py-mgipsim-Autoren: keine Einwände. Hinweisfenster vor der ersten Nutzung. Repository öffentlich, Release v1.0.0. Englische Fassung unter `/en/`, Release v1.1.0 |
 | 09.11.2026 | Sprachwahl im Hinweisfenster. Reserven füllen sich beim Essen, Hinweis „Heißhunger“. Bewegungssystem abgeglichen, Training absagbar. Lange Nachwirkung der Bewegung kalibriert |
 | 10.11.2026 | Wischgeste für das iPhone überarbeitet. Diese Texte zur Entstehung auf der Startseite, auf Deutsch und Englisch |
+| 11.11.2026 | Web-App für den iPhone-Startbildschirm. Trainingsarten wechseln harte und lockere Minuten, Bewegung erscheint in der Wirkungskarte, Sensor streut weniger. Release v1.2.0 |
 
 ---
 

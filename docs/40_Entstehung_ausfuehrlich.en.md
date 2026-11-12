@@ -50,6 +50,7 @@ It started with an interactive prototype (`index.html`) with its own simplified 
 | 28 Oct 2026 | Reply from the py-mgipsim authors: no objections. Notice before first use. Repository public, release v1.0.0. English version at `/en/`, release v1.1.0 |
 | 9 Nov 2026 | Language choice in the notice. Reserves fill up when eating, "ravenous" hint. Exercise system made consistent, training can be cancelled. Long aftereffect of exercise calibrated |
 | 10 Nov 2026 | Swipe gesture for the iPhone reworked. These texts on how nebel. came about added to the start page, in German and English |
+| 11 Nov 2026 | Web app for the iPhone home screen. Training types alternate hard and easy minutes, exercise shows up in the effect chart, the sensor scatters less. Release v1.2.0 |
 
 ---
 

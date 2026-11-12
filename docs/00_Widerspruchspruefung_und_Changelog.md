@@ -458,3 +458,5 @@ Neu hat jede Trainingsart außer dem Dauerlauf ein Muster aus Minuten und Anteil
 **Reserven beim Aufwachen:** Der Tag begann um 7 Uhr mit vollen Reserven, obwohl die Leber die Nacht über gearbeitet hat. Neu startet die Reserve bei 55 %, die Karte sagt damit „hungrig aufgewacht“ (Schwelle 70 %). Szenarioschicht, keine Physiologie (docs/08).
 
 **Layout:** Die Bewegungskarte und die Reserven blenden beim Seitenwechsel wieder mit ein (das Neuzeichnen hatte die Klasse `.gi` überschrieben). „Sensorabweichung“ darf umbrechen, damit dreistellige Werte wie „12.4 %“ passen. Der Satz unter der 12-Stunden-Vorhersage hat eine feste Höhe von vier Zeilen, damit wechselnde Werte nichts darunter verschieben. Im Hinweisfenster stehen die Rechtslinks 18 px unter dem Button (`.gate p` hatte den Abstand auf 0 gesetzt).
+
+**Release `v1.2.0`** am 11.11.2026 auf `1ed8cff`: fasst die Nachträge 17 bis 24 zusammen (Nachwirkung der Bewegung, Trainingsarten, Bewegung in der Wirkungskarte, Reserven, Entstehungstexte, iPhone-Web-App, ruhigerer Sensor). Nachtrag 25 ist nicht enthalten.
