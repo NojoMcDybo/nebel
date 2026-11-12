@@ -514,7 +514,7 @@ Die neue Produkthaftungsrichtlinie (EU) 2024/2853 schließt Software ein, nimmt 
 - Keine Cookies, kein Tracking, keine Gesundheitsdaten. Spielstand und Personenwahl liegen nur im Browser (§ 25 Abs. 2 Nr. 2 TDDDG).
 - Schriften liegen lokal. Vorher kamen sie von Google Fonts, was die IP jedes Besuchers an Google schickte (dazu LG München I, Urteil vom 20.01.2022, Az. 3 O 17493/20).
 - Hosting über GitHub Pages, das IP-Adressen aus Sicherheitsgründen protokolliert (Art. 6 Abs. 1 lit. f DSGVO).
-- Das Impressum (§ 5 DDG) kommt aus Repository-Variablen, damit keine Anschrift dauerhaft in der Git-Historie steht.
+- Das Impressum (§ 18 Abs. 1 MStV, vorsorglich § 5 DDG) kommt aus Repository-Variablen, damit keine Anschrift dauerhaft in der Git-Historie steht.
 
 ### 10.5 Bau und Veröffentlichung
 
@@ -590,7 +590,7 @@ Mit „PubMed“ markierte Angaben wurden am 09.11.2026 gegen PubMed abgeglichen
 ### Recht
 
 30. Verordnung (EU) 2017/745 über Medizinprodukte (MDR), Art. 2 Nr. 1.
-31. MDCG 2019-11: Guidance on qualification and classification of software in Regulation (EU) 2017/745. https://health.ec.europa.eu/system/files/2020-09/md_mdcg_2019_11_guidance_en_0.pdf
+31. MDCG 2019-11 rev.1 (Juni 2025): Guidance on qualification and classification of software in Regulation (EU) 2017/745 – MDR and Regulation (EU) 2017/746 – IVDR. https://health.ec.europa.eu/document/download/b45335c5-1679-4c71-a91c-fc7a4d37f12b_en?filename=mdcg_2019_11_en.pdf
 32. Richtlinie (EU) 2024/2853 über die Haftung für fehlerhafte Produkte, Art. 2 Abs. 2.
 33. GNU General Public License v3. https://www.gnu.org/licenses/gpl-3.0.html
 34. LG München I, Urteil vom 20.01.2022, Az. 3 O 17493/20 (Google Fonts).

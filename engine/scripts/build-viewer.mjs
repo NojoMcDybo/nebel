@@ -28,6 +28,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFi
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
+import { createHash } from "node:crypto";
 import { PAIRS } from "./i18n-en.mjs";
 import { markdown } from "./md.mjs";
 
@@ -67,6 +68,7 @@ const result = await build({
   format: "iife",
   globalName: "Nebel",
   target: "es2022",
+  minify: true,
   write: false,
 });
 const engine = result.outputFiles[0].text;
@@ -115,10 +117,26 @@ const checkScripts = (html, name) => {
 /* Nichts von fremden Servern laden — keine Schriften, keine Skripte, keine
    Stile. Verweise (<a href>) sind erlaubt. */
 const checkNoExternal = (html, name) => {
-  const pats = [/<script[^>]+src=["']?(https?:)?\/\//i, /<link[^>]+href=["']?(https?:)?\/\//i,
+  /* rel="alternate" nennt nur die Adresse der anderen Sprachfassung, geladen wird nichts. */
+  const pats = [/<script[^>]+src=["']?(https?:)?\/\//i, /<link(?![^>]*rel="alternate")[^>]+href=["']?(https?:)?\/\//i,
                 /url\(\s*["']?(https?:)?\/\//i, /@import/i, /<img[^>]+src=["']?(https?:)?\/\//i,
                 /<iframe/i];
   for (const re of pats) if (re.test(html)) problem(`${name} laedt etwas von einem fremden Server (${re})`);
+};
+
+/* Content-Security-Policy als <meta>, weil GitHub Pages keine eigenen Kopfzeilen
+   erlaubt. Inline-Skripte sind nur mit ihrem Hash zugelassen: was spaeter ueber
+   innerHTML oder einen manipulierten Spielstand in die Seite geraet, laeuft nicht.
+   Der Browser rechnet den Hash ueber den Text mit LF-Zeilenenden.
+   shortcut: frame-ancestors geht nicht per <meta>; Schutz vor Einbettung braeuchte einen Host mit Kopfzeilen. */
+const writePage = (path, html) => {
+  const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
+    .map((m) => `'sha256-${createHash("sha256").update(m[1].replace(/\r\n?/g, "\n"), "utf8").digest("base64")}'`);
+  const csp = `default-src 'none'; script-src 'self' ${hashes.join(" ")}; style-src 'unsafe-inline'; font-src 'self'; ` +
+    `img-src 'self' data:; manifest-src 'self' data:; base-uri 'none'; form-action 'none'`;
+  const mark = '<meta charset="utf-8">';
+  if (!html.includes(mark)) problem(`${path}: <meta charset> fehlt, keine CSP gesetzt`);
+  writeFileSync(path, html.replace(mark, `${mark}\n<meta http-equiv="Content-Security-Policy" content="${csp}">`), "utf8");
 };
 
 /* ── 1. Viewer ── */
@@ -152,9 +170,11 @@ if (existsSync(appTpl)) {
   const readDoc = (f) => existsSync(resolve(docs, f)) ? readFileSync(resolve(docs, f), "utf8") : (problem(`docs/${f} fehlt`), "");
   const TEXT = {
     de: { lang: "de", kurz: "41_Entstehung_kompakt.md", lang40: "40_Entstehung_ausfuehrlich.md", long: "entstehung.html",
-          out: "entstehung.html", root: "", title: "nebel. ausführlich", back: "← zur Simulation" },
+          out: "entstehung.html", root: "", title: "nebel. ausführlich", back: "← zur Simulation",
+          legalHref: "rechtliches.html", legal: "Impressum · Datenschutz · Lizenzen" },
     en: { lang: "en", kurz: "41_Entstehung_kompakt.en.md", lang40: "40_Entstehung_ausfuehrlich.en.md", long: "making-of.html",
-          out: "en/making-of.html", root: "../", title: "nebel. in detail", back: "← back to the simulation" },
+          out: "en/making-of.html", root: "../", title: "nebel. in detail", back: "← back to the simulation",
+          legalHref: "legal.html", legal: "Imprint · Privacy · Licenses" },
   };
   const hrefFor = (t) => (h) => /^4[01]_Entstehung_/.test(h) ? (h.startsWith("40_") ? t.long : "./") : h;
   const kurzHtml = (t) => markdown(readDoc(t.kurz).replace(/^# .*\n/, ""), { href: hrefFor(t) });
@@ -163,7 +183,7 @@ if (existsSync(appTpl)) {
 
   const htmlDe = html.replace(PH, () => kurzHtml(TEXT.de));
   checkNoExternal(htmlDe, "index.html");
-  writeFileSync(resolve(site, "index.html"), htmlDe, "utf8");
+  writePage(resolve(site, "index.html"), htmlDe);
 
   /* en/index.html — dieselbe App, jeder Text Eins zu Eins aus i18n-en.mjs.
      Fehlt ein Schluessel im Quelltext, ist ein deutscher Text umgezogen. */
@@ -176,7 +196,7 @@ if (existsSync(appTpl)) {
   htmlEn = htmlEn.replace(PH, () => kurzHtml(TEXT.en));
   checkScripts(htmlEn, "en/index.html");
   checkNoExternal(htmlEn, "en/index.html");
-  writeFileSync(resolve(site, "en/index.html"), htmlEn, "utf8");
+  writePage(resolve(site, "en/index.html"), htmlEn);
   /* Deutsche Reste im Sichtbaren (ohne Kommentare, Stile, Bezeichner) melden. */
   {
     const visible = htmlEn
@@ -197,19 +217,23 @@ if (existsSync(appTpl)) {
   const ids = vm2.__IDS;
   const chosen = subjects.filter((s) => ids.includes(s.id));
   if (chosen.length !== ids.length) { console.error("Nicht jede Person hat einen Parametersatz."); process.exit(1); }
-  const today = new Date().toISOString().slice(0, 10);
+  /* GPL §5a: Datum der tatsaechlichen Aenderung, nicht das Baudatum. Nachziehen, wenn sich
+     Auswahl (app/personas.js) oder Zuordnung unten aendert. */
+  const DATA_CHANGED = "2026-10-12";
   const dataJs = `/*
  * nebel. — Parametersaetze der zehn Personen
  *
  * Herkunft: py-mgipsim, Illinois Institute of Technology
  *   https://github.com/illinoistech-itm/py-mgipsim  (Stand ${ref})
  *   pymgipsim/VirtualPatient/Models/T1DM/ExtHovorka/Patients/Patient_*.json
+ *   Urheber der Daten: die Autorinnen und Autoren von py-mgipsim.
  *
  * Lizenz: GNU General Public License v3 (lizenzen/GPL-3.0.txt). Diese Datei
  * wird unter derselben Lizenz weitergegeben. Sie ist ein eigenstaendiger Teil
  * der Seite; der uebrige Code von nebel. steht unter Apache 2.0.
+ * Ohne jede Gewaehrleistung, soweit gesetzlich zulaessig (GPL-3.0 §§ 15-16).
  *
- * Geaendert (${today}, nebel.): ${chosen.length} von ${subjects.length} Datensaetzen ausgewaehlt
+ * Geaendert (${DATA_CHANGED}, nebel.): ${chosen.length} von ${subjects.length} Datensaetzen ausgewaehlt
  * (${ids.join(", ")}), die benoetigten Felder aus JSON in JavaScript
  * uebertragen. Die Werte selbst sind unveraendert. Zuordnung:
  *   subject  ← model_parameters (kb1 kb2 kb3 EGP0 F01 tmaxI p3 p4 p5 BW HRrest HRmax VG VI VT_HRR)
@@ -244,7 +268,6 @@ window.SUBJECTS = ${JSON.stringify(chosen, null, 1)};
   const env = (k) => (process.env[k] ?? "").replace(/\\n/g, "\n").trim();
   const imp = { NAME: env("NEBEL_IMPRESSUM_NAME"), ANSCHRIFT: env("NEBEL_IMPRESSUM_ANSCHRIFT"), EMAIL: env("NEBEL_IMPRESSUM_EMAIL") };
   for (const [k, v] of Object.entries(imp)) if (!v) problem(`Impressum: NEBEL_IMPRESSUM_${k} ist nicht gesetzt`);
-  const de = today.split("-").reverse().join(".");
   for (const [legalTpl, out] of [["../app/rechtliches.html", "rechtliches.html"], ["../app/rechtliches.en.html", "en/legal.html"]]) {
   if (existsSync(resolve(root, legalTpl))) {
     const legal = readFileSync(resolve(root, legalTpl), "utf8")
@@ -252,11 +275,10 @@ window.SUBJECTS = ${JSON.stringify(chosen, null, 1)};
       .replaceAll("{{IMPRESSUM_ANSCHRIFT}}", esc(imp.ANSCHRIFT || "[Anschrift fehlt: NEBEL_IMPRESSUM_ANSCHRIFT]"))
       .replaceAll("{{IMPRESSUM_EMAIL}}", esc(imp.EMAIL || "[E-Mail fehlt: NEBEL_IMPRESSUM_EMAIL]"))
       .replaceAll("{{PYMGIPSIM_REF}}", esc(ref))
-      .replaceAll("{{PYMGIPSIM_REF_SHORT}}", esc(ref.slice(0, 7)))
-      .replaceAll("{{BUILD_DATE}}", de);
+      .replaceAll("{{PYMGIPSIM_REF_SHORT}}", esc(ref.slice(0, 7)));
     if (/\{\{[A-Z_]+\}\}/.test(legal)) problem(`${out}: unbekannter Platzhalter`);
     checkNoExternal(legal, out);
-    writeFileSync(resolve(site, out), legal, "utf8");
+    writePage(resolve(site, out), legal);
   } else problem(`${legalTpl} fehlt`);
   }
 
@@ -267,10 +289,11 @@ window.SUBJECTS = ${JSON.stringify(chosen, null, 1)};
     for (const t of [TEXT.de, TEXT.en]) {
       const page = shell.replaceAll("{{LANG}}", t.lang).replaceAll("{{TITLE}}", t.title)
         .replaceAll("{{ROOT}}", t.root).replaceAll("{{BACK}}", t.back)
+        .replaceAll("{{LEGAL_HREF}}", t.legalHref).replaceAll("{{LEGAL}}", t.legal)
         .replace("{{BODY}}", () => markdown(readDoc(t.lang40), { href: hrefFor(t) }));
       if (/\{\{[A-Z_]+\}\}/.test(page)) problem(`${t.out}: unbekannter Platzhalter`);
       checkNoExternal(page, t.out);
-      writeFileSync(resolve(site, t.out), page, "utf8");
+      writePage(resolve(site, t.out), page);
     }
   } else problem("app/text.html fehlt");
 

@@ -460,3 +460,33 @@ Neu hat jede Trainingsart außer dem Dauerlauf ein Muster aus Minuten und Anteil
 **Layout:** Die Bewegungskarte und die Reserven blenden beim Seitenwechsel wieder mit ein (das Neuzeichnen hatte die Klasse `.gi` überschrieben). „Sensorabweichung“ darf umbrechen, damit dreistellige Werte wie „12.4 %“ passen. Der Satz unter der 12-Stunden-Vorhersage hat eine feste Höhe von vier Zeilen, damit wechselnde Werte nichts darunter verschieben. Im Hinweisfenster stehen die Rechtslinks 18 px unter dem Button (`.gate p` hatte den Abstand auf 0 gesetzt).
 
 **Release `v1.2.0`** am 11.11.2026 auf `1ed8cff`: fasst die Nachträge 17 bis 24 zusammen (Nachwirkung der Bewegung, Trainingsarten, Bewegung in der Wirkungskarte, Reserven, Entstehungstexte, iPhone-Web-App, ruhigerer Sensor). Nachtrag 25 ist nicht enthalten.
+
+
+## 25. Nachtrag 11.11.2026 — Durchsicht: Leistung, Bedienbarkeit, Sicherheit
+
+**Leistung:** `paint()` läuft in jedem Bild. Bisher legte es dabei den Puffer der Verlaufskurve neu an (`canvas.width` setzen), zeichnete sie vollständig, schrieb acht Texte und setzte `--fade` an der Wurzel, was alle Stile der Seite neu rechnen ließ. Neu: Die Kurve wird nur gezeichnet, wenn sie sich um ein Gerätepixel verschoben hätte, ein Punkt noch einblendet oder Fenster, Größe oder Farben sich ändern. Texte werden nur bei Änderung geschrieben (`put`), `--fade` sitzt an `#readout`. Liegt eine Ebene über der Startseite, ruhen Avatare und Pfeile (`.covered`), sonst wurde die unscharfe Seite darunter in jedem Bild neu gerechnet. Die Engine wird minifiziert eingebettet (index.html 244 → 221 KB), zwei Schriften werden vorab geladen.
+
+**Bedienbarkeit:** Geschlossene Blätter waren nur durchsichtig, ihre rund 25 Regler und Knöpfe blieben per Tab erreichbar und wurden vorgelesen. Sie sind jetzt `visibility:hidden`, offen sind sie Dialoge (`role="dialog"`), die Seite dahinter ist `inert`, der Fokus geht ins Blatt und beim Schließen zurück zum Knopf. Pfeiltasten blättern nicht mehr, während ein Regler, ein Blatt, der Hinweis oder die Nacht den Fokus hat. Der Hell/Dunkel-Schalter meldet `aria-checked` (zu `role="switch"` gehört nicht `aria-pressed`). Die Punkte des Seitenindikators haben eine Trefferfläche von mindestens 24 px. Die Diagramme tragen `role="img"` mit Beschriftung, Notfall und Nachtalarm werden angesagt. Ohne JavaScript steht ein Hinweis statt dreier übereinanderliegender Seiten.
+
+**Fehler im Dunkelmodus:** Die zweite Zeile im Knopf „Zum Simulator“ hatte eine feste helle Farbe und stand im Dunkelmodus hell auf hell. Sie folgt jetzt `--rgb-paper`. Der Hinweis im Nachtbild ist lesbar (Kontrast 2,2 → 4,9), die Uhr bleibt gedimmt.
+
+**Sicherheit:** Jede veröffentlichte Seite bekommt beim Bau eine Content-Security-Policy als `<meta>`: Standard `none`, Skripte nur von der eigenen Herkunft und inline nur mit SHA-256-Hash, keine Formulare, kein `<base>`. Anlass: Der Spielstand im `localStorage` wird über `innerHTML` in Protokoll und Auswertung geschrieben, und unter `github.io` teilen sich alle Projektseiten eines Kontos denselben Speicher. Die Rückmeldung (`toast`) schreibt Namen jetzt als Text. Im Workflow hat nur noch der Veröffentlichungsschritt Schreibrechte für Pages. Grenze: `frame-ancestors` lässt sich per `<meta>` nicht setzen, GitHub Pages erlaubt keine eigenen Kopfzeilen.
+
+**Inhalt:** Beschreibung und Open-Graph-Angaben für Suchmaschinen und Vorschauen, `hreflang`-Verweise zwischen Deutsch und Englisch. Testzahl im README auf 149 nachgeführt.
+
+
+## 26. Nachtrag 12.11.2026 — Rechtscheck der Live-Seite
+
+Erweiterter Rechtscheck der veröffentlichten Seite, Bericht in `31_Rechtscheck_2026-11-12.md`. Ergebnis: nichts Rotes oder Oranges, vier kleine Korrekturen, hier umgesetzt.
+
+**Fußlink:** `entstehung.html` und `en/making-of.html` hatten keinen Link auf Impressum und Datenschutz. Die Hülle `app/text.html` trägt ihn jetzt neben „zur Simulation“ (`legalHref`/`legal` in `TEXT`).
+
+**Datenschutztext DE/EN:** GitHub verarbeitet die Zugriffsdaten nach eigenen Angaben als Verantwortlicher, Speicherdauer liegt bei GitHub. Alle vier Browser-Einträge mit Schlüssel (`state`, `person`, `hinweis`, `theme`; englisch mit `nebel.en.`). Neuer Absatz „Kontakt per E-Mail“ mit der Bitte, keine eigenen Gesundheitswerte zu schicken. Widerspruchsrecht als eigener, fett gesetzter Absatz (Art. 21 Abs. 4 DSGVO). Der Mailanbieter wird nicht genannt, weil die Adresse aus einer Repository-Variable kommt.
+
+**Impressum:** Grundlage § 18 Abs. 1 MStV, vorsorglich § 5 DDG. § 5 DDG gilt nur für geschäftsmäßige, in der Regel entgeltliche Dienste. Auch in Doc 30 und im Entstehungstext 40 (DE/EN) nachgezogen.
+
+**Feste Daten:** „Stand dieser Seite“ war das Baudatum (`{{BUILD_DATE}}`), steht jetzt fest im Text und wird bei Textänderungen von Hand nachgezogen. Der GPL-Änderungsvermerk in `personen-daten.js` nannte ebenfalls das Baudatum, jetzt `DATA_CHANGED = "2026-10-12"` (Tag der eigenen Datendatei, Commit 7ff2922). Dateikopf zusätzlich mit Urhebern und Gewährleistungsausschluss (GPL-3.0 §§ 15–16).
+
+**MDCG 2019-11:** Verweise in Doc 30, 40 und 41 (DE/EN) zeigen auf rev.1 vom Juni 2025 statt auf die Fassung von 2019/2020.
+
+Geprüft: Veröffentlichungsbau ohne Probleme, Typen sauber, Tests 144 grün, 4 übersprungen, 1 rot (Orakel-Referenzwerte fehlen lokal, braucht numpy, unverändert). Rechtsseiten, Fußlinks und MDCG-Links im Vorschaubrowser kontrolliert.

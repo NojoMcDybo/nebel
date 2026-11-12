@@ -62,3 +62,7 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 | Bewegung in der Analyse | Eigene Linie mit Vorzeichen in der Wirkungskarte, Nachwirkung zählt zur Bewegung | 11.11.2026 |
 | Sensorstreuung | `a0` 0,97 ± 0,04 (0,89–1,05), Drift 3,5 mg/dL; MARD 5,0 % statt 6,3 % | 11.11.2026 |
 | Reserven beim Aufwachen | Start um 7 Uhr mit 55 % statt 100 % („hungrig aufgewacht“) | 11.11.2026 |
+| Content-Security-Policy | Jede Seite trägt eine CSP als `<meta>`; Inline-Skripte nur mit Hash, den der Bau rechnet. Nichts außer der eigenen Herkunft | 11.11.2026 |
+| Blätter als Dialoge | Geschlossene Blätter sind unsichtbar und nicht fokussierbar; offen ruht die Seite dahinter, der Fokus kehrt zum Knopf zurück | 11.11.2026 |
+| Zeichnen nach Bedarf | Die Verlaufskurve wird nur gezeichnet, wenn sich ein Pixel ändert; Avatare ruhen unter einer aufgelegten Ebene | 11.11.2026 |
+| Rechtsgrundlage Impressum | § 18 Abs. 1 MStV, vorsorglich § 5 DDG; Datenschutz- und Änderungsdatum fest statt Baudatum (Rechtscheck, Doc 31) | 12.11.2026 |

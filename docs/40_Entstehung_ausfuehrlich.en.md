@@ -514,7 +514,7 @@ The new Product Liability Directive (EU) 2024/2853 includes software, but exclud
 - No cookies, no tracking, no health data. Progress and the choice of person stay in the browser only (§ 25(2) no. 2 TDDDG).
 - Fonts are local. They used to come from Google Fonts, which sent every visitor's IP address to Google (see Munich Regional Court I, judgment of 20 January 2022, ref. 3 O 17493/20).
 - Hosting on GitHub Pages, which logs IP addresses for security reasons (Art. 6(1)(f) GDPR).
-- The legal notice (§ 5 DDG) comes from repository variables, so that no postal address stays in the Git history for good.
+- The legal notice (§ 18(1) MStV, and as a precaution § 5 DDG) comes from repository variables, so that no postal address stays in the Git history for good.
 
 ### 10.5 Build and publication
 
@@ -590,7 +590,7 @@ Entries marked "PubMed" were checked against PubMed on 9 November 2026.
 ### Law
 
 30. Regulation (EU) 2017/745 on medical devices (MDR), Art. 2(1).
-31. MDCG 2019-11: Guidance on qualification and classification of software in Regulation (EU) 2017/745. https://health.ec.europa.eu/system/files/2020-09/md_mdcg_2019_11_guidance_en_0.pdf
+31. MDCG 2019-11 rev.1 (June 2025): Guidance on qualification and classification of software in Regulation (EU) 2017/745 – MDR and Regulation (EU) 2017/746 – IVDR. https://health.ec.europa.eu/document/download/b45335c5-1679-4c71-a91c-fc7a4d37f12b_en?filename=mdcg_2019_11_en.pdf
 32. Directive (EU) 2024/2853 on liability for defective products, Art. 2(2).
 33. GNU General Public License v3. https://www.gnu.org/licenses/gpl-3.0.html
 34. Munich Regional Court I (LG München I), judgment of 20 January 2022, ref. 3 O 17493/20 (Google Fonts).

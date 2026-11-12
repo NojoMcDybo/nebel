@@ -1,6 +1,6 @@
 # Nebel — Rechtliche Einordnung
 
-Stand: 2026-10-12 (Abschnitt 7 neu: Veröffentlichung der App)
+Stand: 2026-10-12 (Abschnitt 7 neu: Veröffentlichung der App), ergänzt 2026-11-12 nach dem Rechtscheck in `31_Rechtscheck_2026-11-12.md`
 
 **Vorbemerkung:** Das hier ist eine Risikoeinschätzung, keine Rechtsberatung. Vor einer echten Veröffentlichung mit Reichweite — insbesondere, falls Nebel je Teil einer Abschlussarbeit oder einer kommerziellen Tätigkeit wird — gehört das einmal vor jemanden mit Zulassung. Die Uni Münster hat eine Rechtsabteilung, und die Verbraucherzentrale NRW berät zu Medizinprodukte- und Haftungsfragen.
 
@@ -30,7 +30,7 @@ Was unbedenklich bleibt: eine fiktive Beispielperson, erfundene Ereignisse, Erkl
 
 **Diese Grenze ist im Projekt bereits als Produktregel verankert** (Spec V2, Abschnitt 13 und `08_Beduerfnisse_und_Hunger.md`): keine Dosierungsempfehlungen, keine Simulation einer realen Person. Das war ursprünglich eine pädagogische Entscheidung. Sie ist jetzt auch die rechtliche Grundlage und darf nicht aus Bequemlichkeit aufgeweicht werden.
 
-Quellen: [MDCG 2019-11 (Kommission)](https://health.ec.europa.eu/system/files/2020-09/md_mdcg_2019_11_guidance_en_0.pdf) · [Einordnung von Software unter MDR](https://openregulatory.com/mdcg/mdcg-2019-11)
+Quellen: [MDCG 2019-11 rev.1, Juni 2025 (Kommission)](https://health.ec.europa.eu/document/download/b45335c5-1679-4c71-a91c-fc7a4d37f12b_en?filename=mdcg_2019_11_en.pdf) · [Einordnung von Software unter MDR](https://openregulatory.com/mdcg/mdcg-2019-11)
 
 ## 2. Produkthaftung
 
@@ -86,7 +86,7 @@ Das ändert sich an drei Stellen, sobald die Erlebnisschicht gebaut wird:
 
 Die dritte Zeile ist zweimal derselbe Grund, es nicht zu tun. Für den Echtzeit-Modus heißt das konkret: Benachrichtigungen möglichst über die Browser-Notification-API lokal auslösen, nicht über einen Push-Dienst mit Serverkomponente.
 
-Sobald eine öffentlich erreichbare Website existiert, greift außerdem die Impressumspflicht nach § 5 DDG. Bei einer nicht-kommerziellen privaten Seite ist sie eingeschränkt, aber sauberer ist ein Impressum von Anfang an.
+Sobald eine öffentlich erreichbare Website existiert, greift außerdem die Impressumspflicht. Für eine nicht-kommerzielle Seite folgt sie aus § 18 Abs. 1 MStV (Name und Anschrift), § 5 DDG gilt nur für geschäftsmäßige, in der Regel entgeltliche Dienste. Sauberer ist ein Impressum von Anfang an.
 
 ## 5. Kleinere Punkte
 
@@ -160,13 +160,14 @@ Außerdem möchten die Autorinnen und Autoren den Link wissen, sobald die Seite 
 
 ### 7.3 Impressum und Datenschutz
 
-- **Impressum (§ 5 DDG):** Name, ladungsfähige Anschrift, E-Mail. Die Angaben stehen **nicht im Repository**. Sie kommen aus den Repository-Variablen `NEBEL_IMPRESSUM_NAME`, `NEBEL_IMPRESSUM_ANSCHRIFT` und `NEBEL_IMPRESSUM_EMAIL` und werden beim Bau eingesetzt. So landet keine Anschrift dauerhaft in der Git-Historie. Ohne diese Angaben bricht der Veröffentlichungsbau ab.
+- **Impressum (§ 18 Abs. 1 MStV, vorsorglich § 5 DDG):** Name, ladungsfähige Anschrift, E-Mail. Die Angaben stehen **nicht im Repository**. Sie kommen aus den Repository-Variablen `NEBEL_IMPRESSUM_NAME`, `NEBEL_IMPRESSUM_ANSCHRIFT` und `NEBEL_IMPRESSUM_EMAIL` und werden beim Bau eingesetzt. So landet keine Anschrift dauerhaft in der Git-Historie. Ohne diese Angaben bricht der Veröffentlichungsbau ab.
 - **Datenschutzerklärung**, Seite `rechtliches.html`:
   - Hosting über GitHub Pages. GitHub protokolliert die IP-Adresse jedes Besuchers aus Sicherheitsgründen (GitHub Docs, „About GitHub Pages“). Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.
   - USA-Übermittlung: GitHub nimmt nach eigener Angabe am EU-U.S. Data Privacy Framework teil (GitHub General Privacy Statement).
   - `localStorage` für Spielstand und Personenwahl: Rechtsgrundlage § 25 Abs. 2 Nr. 2 TDDDG.
   - Keine Cookies, kein Tracking, keine Gesundheitsdaten.
   - Betroffenenrechte, Beschwerde bei der LDI NRW.
+  - Ergänzt am 12.11.2026 (Rechtscheck, Dok. 31): GitHub als eigener Verantwortlicher mit eigener Speicherdauer, alle vier `localStorage`-Schlüssel, Kontakt per E-Mail, Widerspruchsrecht als eigener Absatz (Art. 21 Abs. 4 DSGVO), festes Datum statt Baudatum. Fußlink auf die Rechtsseite jetzt auch in `entstehung.html` und `en/making-of.html`.
 - Die Texte sind eine sorgfältige Vorlage, **keine Rechtsberatung**. Vor einer breiten Verbreitung einmal von der Rechtsabteilung der Uni oder der Verbraucherzentrale ansehen lassen (siehe Vorbemerkung).
 
 ### 7.3a Englische Fassung (28.10.2026)

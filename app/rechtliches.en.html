@@ -52,7 +52,7 @@ small{color:var(--ink3)}
 
   <section id="impressum">
     <h2>Legal notice</h2>
-    <p class="k">Information pursuant to § 5 DDG (Germany)</p>
+    <p class="k">Information pursuant to § 18(1) MStV (Germany), and as a precaution § 5 DDG</p>
     <address>{{IMPRESSUM_NAME}}
 {{IMPRESSUM_ANSCHRIFT}}</address>
     <p class="k">Contact</p>
@@ -68,16 +68,29 @@ small{color:var(--ink3)}
     <p>{{IMPRESSUM_NAME}}, address and contact as in the legal notice.</p>
 
     <h3>Hosting on GitHub Pages</h3>
-    <p>The site is delivered through GitHub Pages (GitHub B.V., Prins Bernhardplein 200, 1097 JB Amsterdam, Netherlands, and GitHub, Inc., USA). When you open it, GitHub processes technically necessary access data, including your IP address; according to GitHub, it stores it for security reasons. The legal basis is Art. 6(1)(f) GDPR: the legitimate interest in providing the site securely and reliably. Data may be transferred to the USA. According to GitHub, it participates in the EU-U.S. Data Privacy Framework, for which an adequacy decision of the European Commission exists (Art. 45 GDPR). Details: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub General Privacy Statement</a>.</p>
+    <p>The site is delivered through GitHub Pages (GitHub B.V., Prins Bernhardplein 200, 1097 JB Amsterdam, Netherlands, and GitHub, Inc., USA). When you open it, GitHub processes technically necessary access data, including your IP address; according to GitHub, it stores it for security reasons. According to GitHub, it does so as a controller in its own responsibility. I have no access to this data and no influence on how long GitHub keeps it; according to GitHub, the duration depends on the purpose and on legal obligations. The legal basis for hosting the site on GitHub is Art. 6(1)(f) GDPR: the legitimate interest in providing the site securely and reliably. Data may be transferred to the USA. According to GitHub, it participates in the EU-U.S. Data Privacy Framework, for which an adequacy decision of the European Commission exists (Art. 45 GDPR). Details: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub General Privacy Statement</a>.</p>
 
     <h3>Storage in your browser</h3>
-    <p>The simulation keeps your progress and the chosen person in your browser's local storage (localStorage) so you can continue later. This data does not leave your device and I do not receive it. The legal basis is § 25(2) no. 2 TDDDG: the storage is strictly necessary for the function you explicitly use. You can delete it with “Start over” in the review or through your browser's site data. The CSV and JSON exports are also created on your device only.</p>
+    <p>The site keeps up to four entries in your browser's local storage (localStorage) so you can continue later:</p>
+    <ul>
+      <li>your progress (<code>nebel.en.state.v1</code>),</li>
+      <li>the chosen person (<code>nebel.en.person.v1</code>),</li>
+      <li>that you confirmed the notice “Before you start” (<code>nebel.en.hinweis.v1</code>),</li>
+      <li>light or dark design, once you switch it (<code>nebel.theme</code>, shared with the German version).</li>
+    </ul>
+    <p>This data does not leave your device and I do not receive it. The legal basis is § 25(2) no. 2 TDDDG: the storage is strictly necessary for the function you explicitly use. “Start over” in the review deletes your progress; you can delete everything through your browser's site data. The CSV and JSON exports are also created on your device only.</p>
+
+    <h3>Contact by email</h3>
+    <p>If you write to me, I process your email address, your name if you give it, and the content of your message in order to reply. The legal basis is Art. 6(1)(f) GDPR: the legitimate interest in answering enquiries. The message is stored with my email provider, which processes it technically. I delete it once the matter is settled and no legal retention obligation applies. Please do not send me your own health values: I cannot say anything about your therapy, that is what your diabetes care team is for.</p>
 
     <h3>No health data</h3>
     <p>Everything in the simulation concerns fictional people. The site does not ask for real glucose, insulin or meal values and has no input field for them.</p>
 
     <h3>Your rights</h3>
-    <p>You have the right of access (Art. 15 GDPR), rectification (Art. 16), erasure (Art. 17), restriction of processing (Art. 18) and objection (Art. 21). You can lodge a complaint with a data protection authority (Art. 77), for example the State Commissioner for Data Protection and Freedom of Information of North Rhine-Westphalia. I do not store any data about you myself; the access data is held by GitHub.</p>
+    <p>You have the right of access (Art. 15 GDPR), rectification (Art. 16), erasure (Art. 17) and restriction of processing (Art. 18). You can lodge a complaint with a data protection authority (Art. 77), for example the State Commissioner for Data Protection and Freedom of Information of North Rhine-Westphalia. Unless you write to me, I do not store any data about you; the access data is held by GitHub.</p>
+
+    <h3>Right to object</h3>
+    <p><b>You may object at any time, on grounds relating to your particular situation, to the processing of your data based on Art. 6(1)(f) GDPR (Art. 21 GDPR).</b> An informal message to the address in the legal notice is enough.</p>
   </section>
 
   <section id="lizenzen">
@@ -95,7 +108,8 @@ small{color:var(--ink3)}
     <p>DM Mono (The DM Mono Project Authors) and Plus Jakarta Sans (The Plus Jakarta Sans Project Authors), both under the SIL Open Font License 1.1: <a href="../fonts/OFL-DM-Mono.txt">DM Mono</a>, <a href="../fonts/OFL-Plus-Jakarta-Sans.txt">Plus Jakarta Sans</a>.</p>
   </section>
 
-  <p><small>This page as of: {{BUILD_DATE}}</small></p>
+  <!-- Datum der letzten inhaltlichen Aenderung, zusammen mit rechtliches.html von Hand nachziehen. -->
+  <p><small>This page as of: 12.11.2026</small></p>
   <a class="back" href="./">← back to the simulation</a>
 </main>
 </body>

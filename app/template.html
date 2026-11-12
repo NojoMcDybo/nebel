@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>nebel. — Diabetes-Alltagssimulator</title>
+<meta name="description" content="Ein Tag mit Typ-1-Diabetes zum Durchspielen, für Angehörige und Freunde: essen, spritzen, bewegen und einem Sensor vertrauen, der hinterherhinkt. Lernwerkzeug, kein Medizinprodukt.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="nebel. — Diabetes-Alltagssimulator">
+<meta property="og:description" content="Ein Tag mit Typ-1-Diabetes zum Durchspielen, für Angehörige und Freunde. Lernwerkzeug, kein Medizinprodukt.">
+<link rel="alternate" hreflang="de" href="https://nojomcdybo.github.io/nebel/">
+<link rel="alternate" hreflang="en" href="https://nojomcdybo.github.io/nebel/en/">
+<link rel="preload" href="fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/dm-mono-400.woff2" as="font" type="font/woff2" crossorigin>
 <meta name="theme-color" content="#EDF1F1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230A0D0D'/%3E%3Ccircle cx='23' cy='22' r='3' fill='%23B8362B'/%3E%3Cpath d='M8 23V12.5c0-1.4 1.1-2.5 2.5-2.5h2c2.8 0 5 2.2 5 5V23' fill='none' stroke='%23EDF1F1' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -114,7 +122,7 @@ body.dragging, body.dragging *{
   pointer-events:none;
 }
 #rail button{
-  pointer-events:auto; border:0; background:transparent; padding:8px 5px; cursor:pointer;
+  pointer-events:auto; border:0; background:transparent; padding:12px 10px; margin:-4px -5px; cursor:pointer;   /* Trefferflaeche mind. 24 px, Abstand der Punkte wie zuvor */
   display:flex; align-items:center;
 }
 #rail i{
@@ -317,7 +325,10 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .cmpbar b{transition:left .55s var(--spring)}
 .cmp .cv{font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion: reduce){ .pbtn .av, .cmpbar b{transition:none} .pbtn.pop .av, .person .swap, .person .go.rise, .av-head, .av-body, .av-eyes{animation:none!important} }
-.pbtn:focus-visible{outline:none} .pbtn:focus-visible .av{box-shadow:0 0 0 2.5px var(--ring)}
+.pbtn:focus-visible{outline:none} .pbtn:focus-visible .av{box-shadow:0 0 0 2.5px var(--paper), 0 0 0 5px var(--ink)}
+/* Liegt eine Ebene ueber der Startseite, ruhen Avatare und Pfeile: sonst wird die
+   unscharfe Seite darunter in jedem Bild neu gerechnet. */
+.covered .av-head, .covered .av-body, .covered .av-eyes, .covered .swipe .arrows span{animation-play-state:paused!important}
 .person{margin-top:14px; background:var(--card); border-radius:18px; padding:17px 18px; box-shadow:var(--sh)}
 .person .head{display:grid; grid-template-columns:58px 1fr; gap:14px; align-items:center}
 .person .head .av{width:58px; height:58px; border-radius:50%; overflow:hidden}
@@ -354,7 +365,7 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .swipe:active{transform:scale(.982)}
 .swipe .t{flex:1}
 .swipe .t .a{font-size:15.5px; font-weight:700; letter-spacing:-.01em}
-.swipe .t .b{font-family:var(--mono); font-size:11px; color:rgba(237,241,241,.62); margin-top:3px}
+.swipe .t .b{font-family:var(--mono); font-size:11px; color:rgba(var(--rgb-paper),.7); margin-top:3px}
 .swipe .arrows{display:flex; gap:2px; color:var(--paper)}
 .swipe .arrows span{animation:drift 1.9s ease-in-out infinite; opacity:.3}
 .swipe .arrows span:nth-child(2){animation-delay:.14s; opacity:.6}
@@ -460,7 +471,7 @@ canvas{width:100%; height:206px; display:block; touch-action:pan-y}
   font-family:var(--mono); font-size:74px; font-weight:300; letter-spacing:-.05em;
   font-variant-numeric:tabular-nums; color:#3B4A50; transition:color 1.2s linear;
 }
-.nhint{font-size:13.5px; color:#3B4A50; margin:14px 0 30px; max-width:26ch; line-height:1.5}
+.nhint{font-size:13.5px; color:#6E8087; margin:14px 0 30px; max-width:26ch; line-height:1.5}
 .nrow{display:flex; gap:9px; justify-content:center}
 .night .btn{min-width:130px}
 .night .btn.line{box-shadow:inset 0 0 0 1.5px rgba(233,239,239,.16); color:#6E8087; min-width:76px}
@@ -634,10 +645,11 @@ canvas{width:100%; height:206px; display:block; touch-action:pan-y}
 .sheet{
   position:fixed; inset:0; z-index:40; display:flex; align-items:flex-end; justify-content:center;
   background:transparent; backdrop-filter:blur(0px); -webkit-backdrop-filter:blur(0px);
-  opacity:0; pointer-events:none;
-  transition:opacity .34s var(--spring), background .34s var(--spring), backdrop-filter .34s var(--spring);
+  opacity:0; pointer-events:none; visibility:hidden;   /* zu heisst auch: nicht per Tab erreichbar, nicht vorgelesen */
+  transition:opacity .34s var(--spring), background .34s var(--spring), backdrop-filter .34s var(--spring), visibility 0s .44s;
 }
-.sheet.on{opacity:1; pointer-events:auto; background:var(--scrim); backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px)}
+.sheet.on{opacity:1; pointer-events:auto; visibility:visible; transition-delay:0s; background:var(--scrim); backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px)}
+.panel:focus{outline:none}
 .panel{
   width:100%; max-width:460px; background:var(--paper); border-radius:26px 26px 0 0;
   padding:12px 20px calc(22px + env(safe-area-inset-bottom));
@@ -742,6 +754,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
 </style>
 </head>
 <body>
+<noscript><p style="position:fixed; inset:0; z-index:200; margin:0; padding:24px; background:var(--paper)">nebel. ist eine Simulation und braucht JavaScript.</p></noscript>
 
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateT" hidden>
   <div class="box">
@@ -840,7 +853,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     </div>
 
     <div class="readout" id="readout">
-      <div class="crit" id="crit" hidden>
+      <div class="crit" id="crit" role="status" hidden>
         <svg id="critSkull" viewBox="0 0 24 24" fill="none">
           <path d="M12 2C7.6 2 4 5.5 4 9.7c0 2.6 1.3 4.6 3 5.8V19a1 1 0 001 1h1.6v-2h1.1v2h2.6v-2h1.1v2H17a1 1 0 001-1v-3.5c1.7-1.2 3-3.2 3-5.8C21 5.5 16.4 2 12 2z"
                 stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
@@ -872,7 +885,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
       <div class="behind" id="behind">dein Körper vor etwa einer Weile</div>
     </div>
 
-    <div class="chartcard"><canvas id="chart"></canvas></div>
+    <div class="chartcard"><canvas id="chart" role="img" aria-label="Verlauf der Sensorwerte"></canvas></div>
     <div class="rangerow">
       <div class="seg" id="ranges">
         <span class="knob"></span>
@@ -957,7 +970,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     <span><i class="dash"></i>Blut — was kommt</span>
     <span id="legFault" hidden><i style="background:var(--ink3);opacity:.35"></i>Sensor gedrückt — Messfehler, kein Abfall</span>
   </div>
-  <div class="chartcard"><canvas id="revChart"></canvas></div>
+  <div class="chartcard"><canvas id="revChart" role="img" aria-label="Sensor und Blut bisher, Vorhersage für zwölf Stunden"></canvas></div>
   <p class="fcsum" id="fcSum"></p>
   <div class="chartcard fx">
     <div class="fxhead">
@@ -968,7 +981,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
         <span class="fxc" id="fxMove" hidden><i class="mv"></i>Bewegung</span>
       </span>
     </div>
-    <canvas id="revFx" aria-label="Wirkung von Insulin, Essen und Bewegung auf den Blutzucker"></canvas>
+    <canvas id="revFx" role="img" aria-label="Wirkung von Insulin, Essen und Bewegung auf den Blutzucker"></canvas>
     <div class="fxsplit" id="fxSplit" hidden>
       <span><i style="background:var(--high)"></i>schnelle Kohlenhydrate</span>
       <span><i style="background:repeating-linear-gradient(90deg, var(--high) 0 5px, transparent 5px 8px)"></i>langsame Kohlenhydrate</span>
@@ -996,7 +1009,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
 
 <div id="topbar"><div class="col">
   <a class="lang" id="lang" href="en/" lang="en" hreflang="en" aria-label="English">EN</a>
-  <button id="theme" class="tgl" role="switch" aria-label="Dunkelmodus" aria-pressed="false">
+  <button id="theme" class="tgl" role="switch" aria-label="Dunkelmodus" aria-checked="false">
     <span class="knob"></span>
     <svg class="i sun" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3.7" stroke="currentColor" stroke-width="1.8"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 1.4v1.9M10 16.7v1.9M18.6 10h-1.9M3.3 10H1.4M16.1 3.9l-1.4 1.4M5.3 14.7l-1.4 1.4M16.1 16.1l-1.4-1.4M5.3 5.3L3.9 3.9"/></g></svg>
     <svg class="i moon" viewBox="0 0 20 20" fill="none"><path d="M16.8 12.4A7.3 7.3 0 017.6 3.2a7.3 7.3 0 109.2 9.2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
@@ -1012,7 +1025,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
       <button class="btn soft" id="btnWake">Aufstehen</button>
     </div>
   </div>
-  <div class="alarmbox" id="alarmBox" hidden>
+  <div class="alarmbox" id="alarmBox" role="alert" hidden>
     <div class="asig"><span></span><span></span><span></span></div>
     <div class="avalue" id="aValue">62</div>
     <div class="aunit">mg/dL · Sensor</div>
@@ -1182,6 +1195,9 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
    TEIL 2 — DARSTELLUNG (beim Swift-Port ersetzen, nicht uebersetzen)
    ══════════════════════════════════════════════════════════════════ */
 const $ = id => document.getElementById(id);
+/* Text nur schreiben, wenn er sich aendert: paint() laeuft in jedem Bild. */
+const shown = {};
+const put = (id, s) => { if (shown[id] !== s){ shown[id] = s; $(id).textContent = s; } };
 let C = {};
 function readTheme(){
   const g = getComputedStyle(document.documentElement);
@@ -1249,6 +1265,7 @@ function applyProg(p){
                      : `blur(${(Math.min(under, 1.35)*9).toFixed(2)}px)`;
     el.style.opacity = String(1 - .26*Math.min(under, 1.4));
     el.style.pointerEvents = Math.round(clamp(p,0,LAST)) === i ? "auto" : "none";
+    if (i === 0) el.classList.toggle("covered", p > .999);
     const f = FOGS[i];
     if (f){
       f.style.transform = `translate3d(${x.toFixed(2)}px,0,0)`;
@@ -1388,7 +1405,6 @@ $("rail").onclick = e => {
   const b = e.target.closest("button[data-p]"); if (b) snapTo(+b.dataset.p);
 };
 const root = document.documentElement;
-$("theme").setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
 ["lang", "gateLang"].forEach(id => $(id).href += "#person=" + personId);   // die andere Sprache beginnt mit derselben Person
 /* Die Karten blenden per CSS in einer halben Sekunde um. Die Diagramme sind
    Canvas — die kennen keine Uebergaenge. Deshalb werden ihre Farben hier in
@@ -1408,11 +1424,11 @@ const mixC = (a, b, k) => {
   return out;
 };
 let themeTw = 0;
-$("theme").setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
+$("theme").setAttribute("aria-checked", String(root.dataset.theme === "dark"));
 $("theme").onclick = () => {
   const from = { ...C };
   root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
-  $("theme").setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
+  $("theme").setAttribute("aria-checked", String(root.dataset.theme === "dark"));
   try { localStorage.setItem("nebel.theme", root.dataset.theme); } catch (e) {}
   document.querySelector('meta[name="theme-color"]').content = root.dataset.theme === "dark" ? "#0E1213" : "#EDF1F1";
   requestAnimationFrame(() => {
@@ -1437,9 +1453,11 @@ $("swipeCta").onclick = () => snapTo(1);
 PAGES.forEach((el, i) =>
   el.addEventListener("click", () => { if (Math.round(prog) > i) snapTo(i); }, true));
 addEventListener("keydown", e => {
+  if (e.key === "Escape") return closeSheets();
+  // Hinter Hinweis, Blatt oder Nacht wird nicht geblaettert; Regler und Segmente behalten ihre Pfeiltasten.
+  if (pager.inert || e.target.closest("input, .seg")) return;
   if (e.key === "ArrowRight") snapTo(page + 1);
   if (e.key === "ArrowLeft")  snapTo(page - 1);
-  if (e.key === "Escape") closeSheets();
 });
 applyProg(0);
 
@@ -1519,7 +1537,7 @@ wireSeg($("speed"), b => {
   // mitlaufen lassen kann. Deshalb wird genau hier gefragt.
   if (speed === 1 && !eng.reality && !realityAsked){
     realityAsked = true;
-    $("sheetReality").classList.add("on");
+    openSheet("sheetReality");
   }
   // Im Zeitraffer ergibt der Reality-Modus keinen Sinn -- er endet dann.
   if (speed > 1 && eng.reality){
@@ -1725,13 +1743,21 @@ $("facts").addEventListener("keydown", e => {
 }
 
 /* ─── Chart ───────────────────────────────────────────────────── */
-function drawChart(cv, pts, hours, tNow, opts={}){
+/* Leere Zeichenflaeche in CSS-Pixeln. Die Groesse wird nur gesetzt, wenn sie sich
+   aendert: jedes Setzen verwirft den Puffer und legt ihn neu an. */
+function fit(cv){
   const dpr = Math.min(3, window.devicePixelRatio || 1);
   const w = cv.clientWidth, h = cv.clientHeight;
-  if (!w) return;
-  cv.width = w*dpr; cv.height = h*dpr;
+  if (!w) return null;
+  const W = Math.round(w*dpr), H = Math.round(h*dpr);
+  if (cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
   const c = cv.getContext("2d");
-  c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h);
+  c.setTransform(dpr,0,0,dpr,0,0); c.globalAlpha = 1; c.setLineDash([]); c.clearRect(0,0,w,h);
+  return { c, w, h };
+}
+function drawChart(cv, pts, hours, tNow, opts={}){
+  const f = fit(cv); if (!f) return;
+  const { c, w, h } = f;
 
   const padL = 10, padR = 44, padT = 14, padB = 22;
   const LAG = P.tau_sens, t0 = tNow - hours*60, gLo = 40, gHi = 400;
@@ -1837,37 +1863,47 @@ function paint(tNow){
      1,8 mmol/L (~1 mg/dL pro Minute), schraeg 1,8–3,4 (1–2), gerade
      3,4–5,0 (2–3), Doppelpfeil ab 5,0 (ab 3). */
   const tcl = trendClass(eng.trend());
-  const deg = TREND_DEG[tcl];
-  document.querySelectorAll(".arw").forEach(a => {
-    a.style.transform = `rotate(${deg}deg)`;
-    a.style.color = tone;
-  });
-  $("arrowbox").classList.toggle("dbl", Math.abs(tcl) === 3);
+  if (tcl + tone !== lastArw){
+    lastArw = tcl + tone;
+    document.querySelectorAll(".arw").forEach(a => {
+      a.style.transform = `rotate(${TREND_DEG[tcl]}deg)`;
+      a.style.color = tone;
+    });
+    $("arrowbox").classList.toggle("dbl", Math.abs(tcl) === 3);
+  }
   /* Differenz zum vorigen Messwert, fuenf Minuten zuvor */
   const trc = eng.trace, nn = trc.length;
   const dlt = nn >= 2 ? trc[nn-1].sensor - trc[nn-2].sensor : null;
-  $("bgDelta").textContent = dlt == null ? "" : dlt === 0 ? "0" : (dlt > 0 ? "+" : "−") + Math.abs(dlt);
+  put("bgDelta", dlt == null ? "" : dlt === 0 ? "0" : (dlt > 0 ? "+" : "−") + Math.abs(dlt));
 
   const mins = Math.floor(tNow) % 1440, day = Math.floor(tNow/1440)+1;
   const hhmm = String(Math.floor(mins/60)).padStart(2,"0")+":"+String(mins%60).padStart(2,"0");
-  $("clock").textContent = hhmm;
-  $("dayLabel").textContent = "Tag " + day + " · " + PERSON.name;
-  $("ctaSub").textContent = eng.trace.length > 1
+  put("clock", hhmm);
+  put("dayLabel", "Tag " + day + " · " + PERSON.name);
+  put("ctaSub", eng.trace.length > 1
     ? `läuft seit ${eng.trace.length*5} Minuten · ${hhmm}`
-    : "nach links wischen oder ziehen";
-  $("iob").textContent = eng.iob().toFixed(1)+" U";
-  $("cob").textContent = Math.round(eng.cob())+" g";
+    : "nach links wischen oder ziehen");
+  put("iob", eng.iob().toFixed(1)+" U");
+  put("cob", Math.round(eng.cob())+" g");
   const t = eng.tir();
-  $("tir").textContent = t === null ? "—" : Math.round(t*100)+" %";
+  put("tir", t === null ? "—" : Math.round(t*100)+" %");
 
   uiFade = lerp(uiFade, clamp((72-v)/26, 0, 1), .045);
-  document.documentElement.style.setProperty("--fade", uiFade.toFixed(3));
-  $("behind").textContent = uiFade > .4 ? "schwer zu lesen" : "dein Körper vor etwa " + LAG_TXT;
+  // Am Element, nicht an der Wurzel: dort liesse jede Aenderung alle Stile der Seite neu rechnen.
+  const fd = uiFade.toFixed(3);
+  if (fd !== lastFade){ lastFade = fd; $("readout").style.setProperty("--fade", fd); }
+  put("behind", uiFade > .4 ? "schwer zu lesen" : "dein Körper vor etwa " + LAG_TXT);
 
   // Zustandsanzeigen brauchen keine 60 Bilder pro Sekunde.
   if ((frame++ & 7) === 0){ paintMove(); paintReserve(); paintChips(); paintCrit(); paintBasal(); }
   viewH = lerp(viewH, rangeH, .12);
-  if (prog > 0.02 && prog < LAST) drawChart($("chart"), eng.trace, viewH, tNow);
+  if (prog > 0.02 && prog < LAST){
+    /* Nur zeichnen, wenn sich die Kurve um ein Geraetepixel verschoben haette,
+       ein Punkt noch einblendet oder Fenster, Groesse oder Farben sich aendern. */
+    const cv = $("chart"), cw = cv.clientWidth, last = trc[nn-1];
+    const key = Math.round(tNow*cw*(window.devicePixelRatio || 1)/(viewH*60)) + "|" + viewH.toFixed(3) + "|" + nn + "|" + cw + "|" + C.ink + C.rgbCard;
+    if (key !== chartKey || (last && performance.now() - last.born < 700)){ chartKey = key; drawChart(cv, trc, viewH, tNow); }
+  }
   // Erst wenn die Ebene wirklich steht, sonst faellt der Neuaufbau
   // mitten in die laufende Animation.
   if (prog > 1.985 && performance.now() - lastRev > 1200){
@@ -1875,7 +1911,7 @@ function paint(tNow){
   }
 }
 
-let lastRev = -1e9, lastMoveKey = "", lastRes = "", frame = 0;
+let lastRev = -1e9, lastMoveKey = "", lastRes = "", frame = 0, lastArw = "", lastFade = "", chartKey = "";
 
 let lastChips = "", lastCrit = "";
 const LOADBARS = n => Array.from({length:4}, (_,k) => `<i class="${k < n ? "on" : ""}"></i>`).join("");
@@ -2050,7 +2086,8 @@ const ICON = {
 let toastT = null;
 function toast(kind, text, cell){
   const el = $("toast");
-  el.innerHTML = (ICON[kind] || "") + "<span>" + text + "</span>";
+  el.innerHTML = ICON[kind] || "";
+  el.append(Object.assign(document.createElement("span"), { textContent:text }));   // Namen koennen aus dem gespeicherten Stand kommen
   el.classList.add("on");
   clearTimeout(toastT);
   toastT = setTimeout(() => el.classList.remove("on"), 1900);
@@ -2078,7 +2115,26 @@ const GATE_KEY = "nebel.hinweis.v1";
   $("gateOk").focus();
 })();
 
-const closeSheets = () => document.querySelectorAll(".sheet").forEach(s => s.classList.remove("on"));
+/* Ein offenes Blatt ist ein Dialog: die Seite dahinter ruht, der Fokus geht ins
+   Blatt und beim Schliessen zurueck zum Knopf, der es geoeffnet hat. */
+let sheetFrom = null;
+document.querySelectorAll(".sheet").forEach(s => {
+  s.setAttribute("role", "dialog"); s.setAttribute("aria-modal", "true");
+  s.setAttribute("aria-label", s.querySelector("h3").textContent);
+  s.firstElementChild.tabIndex = -1;
+});
+function openSheet(id){
+  sheetFrom = document.activeElement;
+  $(id).classList.add("on"); pager.inert = true;
+  $(id).firstElementChild.focus({ preventScroll:true });
+}
+const closeSheets = () => {
+  if (!document.querySelector(".sheet.on")) return;
+  document.querySelectorAll(".sheet").forEach(s => s.classList.remove("on"));
+  pager.inert = asleep;
+  if (sheetFrom && sheetFrom.isConnected) sheetFrom.focus({ preventScroll:true });
+  sheetFrom = null;
+};
 document.querySelectorAll("[data-close]").forEach(b => b.onclick = closeSheets);
 document.querySelectorAll(".sheet").forEach(s => s.onclick = e => { if (e.target === s) closeSheets(); });
 /* Blatt nach unten wegwischen. Nur wenn der Inhalt ganz oben steht, sonst scrollt er.
@@ -2119,7 +2175,7 @@ const guarded = fn => () => { const d = uiFade*700; d > 40 ? setTimeout(fn, d) :
 
 $("btnMeal").onclick = guarded(() => {
   macroTouched = false; syncMacros();
-  $("sheetMeal").classList.add("on");
+  openSheet("sheetMeal");
   requestAnimationFrame(() => moveKnob($("mealType")));
 });
 $("btnBolus").onclick = guarded(() => {
@@ -2129,7 +2185,7 @@ $("btnBolus").onclick = guarded(() => {
     ? `${i.toFixed(1)} U wirken noch. Was du jetzt spritzt, kommt oben drauf.`
     : "Wirkbeginn nach zehn bis zwanzig Minuten, am stärksten nach etwa einer Stunde, vorbei nach drei bis vier. Bei fettigem Essen kommen die Kohlenhydrate später, und das Insulin wirkt über Stunden schwächer — dann lohnt sich eine Aufteilung.";
   paintBolusSheet();
-  $("sheetBolus").classList.add("on");
+  openSheet("sheetBolus");
   requestAnimationFrame(() => moveKnob($("bolusSplit")));
 });
 let moveInt = 0.50;
@@ -2148,7 +2204,7 @@ wireSeg($("moveInt"), b => { moveInt = +b.dataset.i; paintMoveSheet(); });
 $("moveDur").oninput = e => $("mvDurTxt").textContent = e.target.value;
 $("btnMove").onclick = guarded(() => {
   paintMoveSheet();
-  $("sheetMove").classList.add("on");
+  openSheet("sheetMove");
   requestAnimationFrame(() => moveKnob($("moveInt")));
 });
 $("mvCancel").onclick = () => {
@@ -2186,7 +2242,7 @@ $("basalR").oninput = paintBasalSheet;
 $("btnBasal").onclick = guarded(() => {
   $("basalR").value = eng.s.basalSet.toFixed(2);
   paintBasalSheet();
-  $("sheetBasal").classList.add("on");
+  openSheet("sheetBasal");
 });
 $("basalOK").onclick = () => {
   const r = +$("basalR").value;
@@ -2312,6 +2368,7 @@ function goSleep(){
   holdScreen(true);
   $("night").hidden = false; $("alarmBox").hidden = true;
   $("nBody").hidden = false;
+  pager.inert = true; $("btnWake").focus();
   $("night").className = "night";
   alarmOn = false; snoozeUntil = -1e9;
   $("btnTempo").textContent = speed === 0 ? "❙❙" : speed + "×";
@@ -2321,7 +2378,7 @@ function goSleep(){
 function endSleep(byAlarm){
   if (byAlarm) eng.sleepAlarm(eng.lastSensor < 100 ? "low" : "high", eng.lastSensor, false);
   asleep = false; eng.s.asleep = false; alarmOn = false;
-  $("night").hidden = true;
+  $("night").hidden = true; pager.inert = false;
   holdScreen(false); saveState();
   if (navigator.vibrate) navigator.vibrate(0);
   renderLog();
@@ -2437,12 +2494,8 @@ function getForecast(pastMin){
 }
 
 function fcFrame(cv, pastMin, padT, padB){
-  const dpr = Math.min(3, window.devicePixelRatio || 1);
-  const w = cv.clientWidth, h = cv.clientHeight;
-  if (!w) return null;
-  cv.width = w*dpr; cv.height = h*dpr;
-  const c = cv.getContext("2d");
-  c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h);
+  const fr = fit(cv); if (!fr) return null;
+  const { c, w, h } = fr;
   const padL = 10, padR = 44;
   /* Nicht vor den Beginn der Sitzung zurueck — dort gibt es nichts zu zeigen. */
   const t0 = Math.max(eng.s.t - pastMin, eng.trace.length ? eng.trace[0].t : eng.s.t - 60), t1 = eng.s.t + FC_HORIZON;

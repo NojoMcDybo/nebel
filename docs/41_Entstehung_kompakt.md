@@ -69,6 +69,6 @@ nebel. zeigt Größenordnungen und Zusammenhänge. Für einen echten Menschen sa
 10. Wolpert HA, et al. (2013). Dietary fat acutely increases glucose concentrations and insulin requirements in patients with type 1 diabetes. *Diabetes Care* 36(4):810–816. [DOI](https://doi.org/10.2337/dc12-0092)
 11. Paterson MA, et al. (2016). Influence of dietary protein on postprandial blood glucose levels in individuals with type 1 diabetes mellitus using intensive insulin therapy. *Diabet Med* 33(5):592–598. [DOI](https://doi.org/10.1111/dme.13011)
 12. Smart CEM, et al. (2013). Both dietary protein and fat increase postprandial glucose excursions in children with type 1 diabetes, and the effect is additive. *Diabetes Care* 36(12):3897–3902. [DOI](https://doi.org/10.2337/dc13-1195)
-13. Verordnung (EU) 2017/745 (MDR) und MDCG 2019-11 zur Einordnung von Software. https://health.ec.europa.eu/system/files/2020-09/md_mdcg_2019_11_guidance_en_0.pdf
+13. Verordnung (EU) 2017/745 (MDR) und MDCG 2019-11 rev.1 (Juni 2025) zur Einordnung von Software. https://health.ec.europa.eu/document/download/b45335c5-1679-4c71-a91c-fc7a4d37f12b_en?filename=mdcg_2019_11_en.pdf
 
 Die ausführliche Fassung mit allen Entscheidungen, Zahlen und Quellen: [nebel. ausführlich](40_Entstehung_ausfuehrlich.md).

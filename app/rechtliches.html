@@ -52,7 +52,7 @@ small{color:var(--ink3)}
 
   <section id="impressum">
     <h2>Impressum</h2>
-    <p class="k">Angaben gemäß § 5 DDG</p>
+    <p class="k">Angaben gemäß § 18 Abs. 1 MStV (vorsorglich auch § 5 DDG)</p>
     <address>{{IMPRESSUM_NAME}}
 {{IMPRESSUM_ANSCHRIFT}}</address>
     <p class="k">Kontakt</p>
@@ -68,16 +68,29 @@ small{color:var(--ink3)}
     <p>{{IMPRESSUM_NAME}}, Anschrift und Kontakt wie im Impressum.</p>
 
     <h3>Bereitstellung über GitHub Pages</h3>
-    <p>Die Seite wird über GitHub Pages ausgeliefert (GitHub B.V., Prins Bernhardplein 200, 1097 JB Amsterdam, Niederlande, und GitHub, Inc., USA). Beim Aufruf verarbeitet GitHub technisch notwendige Zugriffsdaten, darunter deine IP-Adresse; GitHub speichert sie nach eigener Angabe aus Sicherheitsgründen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO: das berechtigte Interesse, die Seite sicher und stabil bereitzustellen. Dabei können Daten in die USA übermittelt werden. GitHub nimmt nach eigener Angabe am EU-U.S. Data Privacy Framework teil, für das ein Angemessenheitsbeschluss der EU-Kommission besteht (Art. 45 DSGVO). Einzelheiten: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub General Privacy Statement</a>.</p>
+    <p>Die Seite wird über GitHub Pages ausgeliefert (GitHub B.V., Prins Bernhardplein 200, 1097 JB Amsterdam, Niederlande, und GitHub, Inc., USA). Beim Aufruf verarbeitet GitHub technisch notwendige Zugriffsdaten, darunter deine IP-Adresse; GitHub speichert sie nach eigener Angabe aus Sicherheitsgründen. Das tut GitHub nach eigenen Angaben als Verantwortlicher in eigener Verantwortung. Ich habe auf diese Daten keinen Zugriff und keinen Einfluss darauf, wie lange GitHub sie aufbewahrt; nach GitHubs Angaben hängt die Dauer vom Zweck und von gesetzlichen Pflichten ab. Rechtsgrundlage für die Bereitstellung über GitHub ist Art. 6 Abs. 1 lit. f DSGVO: das berechtigte Interesse, die Seite sicher und stabil bereitzustellen. Dabei können Daten in die USA übermittelt werden. GitHub nimmt nach eigener Angabe am EU-U.S. Data Privacy Framework teil, für das ein Angemessenheitsbeschluss der EU-Kommission besteht (Art. 45 DSGVO). Einzelheiten: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub General Privacy Statement</a>.</p>
 
     <h3>Speicherung in deinem Browser</h3>
-    <p>Die Simulation legt den Spielstand und die gewählte Person im lokalen Speicher deines Browsers ab (localStorage), damit du später weitermachen kannst. Diese Daten verlassen dein Gerät nicht, ich erhalte sie nicht. Rechtsgrundlage ist § 25 Abs. 2 Nr. 2 TDDDG: Die Speicherung ist unbedingt erforderlich für die Funktion, die du ausdrücklich nutzt. Löschen kannst du sie mit „Von vorn beginnen“ in der Auswertung oder über die Website-Daten deines Browsers. Die Exporte als CSV und JSON entstehen ebenfalls nur auf deinem Gerät.</p>
+    <p>Die Seite legt im lokalen Speicher deines Browsers (localStorage) bis zu vier Einträge ab, damit du später weitermachen kannst:</p>
+    <ul>
+      <li>den Spielstand (<code>nebel.state.v1</code>),</li>
+      <li>die gewählte Person (<code>nebel.person.v1</code>),</li>
+      <li>dass du den Hinweis „Bevor es losgeht“ bestätigt hast (<code>nebel.hinweis.v1</code>),</li>
+      <li>helles oder dunkles Design, sobald du es umstellst (<code>nebel.theme</code>).</li>
+    </ul>
+    <p>Die englische Fassung nutzt eigene Einträge mit <code>nebel.en.</code> vorne. Diese Daten verlassen dein Gerät nicht, ich erhalte sie nicht. Rechtsgrundlage ist § 25 Abs. 2 Nr. 2 TDDDG: Die Speicherung ist unbedingt erforderlich für die Funktion, die du ausdrücklich nutzt. „Von vorn beginnen“ in der Auswertung löscht den Spielstand, alles zusammen löschst du über die Website-Daten deines Browsers. Die Exporte als CSV und JSON entstehen ebenfalls nur auf deinem Gerät.</p>
+
+    <h3>Kontakt per E-Mail</h3>
+    <p>Wenn du mir schreibst, verarbeite ich deine E-Mail-Adresse, deinen Namen, falls du ihn nennst, und den Inhalt der Nachricht, um dir zu antworten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO: das berechtigte Interesse, Anfragen zu beantworten. Die Nachricht liegt bei meinem E-Mail-Anbieter, der sie technisch verarbeitet. Ich lösche sie, wenn die Sache erledigt ist und keine gesetzliche Aufbewahrungspflicht besteht. Bitte schick mir keine eigenen Gesundheitswerte: Zu deiner Therapie kann ich nichts sagen, dafür ist dein Diabetesteam da.</p>
 
     <h3>Keine Gesundheitsdaten</h3>
     <p>Alles in der Simulation betrifft erfundene Personen. Die Seite fragt keine echten Blutzucker-, Insulin- oder Mahlzeitenwerte ab und hat dafür kein Eingabefeld.</p>
 
     <h3>Deine Rechte</h3>
-    <p>Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18) und Widerspruch (Art. 21). Du kannst dich bei einer Datenschutz-Aufsichtsbehörde beschweren (Art. 77), zum Beispiel bei der Landesbeauftragten für Datenschutz und Informationsfreiheit Nordrhein-Westfalen. Ich selbst speichere keine Daten über dich; die Zugriffsdaten liegen bei GitHub.</p>
+    <p>Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17) und Einschränkung der Verarbeitung (Art. 18). Du kannst dich bei einer Datenschutz-Aufsichtsbehörde beschweren (Art. 77), zum Beispiel bei der Landesbeauftragten für Datenschutz und Informationsfreiheit Nordrhein-Westfalen. Außer wenn du mir schreibst, speichere ich keine Daten über dich; die Zugriffsdaten liegen bei GitHub.</p>
+
+    <h3>Widerspruchsrecht</h3>
+    <p><b>Du kannst jederzeit aus Gründen, die sich aus deiner besonderen Situation ergeben, der Verarbeitung deiner Daten widersprechen, die auf Art. 6 Abs. 1 lit. f DSGVO beruht (Art. 21 DSGVO).</b> Eine formlose Nachricht an die Adresse im Impressum genügt.</p>
   </section>
 
   <section id="lizenzen">
@@ -95,7 +108,8 @@ small{color:var(--ink3)}
     <p>DM Mono (The DM Mono Project Authors) und Plus Jakarta Sans (The Plus Jakarta Sans Project Authors), beide unter der SIL Open Font License 1.1: <a href="fonts/OFL-DM-Mono.txt">DM Mono</a>, <a href="fonts/OFL-Plus-Jakarta-Sans.txt">Plus Jakarta Sans</a>.</p>
   </section>
 
-  <p><small>Stand dieser Seite: {{BUILD_DATE}}</small></p>
+  <!-- Datum der letzten inhaltlichen Aenderung, bei jeder Textaenderung von Hand nachziehen (auch in rechtliches.en.html). -->
+  <p><small>Stand dieser Seite: 12.11.2026</small></p>
   <a class="back" href="./">← zur Simulation</a>
 </main>
 </body>
