@@ -127,13 +127,14 @@ function paintLive(){
   const trc = eng.trace, last = trc[trc.length - 1];
   if (!last || trc.length === liveN) return;
   liveN = trc.length;
-  const v = eng.lastSensor;
+  const v = eng.lastSensor, pts = trc.slice(-13);
+  const pulse = pts.map(p => Math.round(N.heartRateAt(p.t, eng.input, eng.p.HRrest)));   // Puls der Person, mit Gurt dessen Minutenmittel
   liveAct.update({
     value: bgv(v), unit: UL(), arrow: LIVE_ARROW[trendClass(eng.trend())],
     tone: v < 70 ? "low" : v > 180 ? "high" : "ok", name: PERSON.name,
-    bpm: eng.beltT != null ? beltBpmNow : 0,
+    bpm: eng.beltT != null ? beltBpmNow : pulse[pulse.length - 1],
     at: anchor.wall + (last.t - anchor.simT)*60000,
-    points: trc.slice(-13).map(p => p.sensor),
+    points: pts.map(p => p.sensor), pulse,
   }).catch(() => {});
 }
 

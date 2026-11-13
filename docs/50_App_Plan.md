@@ -149,11 +149,12 @@ Apple Health als Lückenfüller gebaut (13.11.2026), Test auf dem iPhone offen. 
 - Minuten, in denen der Gurt selbst geliefert hat, bleiben unangetastet. Ohne Health-Werte bleibt die Lücke drei Tage offen, dann verfällt sie.
 - HealthKit braucht eine Berechtigung im Programm: `ios/App/App/App.entitlements`, eingebettet per Ad-hoc-Signatur im CI. Ob SideStore sie mit dem kostenlosen Konto übernimmt, zeigt der Test.
 
-Live-Aktivität auf dem Sperrbildschirm und App-Icon gebaut (13.11.2026), Test auf dem iPhone offen:
+Live-Aktivität auf dem Sperrbildschirm und App-Icon gebaut (13.11.2026), auf dem iPhone getestet:
 - In Reality zeigt der Sperrbildschirm Wert, Pfeil, Person, Uhrzeit, Puls und die letzte Stunde, gekennzeichnet als „nebel. · Simulation“. Aktualisiert mit jedem Sensorwert (alle 5 min), bei gesperrtem iPhone über die Gurtwerte. Ohne neuen Wert seit 15 min wird sie blass.
 - Starten darf iOS sie nur aus der geöffneten App; nach 8 h beendet iOS sie, beim nächsten Öffnen startet eine neue. Kein Push, kein Server.
 - Technik: Widget-Erweiterung `ios/App/NebelWidget` (SwiftUI), `NebelLivePlugin` in `SceneDelegate.swift`. Ohne Mac trägt `scripts/add-widget.rb` (Gem xcodeproj) die Erweiterung im CI ins Projekt ein; die Projektdatei im Repo bleibt unverändert. SideStore braucht dafür eine zweite App-ID.
 - App-Icon: das „n.“ des Favicons in 1024 px, statt des Capacitor-Icons.
+- Nachgezogen: Live-Aktivität im dunklen Schema der App. Der Graph zeigt Sensorwerte als Punkte wie der Verlauf der App und den Puls als Linie, die bis in die Nebelzone reicht. Startbildschirm schwarz mit „n.“. Test auf dem iPhone offen.
 - Datenschutztext der App (Pulsdaten), bevor die App an andere geht.
 - Entscheidung Developer Program und TestFlight.
 
