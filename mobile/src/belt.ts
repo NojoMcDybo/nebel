@@ -91,8 +91,9 @@ export function createBelt(h: BeltHandlers) {
       const d = await find(interactive);
       if (d) await attach(d);
       else status("aus");
-    } catch (e) {
-      status("aus", e instanceof Error ? e.message : String(e));
+    } catch {
+      // Häufigster Grund: der Gurt liegt nicht an und wirbt dann nicht.
+      status(deviceId ? "getrennt" : "aus", "Gurt nicht erreichbar");
       if (deviceId) void reconnect();
     }
   }

@@ -2054,7 +2054,7 @@ function paintMove(){
   $("mvCancel").hidden = a.mode !== "soon";
   put("mvSrc", belted ? `Quelle: Pulsgurt · ${beltBpmNow} bpm`
     : beltState === "suche" ? "Quelle: simuliert · suche Pulsgurt …"
-    : beltState === "getrennt" ? "Quelle: simuliert · Gurt getrennt, verbinde neu …"
+    : beltState === "getrennt" ? "Quelle: simuliert · " + (beltMsg || "Gurt getrennt, verbinde neu …")
     : "Quelle: simuliert" + (beltMsg ? " · " + beltMsg : ""));
   $("btnBelt").hidden = belted;
   $("mvBeat").style.display = beat ? "block" : "none";

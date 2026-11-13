@@ -26,7 +26,7 @@ const belt = createBelt({
   onStatus(state, name, msg) {
     $("dev").textContent =
       state === "verbunden" ? name : state === "getrennt" ? name + " getrennt" : state === "suche" ? "Suche Pulsgurt …" : "Kein Pulsgurt verbunden";
-    $("msg").textContent = msg ? "Verbindung nicht möglich: " + msg : "";
+    $("msg").textContent = msg;
     btn.disabled = state === "suche";
   },
 });
