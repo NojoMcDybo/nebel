@@ -418,11 +418,11 @@ Auf der Startseite wählt man, in wessen Körper man den Tag verbringt. Zehn Per
 |---|---|---|
 | Lena, 23 (Standard) | 10 | nah am Median in allem außer der Mahlzeit |
 | Jonas, 22 | 4 | empfindlich auf Insulin, harter Sport hebt stark |
-| Mira, 30 | 6 | Sport senkt maximal, harter Sport hebt nicht |
-| Aylin, 31 | 7 | am unempfindlichsten auf Insulin |
+| Mira, 38 | 6 | Sport senkt maximal, harter Sport hebt nicht |
+| Aylin, 41 | 7 | am unempfindlichsten auf Insulin |
 | Malik, 25 | 8 | mittlerer Sport-Responder, flache Mahlzeiten |
-| Tobias, 33 | 11 | Sport bewirkt fast nichts |
-| Jana, 26 | 13 | höchste Spitze nach dem Essen |
+| Tobias, 43 | 11 | Sport bewirkt fast nichts |
+| Jana, 34 | 13 | höchste Spitze nach dem Essen |
 | Finn, 19 | 14 | empfindlich, harter Sport hebt kaum |
 | Sofia, 24 | 15 | kräftige Antwort auf Sport in beide Richtungen |
 | David, 20 | 18 | Sport bewirkt wenig, flache Mahlzeiten |

@@ -63,6 +63,24 @@ const TRAIN_LOW = 80, TRAIN_HIGH = 280;
    zeigt die Karte sie an, ab 6 % sagen die Reserven „nachtanken". 45 min
    Dauerlauf: rund 12 h sichtbar, davon gut 5 h nachtanken. */
 const AFTER_SHOW = 0.03, AFTER_REFUEL = 0.06;
+/* ── Achterbahn (nur im ganzen Alltag, eng.variability) ──────────────
+   Insulinempfindlichkeit wandert ueber den Tag: glatter Zufallsverlauf mit
+   Stuetzstellen alle 4 h, log-normal mit sd 0,25 (rund 25 %). Laut Ruan 2017
+   schwankt sie von Tag zu Tag um 38–79 % (doi:10.1109/TBME.2016.2590498),
+   laut Visentin 2016 und Hinshaw 2013 ohne festes Tagesmuster, je Person
+   anders (doi:10.1109/TBME.2016.2535241, doi:10.2337/db12-1759). Innerhalb
+   eines Tages bewusst darunter (NEBEL-ANNAHME): Mit fehlerfreien Boli zu
+   3 × 60 g sinkt die Zeit im Ziel ueber 60 Tage so von 93 auf 65 %
+   (sd 0,35: 52 %, sd 0,2: 73 %).
+   Katheter: Laut Kanapka 2022 scheitern 3,3 % der Sets mit stundenlang hohen
+   Werten, im Mittel 5,1 h ueber 250 bis zum Wechsel (doi:10.1089/dia.2021.0548);
+   laut Hughes 2023 erleben 41 % mindestens einen Ausfall im Monat und merken
+   ihn meist erst am hohen Wert (doi:10.1089/dia.2023.0005). Hier 10 % je
+   Tag, damit es in einem gespielten Tag ueberhaupt vorkommt (NEBEL-ANNAHME,
+   deutlich haeufiger als in echt). Gewechselt wird nach Kanapkas Kriterium:
+   2 h am Stueck ueber 250. */
+const SI_SD = 0.25, SI_KNOT = 240, OCC_PER_DAY = 0.10, OCC_LEFT = 0.1;
+
 /* p: Belastungsmuster [Minuten, Anteil der HF-Reserve], wiederholt bis zum Ende.
    Fehlt es, bleibt die Belastung gleichmaessig bei i. Mit Muster ist i nur
    die gefuehlte Belastung fuer die Anzeige.
@@ -139,6 +157,10 @@ class Engine {
     this._fault = null;
     /* Morgens ist der Speicher am tiefsten: unter 70 % zeigt die Karte „hungrig aufgewacht". */
     this._reserve = 0.55;
+    /* Achterbahn: aus, bis die Oberflaeche „ganzer Alltag“ setzt. Geplant
+       wird trotzdem immer, damit derselbe Seed dieselben Ereignisse hat. */
+    this.variability = false;
+    this._occ = []; this._highSince = null;
 
     this.s = {
       t: 7*60, G: 0, Gi: 0,
@@ -180,6 +202,7 @@ class Engine {
                        dur: Math.round(span(tr.d, 220)), warn: Math.round(span(tr.w, 230)) });
     }
     this.acts.sort((a,b) => a.start - b.start);
+    if (u(300) < OCC_PER_DAY) this._occ.push({ start: base + 8*60 + Math.floor(u(301)*720), end: null });
   }
 
   /* ── Eingaben der Nutzerin ── */
@@ -342,7 +365,7 @@ class Engine {
     return { v:1, subjectId:this.subjectId, seed:this.seed,
              z:N.serializeState(this.z), input:this.input,
              reserve:this._reserve, act:this._act, sensorIndex:this._sensorIndex,
-             faults:this.sensorFaults, snaps:this._snaps };
+             faults:this.sensorFaults, snaps:this._snaps, occ:this._occ };
   }
   canRestore(core){
     return !!core && core.v === 1 && core.subjectId === this.subjectId && Number.isInteger(core.seed);
@@ -356,6 +379,7 @@ class Engine {
     this._act = core.act || null;
     this._sensorIndex = core.sensorIndex;
     this.sensorFaults = core.faults || [];
+    this._occ = core.occ || [];
     this._fault = this.sensorFaults.find(f => f.open) || null;
     this._snaps = core.snaps && core.snaps.length ? core.snaps : [{ t:this.s.t, z:Array.from(this.z) }];
     /* Aeltere Staende kannten Basalaenderungen nur als Pumpenprogramm. */
@@ -370,16 +394,30 @@ class Engine {
   /* Eingaben der Engine fuer die Minute [t, t+1) aus einer Ereignisliste.
      Dieselbe Funktion fuer den Lauf und fuer die Vorhersage — sonst rechnet
      die Vorhersage eine andere Vergangenheit nach, als gelaufen ist. */
+  /* Faktor auf die Insulinempfindlichkeit, rein aus t und Seed, damit Lauf
+     und Vorhersage dieselbe Kurve sehen. Mittel 1, begrenzt auf 0,5–2. */
+  _drift(t){
+    if (!this.variability) return 1;
+    const k = Math.floor(t / SI_KNOT), f = (t - k*SI_KNOT) / SI_KNOT, sm = f*f*(3 - 2*f);
+    const a = N.normalAt(this.seed + 501, k), b = N.normalAt(this.seed + 501, k + 1);
+    return Math.min(2, Math.max(0.5, Math.exp(SI_SD*(a + (b - a)*sm) - SI_SD*SI_SD/2)));
+  }
+  /* Anteil des Insulins, der ankommt: 0,1 bei geknicktem Katheter. */
+  _deliv(t){
+    if (!this.variability) return 1;
+    for (const o of this._occ) if (t >= o.start && (o.end == null || t < o.end)) return OCC_LEFT;
+    return 1;
+  }
   _u(t, ev){
-    const m = N.mealInputsAt(t, 1, ev);
+    const m = N.mealInputsAt(t, 1, ev), dr = this._drift(t);
     /* Insulinsensitivitaet: Fett senkt sie, Bewegung hebt sie fuer Stunden.
        siFat bleibt fuer die Zerlegung der Vorhersage getrennt. */
     return {
       uFastCarbs: m.uFastCarbs, uSlowCarbs: m.uSlowCarbs,
-      uProteinGlucose: m.uProteinGlucose, siFat: m.siFactor,
-      siFactor: m.siFactor * N.afterEffectFactor(t, ev, this.p),
+      uProteinGlucose: m.uProteinGlucose, siFat: m.siFactor, siDrift: dr,
+      siFactor: m.siFactor * N.afterEffectFactor(t, ev, this.p) * dr,
       uHR: N.heartRateAt(t, ev, this.p.HRrest),
-      uInsulin: N.insulinInputAt(t, 1, this.pump, ev),
+      uInsulin: N.insulinInputAt(t, 1, this.pump, ev) * this._deliv(t),
     };
   }
 
@@ -426,6 +464,15 @@ class Engine {
     });
     const v = Math.max(40, Math.min(400, Math.round(raw)));
     this.lastSensor = v;
+    this._highSince = v > 250 ? (this._highSince ?? this.s.t) : null;
+    const occ = this._occ.find(o => o.end == null && this.s.t >= o.start);
+    if (occ && this.variability && this._highSince != null && this.s.t - this._highSince >= 120){
+      occ.end = this.s.t;
+      this.events.push({ kind:"state", t:this.s.t, name:"Seit 2 Stunden sehr hoch · Katheter gewechselt, er war geknickt" });
+    } else if (occ && this.variability && this.s.t - occ.start >= 12*60){
+      occ.end = this.s.t;                                    // spaetestens beim naechsten Wechsel
+      this.events.push({ kind:"state", t:this.s.t, name:"Katheter gewechselt · er war seit Stunden geknickt" });
+    }
     this._trackFault(v);
     this.trace.push({ t:this.s.t, G:this.s.G, gi:this.s.Gi, sensor:v, born:performance.now() });
     if (this.trace.length > 4032) this.trace.shift();   // 14 Tage
@@ -546,7 +593,7 @@ class Engine {
            Muskeln nehmen auf, und die Nachwirkung laesst alles Insulin staerker
            wirken. Die Nachwirkung steht deshalb hier und nicht beim Insulin. */
         const EEf = N.get(z, "EEfast"), EEh = N.get(z, "EEhigh"), EEl = N.get(z, "EElong");
-        const x2 = N.get(z, "x2"), x3 = N.get(z, "x3"), ae = u.siFactor / u.siFat;
+        const x2 = N.get(z, "x2"), x3 = N.get(z, "x3"), ae = u.siFactor / (u.siFat * u.siDrift);
         const liver = p.EGP0 * (1 - x3) * (p.p1*EEf + p.p2*EEh);
         const muscle = p.p4*EEf + p.p5*x2*EEl;
         const after = (x2*Q2 + p.EGP0*x3) * (1 - 1/ae);
@@ -554,7 +601,7 @@ class Engine {
       }
       if (t >= end) break;
       const si = N.sensitivityFactor(G, p), I = N.get(z, "I");
-      d = rk(d, u.uInsulin - basalMU, si * u.siFat);
+      d = rk(d, u.uInsulin - basalMU, si * u.siFat * u.siDrift);
       const gap = si * I * (u.siFactor / u.siFat) * (1 - u.siFat);   // nur der Fettanteil
       dx2 = dx2*e2 + p.kb2*gap/p.ka2*(1 - e2);
       dx3 = dx3*e3 + p.kb3*gap/p.ka3*(1 - e3);

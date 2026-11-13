@@ -138,11 +138,6 @@ body.dragging, body.dragging *{
   width:100%; max-width:460px; padding:calc(14px + env(safe-area-inset-top)) 20px 0;
   display:flex; justify-content:flex-end; align-items:center; gap:2px;
 }
-.lang{
-  pointer-events:auto; font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-decoration:none;
-  color:var(--ink3); opacity:.7; padding:10px 8px; transition:color .3s var(--spring), opacity .3s var(--spring);
-}
-.lang:hover, .lang:focus-visible{color:var(--ink); opacity:1}
 .tgl{
   pointer-events:auto; position:relative; width:70px; height:36px; padding:0; border:0;
   border-radius:99px; cursor:pointer; background:var(--card);
@@ -151,10 +146,21 @@ body.dragging, body.dragging *{
   transition:background-color .5s var(--spring), transform .28s var(--spring);
 }
 .tgl:active{transform:scale(.93)}
+.cog{
+  pointer-events:auto; width:36px; height:36px; margin-right:6px; padding:0; border:0; border-radius:99px; cursor:pointer;
+  background:var(--card); color:var(--ink); display:grid; place-items:center;
+  box-shadow:inset 0 0 0 1.5px var(--hair), 0 4px 16px rgba(0,0,0,.13);
+  transition:background-color .5s var(--spring), transform .28s var(--spring);
+}
+.cog:active{transform:scale(.93)}
+.cog svg{width:18px; height:18px}
+.cog circle{transition:transform .5s cubic-bezier(.34,1.5,.5,1)}
+.cog circle.k2{transition-delay:.04s} .cog circle.k3{transition-delay:.08s}
+.cog.on .k1{transform:translateX(6px)} .cog.on .k2{transform:translateX(-6px)} .cog.on .k3{transform:translateX(3.5px)}   /* Regler verschieben sich */
 .tgl .knob{
   position:absolute; top:3px; left:3px; width:30px; height:30px; border-radius:99px;
   background:var(--ink); box-shadow:0 2px 6px rgba(0,0,0,.28);
-  transition:transform .48s var(--spring), background-color .5s var(--spring);
+  transition:transform .55s cubic-bezier(.34,1.5,.5,1), background-color .5s var(--spring);
 }
 html[data-theme="dark"] .tgl .knob{transform:translateX(34px)}
 .tgl .i{
@@ -264,22 +270,25 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .glang a:hover, .glang a:focus-visible{color:var(--ink)}
 .gate p{font-size:14px; line-height:1.55; color:var(--ink2); margin:0 0 18px}
 .gate b{color:var(--ink)}
+.okbtn{position:relative; overflow:hidden}
 .gate button{position:relative; width:100%; height:50px; font:inherit; font-weight:700; font-size:15px; color:var(--paper); background:var(--ink);
   border:0; border-radius:16px; cursor:pointer; overflow:hidden; transition:transform .22s var(--spring), background-color .3s var(--spring)}
 .gate button:active{transform:scale(.96)}
-.gate button .t, .gate button .ck{position:absolute; inset:0; display:grid; place-items:center; transition:opacity .22s var(--spring), transform .3s var(--spring)}
-.gate button .ck{opacity:0; transform:scale(.5)}
-.gate button .ck svg{width:24px; height:24px}
-.gate button .ck path{stroke-dasharray:22; stroke-dashoffset:22}
-.gate button.ok{pointer-events:none; animation:gateBump .42s var(--spring)}
-.gate button.ok .t{opacity:0; transform:translateY(-8px)}
-.gate button.ok .ck{opacity:1; transform:none}
-.gate button.ok .ck path{stroke-dashoffset:0; transition:stroke-dashoffset .3s ease-out .1s}
+.gate button .t, .gate button .ck, .okbtn .t, .okbtn .ck{position:absolute; inset:0; display:grid; place-items:center; transition:opacity .22s var(--spring), transform .3s var(--spring)}
+.gate button .ck, .okbtn .ck{opacity:0; transform:scale(.5)}
+.gate button .ck svg, .okbtn .ck svg{width:24px; height:24px}
+.gate button .ck path, .okbtn .ck path{stroke-dasharray:22; stroke-dashoffset:22}
+.gate button.ok, .okbtn.ok{pointer-events:none; animation:gateBump .42s var(--spring)}
+.gate button.ok .t, .okbtn.ok .t{opacity:0; transform:translateY(-8px)}
+.gate button.ok .ck, .okbtn.ok .ck{opacity:1; transform:none}
+.gate button.ok .ck path, .okbtn.ok .ck path{stroke-dashoffset:0; transition:stroke-dashoffset .3s ease-out .1s}
 @keyframes gateBump{0%{transform:scale(1)} 35%{transform:scale(.95)} 100%{transform:scale(1)}}
 .legal{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-align:center; margin:14px 0 0}
 .legal a{color:var(--ink3); text-decoration:none; padding:6px 4px}
 .legal a:hover, .legal a:focus-visible{color:var(--ink); text-decoration:underline}
-.gate .legal{margin:18px 0 -4px}  /* .gate p nahm sonst den Abstand zum Button weg */
+.gate .legal{margin:18px 0 -4px}
+.gate.hypo .ghd .hv{font-size:28px; font-weight:800; letter-spacing:-.03em; color:var(--low); font-variant-numeric:tabular-nums; white-space:nowrap}
+.gate.hypo .hnote{font-size:12.5px; color:var(--ink3); margin:14px 0 0}  /* .gate p nahm sonst den Abstand zum Button weg */
 
 /* Personenwahl */
 .people{display:grid; grid-template-columns:repeat(5,1fr); gap:10px 8px}
@@ -389,13 +398,14 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .seg{position:relative; display:flex; background:var(--sink); border-radius:99px; padding:3px}
 .seg .knob{
   position:absolute; top:3px; bottom:3px; left:3px; border-radius:99px; background:var(--ink);
-  transition:transform .42s var(--spring), width .42s var(--spring); z-index:0;
+  transition:transform .5s cubic-bezier(.34,1.5,.5,1), width .5s cubic-bezier(.34,1.5,.5,1); z-index:0;   /* federt leicht ueber */
 }
 .seg button{
   position:relative; z-index:1; flex:1; border:0; background:transparent; cursor:pointer;
   font-family:var(--mono); font-size:11.5px; color:var(--ink2); height:30px; padding:0 8px;
-  transition:color .3s var(--spring); white-space:nowrap;
+  transition:color .3s var(--spring), transform .25s cubic-bezier(.34,1.6,.5,1); white-space:nowrap;
 }
+.seg button:active{transform:scale(.92)}
 .seg button[aria-pressed="true"]{color:var(--paper)}
 .seg.tall button{height:40px; font-family:var(--sans); font-size:13.5px; font-weight:600}
 
@@ -508,6 +518,15 @@ canvas{width:100%; height:206px; display:block; touch-action:pan-y}
 }
 .toast.on{transform:translate(-50%, 0) scale(1); opacity:1}
 .toast svg{width:15px; height:15px; flex:0 0 auto}
+.remark{
+  position:fixed; left:50%; top:calc(64px + env(safe-area-inset-top)); z-index:34; pointer-events:none;
+  width:min(400px, calc(100% - 32px)); padding:12px 16px 13px; border-radius:18px;
+  background:var(--card); box-shadow:inset 0 0 0 1.5px var(--hair), var(--shUp);
+  transform:translate(-50%, -12px); opacity:0; transition:transform .5s var(--spring), opacity .35s var(--spring);
+}
+.remark.on{transform:translate(-50%, 0); opacity:1}
+.remark .who{font-family:var(--mono); font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink3)}
+.remark .txt{font-size:15px; line-height:1.4; margin-top:3px; color:var(--ink)}
 
 @keyframes edge{
   0%{box-shadow:inset 0 0 0 0 var(--ink), var(--sh)}
@@ -534,6 +553,8 @@ canvas{width:100%; height:206px; display:block; touch-action:pan-y}
 .chip.kombi{background:var(--ink); color:var(--paper)}
 .chip.nacht{background:transparent; box-shadow:inset 0 0 0 1.3px var(--hair); color:var(--ink3)}
 .chip.hunger{background:transparent; box-shadow:inset 0 0 0 1.3px var(--low); color:var(--low)}
+.chip.feel{background:var(--low); color:#fff}
+.chip.feelhi{background:var(--high); color:#fff}
 
 /* ─── Reserven ─── */
 .reserve{
@@ -881,7 +902,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
         </span>
         <span class="delta" id="bgDelta" title="Differenz zum vorigen Messwert"></span></span>
       </div>
-      <div class="unit">mg/dL · Sensor</div>
+      <div class="unit"><span class="ul">mg/dL</span> · Sensor</div>
       <div class="behind" id="behind">dein Körper vor etwa einer Weile</div>
     </div>
 
@@ -953,8 +974,8 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   <h1 id="revTitle">Tag 1</h1>
   <p class="lede">Jetzt siehst du, was der Sensor dir vorenthalten hat.</p>
   <div class="statlist">
-    <div><span class="k">im Ziel 70–180</span><span class="v" id="rTir">—</span></div>
-    <div><span class="k">wirklich unter 70</span><span class="v" id="rLow">—</span></div>
+    <div><span class="k">im Ziel <span class="u70">70</span>–<span class="u180">180</span></span><span class="v" id="rTir">—</span></div>
+    <div><span class="k">wirklich unter <span class="u70">70</span></span><span class="v" id="rLow">—</span></div>
     <div><span class="k">Mittelwert</span><span class="v" id="rAvg">—</span></div>
     <div><span class="k">Entscheidungen</span><span class="v" id="rDec">—</span></div>
     <div><span class="k">Notfälle</span><span class="v" id="rEmg">—</span></div>
@@ -974,7 +995,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   <p class="fcsum" id="fcSum"></p>
   <div class="chartcard fx">
     <div class="fxhead">
-      <span class="fxk">Wirkung · mg/dL pro Stunde</span>
+      <span class="fxk">Wirkung · <span class="ul">mg/dL</span> pro Stunde</span>
       <span class="fxchips">
         <span class="fxc"><i class="ins"></i>Insulin</span>
         <button class="fxc" id="fxFood" aria-expanded="false"><i class="food"></i>Essen <span class="caret">▶</span></button>
@@ -1008,7 +1029,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
 </div>
 
 <div id="topbar"><div class="col">
-  <a class="lang" id="lang" href="en/" lang="en" hreflang="en" aria-label="English">EN</a>
+  <button id="cfg" class="cog" type="button" aria-label="Einstellungen" aria-haspopup="dialog"><svg viewBox="0 0 20 20" fill="none"><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5.5h14M3 10h14M3 14.5h14"/></g><g fill="var(--card)" stroke="currentColor" stroke-width="1.8"><circle class="k1" cx="7" cy="5.5" r="2"/><circle class="k2" cx="13" cy="10" r="2"/><circle class="k3" cx="8.5" cy="14.5" r="2"/></g></svg></button>
   <button id="theme" class="tgl" role="switch" aria-label="Dunkelmodus" aria-checked="false">
     <span class="knob"></span>
     <svg class="i sun" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3.7" stroke="currentColor" stroke-width="1.8"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 1.4v1.9M10 16.7v1.9M18.6 10h-1.9M3.3 10H1.4M16.1 3.9l-1.4 1.4M5.3 14.7l-1.4 1.4M16.1 16.1l-1.4-1.4M5.3 5.3L3.9 3.9"/></g></svg>
@@ -1028,7 +1049,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   <div class="alarmbox" id="alarmBox" role="alert" hidden>
     <div class="asig"><span></span><span></span><span></span></div>
     <div class="avalue" id="aValue">62</div>
-    <div class="aunit">mg/dL · Sensor</div>
+    <div class="aunit"><span class="ul">mg/dL</span> · Sensor</div>
     <div class="atext" id="aText">Tiefalarm</div>
     <div class="nrow">
       <button class="btn soft" id="btnSnooze">Weiterschlafen</button>
@@ -1038,6 +1059,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
 </div>
 
 <div class="toast" id="toast" aria-live="polite"></div>
+<div class="remark" id="remark" role="status" aria-live="polite"><div class="who" id="rmWho"></div><div class="txt" id="rmTxt"></div></div>
 
 <div id="rail">
   <button data-p="0" aria-current="true" aria-label="Start"><i></i></button>
@@ -1117,6 +1139,59 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     <button class="btn" id="moveOK">Los</button>
   </div>
 </div></div>
+
+<!-- ══════════ SHEET: EINSTELLUNGEN ══════════ -->
+<div class="sheet" id="sheetCfg"><div class="panel">
+  <div class="grab"></div>
+  <h3>Einstellungen</h3>
+  <div class="field">
+    <label><span>Einheit</span></label>
+    <div class="seg tall" id="unitSeg">
+      <span class="knob"></span>
+      <button data-u="mgdl" aria-pressed="true">mg/dL</button>
+      <button data-u="mmol" aria-pressed="false">mmol/L</button>
+    </div>
+  </div>
+  <div class="field">
+    <label><span>Simulation</span></label>
+    <div class="seg tall" id="modeSeg">
+      <span class="knob"></span>
+      <button data-m="geraet" aria-pressed="true">Gerät</button>
+      <button data-m="alltag" aria-pressed="false">Ganzer Alltag</button>
+    </div>
+  </div>
+  <p class="hint">Gerät: nur Blutzucker, Sensor und deine Entscheidungen. Ganzer Alltag: Dazu kommen ein Unterzucker mitten im Meeting, ein geknickter Katheter, Tage, an denen dasselbe Insulin anders wirkt, und andere Leute, die sagen, was sie über Diabetes zu wissen glauben.</p>
+  <div class="field">
+    <label><span>Darstellung</span></label>
+    <div class="seg tall" id="themeSeg">
+      <span class="knob"></span>
+      <button data-t="light" aria-pressed="true">Hell</button>
+      <button data-t="dark" aria-pressed="false">Dunkel</button>
+    </div>
+  </div>
+  <div class="field">
+    <label><span>Sprache</span></label>
+    <div class="seg tall" id="langSeg">
+      <span class="knob"></span>
+      <button aria-pressed="true">Deutsch</button>
+      <button data-href="en/" lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+  <p class="hint">Jede Sprache hat ihren eigenen Spielstand.</p>
+  <div class="row2" style="grid-template-columns:1fr">
+    <button class="btn okbtn" id="cfgDone" type="button"><span class="t">Fertig</span><span class="ck"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+  </div>
+</div></div>
+
+<!-- ══════════ UNTERZUCKER IM ALLTAG ══════════ -->
+<div class="gate hypo" id="hypo" role="alertdialog" aria-modal="true" aria-labelledby="hypoT" aria-describedby="hypoS" hidden>
+  <div class="box">
+    <div class="ghd"><h2 id="hypoT">Unterzucker</h2><span class="hv" id="hypoV"></span></div>
+    <p id="hypoS"></p>
+    <button type="button" id="hypoOk"><span class="t">15 g Traubenzucker essen</span></button>
+    <p class="hnote">Danach heißt es sitzen bleiben. Erst nach 15 Minuten wird nachgemessen.</p>
+  </div>
+</div>
 
 <!-- ══════════ SHEET: REALITY ══════════ -->
 <div class="sheet" id="sheetReality"><div class="panel">
@@ -1405,7 +1480,7 @@ $("rail").onclick = e => {
   const b = e.target.closest("button[data-p]"); if (b) snapTo(+b.dataset.p);
 };
 const root = document.documentElement;
-["lang", "gateLang"].forEach(id => $(id).href += "#person=" + personId);   // die andere Sprache beginnt mit derselben Person
+$("gateLang").href += "#person=" + personId;   // die andere Sprache beginnt mit derselben Person
 /* Die Karten blenden per CSS in einer halben Sekunde um. Die Diagramme sind
    Canvas — die kennen keine Uebergaenge. Deshalb werden ihre Farben hier in
    derselben Zeit mitgemischt und jedes Bild neu gezeichnet. */
@@ -1500,14 +1575,14 @@ function reveal(cv){
 }
 let revGreet = false;
 function countUp(el, delay = 0){
-  const m = el.textContent.match(/^(\D*?)(\d+(?:\.\d+)?)(.*)$/); if (!m) return;
-  const to = +m[2], dec = (m[2].split(".")[1] || "").length, t0 = performance.now() + delay;
+  const m = el.textContent.match(/^(\D*?)(\d+(?:[.,]\d+)?)(.*)$/); if (!m) return;
+  const sep = m[2].includes(",") ? "," : ".", to = +m[2].replace(",", "."), dec = (m[2].split(/[.,]/)[1] || "").length, t0 = performance.now() + delay;
   const id = el._cu = (el._cu || 0) + 1;
-  el.textContent = m[1] + (0).toFixed(dec) + m[3];
+  el.textContent = m[1] + (0).toFixed(dec).replace(".", sep) + m[3];
   const tick = now => {
     if (el._cu !== id) return;
     const k = clamp((now - t0) / 1300, 0, 1), e = 1 - Math.pow(1 - k, 3);
-    el.textContent = m[1] + (to * e).toFixed(dec) + m[3];
+    el.textContent = m[1] + (to * e).toFixed(dec).replace(".", sep) + m[3];
     if (k < 1) requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
@@ -1530,6 +1605,36 @@ function wireSeg(seg, onPick){
   requestAnimationFrame(() => moveKnob(seg));
 }
 wireSeg($("ranges"), b => rangeH = +b.dataset.h);
+
+/* ─── Einstellungen ─── */
+const pressSeg = (seg, pick) => [...seg.querySelectorAll("button")].forEach(x => x.setAttribute("aria-pressed", String(pick(x))));
+function syncCfg(){
+  pressSeg($("unitSeg"), b => (b.dataset.u === "mmol") === MMOL);
+  pressSeg($("themeSeg"), b => b.dataset.t === root.dataset.theme);
+  pressSeg($("modeSeg"), b => (b.dataset.m === "alltag") === FULLDAY);
+  ["unitSeg","modeSeg","themeSeg","langSeg"].forEach(id => moveKnob($(id)));
+}
+$("cfg").onclick = () => { if ($("sheetCfg").classList.contains("on")) return closeSheets(); $("cfg").classList.add("on"); openSheet("sheetCfg"); requestAnimationFrame(syncCfg); };
+wireSeg($("unitSeg"), b => {
+  MMOL = b.dataset.u === "mmol";
+  try { localStorage.setItem(UNIT_KEY, MMOL ? "mmol" : "mgdl"); } catch(e){}
+  applyUnit(); lastCount = -1; chartKey = ""; revStamp = "";
+  buildPeople(); showPerson(previewId); updateReview();
+});
+$("cfgDone").onclick = () => {
+  const b = $("cfgDone");
+  if (quiet()) return closeSheets();
+  b.classList.add("ok");                                   // Haken zeichnet sich, wie bei „Verstanden“
+  setTimeout(() => { closeSheets(); setTimeout(() => b.classList.remove("ok"), 450); }, 520);
+};
+wireSeg($("modeSeg"), b => {
+  FULLDAY = eng.variability = b.dataset.m === "alltag";
+  fcKey = "";
+  try { localStorage.setItem(MODE_KEY, FULLDAY ? "alltag" : "geraet"); } catch(e){}
+  if (!FULLDAY){ hypoUntil = -1; hypoRound = 0; $("remark").classList.remove("on"); }
+});
+wireSeg($("themeSeg"), b => { if (b.dataset.t !== root.dataset.theme) $("theme").click(); });
+wireSeg($("langSeg"), b => { if (b.dataset.href){ saveState(); location.href = b.dataset.href + "#person=" + personId; } });   // die andere Sprache beginnt mit derselben Person
 let realityAsked = false;
 wireSeg($("speed"), b => {
   speed = +b.dataset.x;
@@ -1588,15 +1693,34 @@ $("mealP").addEventListener("input", () => { macroTouched = true; syncMacros(); 
 const subjOf = id => window.SUBJECTS.find(s => s.id === id);
 const bmiOf  = id => { const d = subjOf(id).demo; return d.BW / (d.height/100) ** 2; };
 const fmtDE  = (x, n=0) => x.toLocaleString("de-DE", {minimumFractionDigits:n, maximumFractionDigits:n});
+/* Anzeigeeinheit. Gerechnet wird weiter in mg/dL, umgerechnet erst beim
+   Schreiben. Ohne Wahl: mmol/L dort, wo es die uebliche Einheit ist. */
+const UNIT_KEY = "nebel.unit", MGDL_MMOL = 18.0182;   // wie engine/src/units.ts
+const MODE_KEY = "nebel.mode";
+let FULLDAY = (() => { try { return localStorage.getItem(MODE_KEY) === "alltag"; } catch(e){ return false; } })();
+eng.variability = FULLDAY;   // Achterbahn: wandernde Insulinempfindlichkeit, Katheterknick
+let MMOL = (() => {
+  try { const u = localStorage.getItem(UNIT_KEY); if (u) return u === "mmol"; } catch(e){}
+  return /^en-(GB|AU|NZ|CA|IE|ZA)\b/i.test(navigator.language || "");
+})();
+const UL  = () => MMOL ? "mmol/L" : "mg/dL";
+const bgv = v => MMOL ? fmtDE(v / MGDL_MMOL, 1) : fmtDE(Math.round(v));   // Wert
+const bgd = v => MMOL ? fmtDE(v / MGDL_MMOL, 1) : fmtDE(v);               // Differenz, schon gerundet
+function applyUnit(){
+  document.querySelectorAll(".ul").forEach(e => e.textContent = UL());
+  document.querySelectorAll(".u70").forEach(e => e.textContent = bgv(70));
+  document.querySelectorAll(".u180").forEach(e => e.textContent = bgv(180));
+}
+applyUnit();
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let previewId = personId;
 
 const CMP = [
-  { label:"1 Einheit Insulin ohne Essen",            key:"oneUnitDropMgdl",          fmt:v => v < 5 ? "kaum Wirkung" : `senkt um ${fmtDE(v)} mg/dL` },
-  { label:"60 g Kohlenhydrate mit passendem Bolus",  key:"mealPeakMgdl",             fmt:v => `Spitze bei ${fmtDE(v)} mg/dL` },
-  { label:"60 g Kohlenhydrate ohne Bolus",           key:"mealNoBolusPeakMgdl",      fmt:v => `Spitze bei ${fmtDE(v)} mg/dL` },
-  { label:"45 Minuten Sport, mittlere Belastung",    key:"moderateExerciseDropMgdl", fmt:v => v < 5 ? "kaum Wirkung" : `senkt um ${fmtDE(v)} mg/dL` },
-  { label:"20 Minuten harter Sport",                 key:"hardExerciseRiseMgdl",     fmt:v => v < 5 ? "kaum Wirkung" : `hebt um ${fmtDE(v)} mg/dL` },
+  { label:"1 Einheit Insulin ohne Essen",            key:"oneUnitDropMgdl",          fmt:v => v < 5 ? "kaum Wirkung" : `senkt um ${bgd(v)} ${UL()}` },
+  { label:"60 g Kohlenhydrate mit passendem Bolus",  key:"mealPeakMgdl",             fmt:v => `Spitze bei ${bgd(v)} ${UL()}` },
+  { label:"60 g Kohlenhydrate ohne Bolus",           key:"mealNoBolusPeakMgdl",      fmt:v => `Spitze bei ${bgd(v)} ${UL()}` },
+  { label:"45 Minuten Sport, mittlere Belastung",    key:"moderateExerciseDropMgdl", fmt:v => v < 5 ? "kaum Wirkung" : `senkt um ${bgd(v)} ${UL()}` },
+  { label:"20 Minuten harter Sport",                 key:"hardExerciseRiseMgdl",     fmt:v => v < 5 ? "kaum Wirkung" : `hebt um ${bgd(v)} ${UL()}` },
 ];
 const cmpRange = key => {
   const vals = PERSONAS.map(p => window.PROFILES[p.id][key]);
@@ -1640,8 +1764,8 @@ function buildPeople(){
           ${CMP.map((m, i) => { const r = cmpRange(m.key); return `
             <div class="cmp"><div class="cl">${m.label}</div><div class="cv" id="pcC${i}"></div>
               <div class="cmpbar">${r.vals.map(v => `<i style="left:${r.pos(v)}"></i>`).join("")}<b id="pcB${i}"></b>
-                <span class="lo">${fmtDE(r.lo)}</span><span class="hi">${fmtDE(r.hi)}</span></div></div>`; }).join("")}
-          <p class="cmpfoot">Gleiche Handlung, zehn Körper. Die Striche sind die anderen neun. Gerechnet in der Simulation ab 108 mg/dL, ohne Sensorfehler — kein Maßstab für echte Menschen.</p>
+                <span class="lo">${bgd(r.lo)}</span><span class="hi">${bgd(r.hi)}</span></div></div>`; }).join("")}
+          <p class="cmpfoot">Gleiche Handlung, zehn Körper. Die Striche sind die anderen neun. Gerechnet in der Simulation ab ${bgv(108)} ${UL()}, ohne Sensorfehler — kein Maßstab für echte Menschen.</p>
         </div></div></div>
       <div class="mark"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v13M1 7.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
     </div>
@@ -1664,7 +1788,7 @@ function showPerson(id, tapped){
     [d.height, v => fmtDE(v) + " cm"], [d.BW, v => fmtDE(v) + " kg"],
     [s.subject.HRrest, v => fmtDE(v) + " /min"], [d.HbA1c, v => fmtDE(v, 1) + " %"],
     [th.basalRateUPerH, v => fmtDE(v, 2) + " U/h"], [th.carbRatioGPerU, v => fmtDE(v, 1) + " g/U"],
-    [th.correctionFactor, v => fmtDE(v) + " mg/dL/U"], [null, () => "Insulinpumpe"],
+    [th.correctionFactor, v => bgd(v) + " " + UL() + "/U"], [null, () => "Insulinpumpe"],
   ];
   const old = prev ? subjOf(prev) : null;
   const oldVals = old ? [old.demo.height, old.demo.BW, old.subject.HRrest, old.demo.HbA1c,
@@ -1773,7 +1897,7 @@ function drawChart(cv, pts, hours, tNow, opts={}){
     c.beginPath(); c.moveTo(padL, Y(g)+.5); c.lineTo(w-padR, Y(g)+.5); c.stroke();
     c.setLineDash([]);
     c.fillStyle = cc; c.font = "500 10px 'DM Mono',monospace"; c.textAlign = "left";
-    c.fillText(String(g), w-padR+8, Y(g)+3.5); c.globalAlpha = 1;
+    c.fillText(bgv(g), w-padR+8, Y(g)+3.5); c.globalAlpha = 1;
   }
 
   /* ═══ SIGNATUR — die Nebelzone ══════════════════════════════════
@@ -1853,7 +1977,7 @@ function paint(tNow){
   const v = eng.lastSensor, el = $("bg");
   if (eng.trace.length !== lastCount){
     lastCount = eng.trace.length;
-    el.textContent = v;
+    el.textContent = bgv(v);
     renderLog();
   }
   const tone = v < 70 ? C.low : v > 180 ? C.high : C.ink;
@@ -1874,7 +1998,7 @@ function paint(tNow){
   /* Differenz zum vorigen Messwert, fuenf Minuten zuvor */
   const trc = eng.trace, nn = trc.length;
   const dlt = nn >= 2 ? trc[nn-1].sensor - trc[nn-2].sensor : null;
-  put("bgDelta", dlt == null ? "" : dlt === 0 ? "0" : (dlt > 0 ? "+" : "−") + Math.abs(dlt));
+  put("bgDelta", dlt == null ? "" : dlt === 0 ? "0" : (dlt > 0 ? "+" : "−") + bgd(Math.abs(dlt)));
 
   const mins = Math.floor(tNow) % 1440, day = Math.floor(tNow/1440)+1;
   const hhmm = String(Math.floor(mins/60)).padStart(2,"0")+":"+String(mins%60).padStart(2,"0");
@@ -1895,7 +2019,7 @@ function paint(tNow){
   put("behind", uiFade > .4 ? "schwer zu lesen" : "dein Körper vor etwa " + LAG_TXT);
 
   // Zustandsanzeigen brauchen keine 60 Bilder pro Sekunde.
-  if ((frame++ & 7) === 0){ paintMove(); paintReserve(); paintChips(); paintCrit(); paintBasal(); }
+  if ((frame++ & 7) === 0){ paintMove(); paintReserve(); paintChips(); paintCrit(); paintBasal(); checkHypo(); checkRemarks(); }
   viewH = lerp(viewH, rangeH, .12);
   if (prog > 0.02 && prog < LAST){
     /* Nur zeichnen, wenn sich die Kurve um ein Geraetepixel verschoben haette,
@@ -1917,11 +2041,17 @@ let lastChips = "", lastCrit = "";
 const LOADBARS = n => Array.from({length:4}, (_,k) => `<i class="${k < n ? "on" : ""}"></i>`).join("");
 
 function paintCrit(){
-  const emg = eng.s.emg, key = emg || "";
+  const emg = eng.s.emg, wait = Math.max(0, Math.ceil(hypoUntil - eng.s.t)), key = (emg || "") + wait;
   if (key === lastCrit) return;
   lastCrit = key;
   const el = $("crit");
-  if (!emg){ el.hidden = true; }
+  $("critSkull").style.display = emg ? "" : "none";
+  ["btnMove","btnSleep"].forEach(id => $(id).disabled = wait > 0);
+  if (!emg && wait){
+    el.hidden = false; el.className = "crit lo";
+    $("critTxt").textContent = `Sitzen bleiben · noch ${wait} min`;
+  }
+  else if (!emg){ el.hidden = true; }
   else {
     el.hidden = false;
     el.className = "crit " + (emg === "out" ? "lo" : "hi");
@@ -1932,8 +2062,20 @@ function paintCrit(){
   ["btnMeal","btnBolus"].forEach(id => $(id).disabled = dead);
 }
 
+/* Der Koerper merkt es vor dem Sensor: Symptome folgen dem Blut. Schwellen
+   grob nach den ueblichen Warnzeichen (unter 70 zittrig, unter 55 verwirrt,
+   ab 250 Durst). Wer Unterzucker kaum spuert, gibt es auch — hier nicht. */
+function feeling(){
+  if (!FULLDAY || asleep) return [];
+  const G = eng.s.G;
+  if (G < 55)  return [{ k:"feel", v:1, txt:"zittrig, verwirrt" }];
+  if (G < 70)  return [{ k:"feel", v:1, txt:"zittrig, schwitzig" }];
+  if (G > 300) return [{ k:"feelhi", v:1, txt:"Durst, Kopfweh" }];
+  if (G > 250) return [{ k:"feelhi", v:1, txt:"durstig, müde" }];
+  return [];
+}
 function paintChips(){
-  const st = eng.states();
+  const st = feeling().concat(eng.states());
   const key = st.map(x => x.k + (x.v > .5 ? "H" : "L")).join(",");
   if (key === lastChips) return;
   lastChips = key;
@@ -2038,7 +2180,7 @@ function renderLog(){
     if (e.kind === "bolus") return e.share >= 1
       ? `${e.units.toFixed(1)} U gespritzt`
       : `${e.units.toFixed(1)} U · ${Math.round(e.share*100)} % sofort, Rest über ${e.over} min`;
-    if (e.kind === "alarm") return `${e.low ? "Tiefalarm" : "Hochalarm"} bei ${e.value}${e.snoozed ? " — weitergeschlafen" : ""}`;
+    if (e.kind === "alarm") return `${e.low ? "Tiefalarm" : "Hochalarm"} bei ${bgv(e.value)}${e.snoozed ? " — weitergeschlafen" : ""}`;
     if (e.kind === "basal") return `Basal ${e.from.toFixed(2)} → ${e.to.toFixed(2)} U/h`;
     if (e.kind === "warn") return `${e.name} in ${e.inMin} min angekündigt`;
     if (e.kind === "emg") return e.name;
@@ -2064,7 +2206,7 @@ function loop(ts){
     const want = anchor.simT + (Date.now() - anchor.wall)/60000;
     let n = Math.min(400, Math.floor(want - eng.s.t));
     while (n-- > 0) eng.step();
-  } else if (speed > 0){
+  } else if (speed > 0 && !hypoOn){
     tSub += dt*speed/60000;
     let n = Math.min(320, Math.floor(tSub)); tSub -= n;
     while (n-- > 0) eng.step();
@@ -2131,6 +2273,7 @@ function openSheet(id){
 const closeSheets = () => {
   if (!document.querySelector(".sheet.on")) return;
   document.querySelectorAll(".sheet").forEach(s => s.classList.remove("on"));
+  $("cfg").classList.remove("on");
   pager.inert = asleep;
   if (sheetFrom && sheetFrom.isConnected) sheetFrom.focus({ preventScroll:true });
   sheetFrom = null;
@@ -2168,6 +2311,106 @@ document.querySelectorAll(".sheet .panel").forEach(p => {
   };
   p.addEventListener("touchend", end); p.addEventListener("touchcancel", end);
 });
+
+/* ─── Unterzucker im Alltag ───────────────────────────────────────
+   Ein Tief kommt, wann es will. Wach und unter 70: Die Zeit steht, bis
+   Traubenzucker gegessen ist. Danach 15 Minuten sitzen bleiben (15-15-Regel),
+   erst dann wird nachgemessen, und oft reicht es noch nicht. Nur Oberflaeche,
+   die Wirkung des Zuckers rechnet die Engine wie jede Mahlzeit. */
+const HYPO_WAIT = 15;
+const HYPO_WHERE = [
+  [0, "Es ist mitten in der Nacht, alle anderen schlafen."], [6, "Du stehst in der vollen Bahn."],
+  [9, "Du sitzt mitten in einem Meeting."], [12, "Du stehst an der Kasse im Supermarkt."],
+  [14, "Du hältst gerade eine Präsentation."], [17, "Du sitzt im Bus nach Hause."],
+  [20, "Du bist mit Freunden im Kino."], [23, "Es ist mitten in der Nacht, alle anderen schlafen."],
+];
+let hypoOn = false, hypoUntil = -1, hypoRound = 0;
+function checkHypo(){
+  if (!FULLDAY || hypoOn || asleep || eng.s.emg === "out" || eng.s.t < hypoUntil || !$("gate").hidden) return;
+  const felt = eng.s.G < 62;                               // spuerbar, auch wenn der Sensor noch nichts zeigt
+  if (eng.lastSensor >= 70 && !felt){ hypoRound = 0; return; }
+  if (hypoRound >= 3) return;                              // hoechstens dreimal je Unterzucker, sonst nervt es
+  hypoOn = true; closeSheets(); pager.inert = true;
+  const h = (eng.s.t/60) % 24, where = eng.activity().mode === "live" ? "Du bist mitten im Training."
+    : HYPO_WHERE.filter(([from]) => h >= from).pop()[1];
+  $("hypoV").textContent = bgv(eng.lastSensor) + " " + UL();
+  $("hypoS").textContent = hypoRound++
+    ? "Fünfzehn Minuten gewartet, und der Sensor zeigt immer noch zu wenig. Der Zucker braucht Zeit, und der Sensor hinkt hinterher. Noch einmal, ob du willst oder nicht."
+    : eng.lastSensor >= 70
+    ? `${where} Dein Sensor zeigt noch nichts, aber dein Körper weiß es besser: Du zitterst, schwitzt, dir ist schwindelig. Jetzt hilft nur Zucker, ob du Hunger hast oder nicht.`
+    : `${where} Dein Sensor schlägt Alarm, und es geht weiter runter. Du zitterst, dir ist schwindelig. Jetzt hilft nur Zucker, ob du Hunger hast oder nicht.`;
+  $("hypo").hidden = false; $("hypoOk").focus({ preventScroll:true });
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+}
+$("hypoOk").onclick = () => {
+  eng.logMeal(15, "fast", 5); renderLog();
+  hypoUntil = eng.s.t + HYPO_WAIT;
+  const g = $("hypo"); g.classList.add("out");
+  setTimeout(() => { g.hidden = true; g.classList.remove("out"); pager.inert = false; hypoOn = false; }, 420);
+  toast("meal", "15 g Traubenzucker", $("cob").parentElement);
+  setTimeout(() => remark("low"), 2600);
+};
+
+/* ─── Sprüche von außen (nur im ganzen Alltag) ──────────────────
+   Sätze, die Menschen mit Typ 1 tatsächlich zu hören bekommen, gesammelt
+   aus Erfahrungsberichten (Forum diabetes.co.uk „What stupid things have
+   people said to you?“, asweetlife.org), sinngemäß übertragen. Kein
+   Kommentar dazu, keine Pointe: Der Satz steht für sich. Höchstens einer
+   in 90 simulierten Minuten, jeder nur einmal. */
+const REMARKS = {
+  meal: [
+    ["Kollegin", "Darfst du das überhaupt essen?"],
+    ["Kollege", "Nimm lieber keinen Keks, nicht dass du mir noch unterzuckerst."],
+    ["Tante", "Ich hab dir extra was Zuckerfreies mitgebracht."],
+    ["Bekannter", "Ich kannte mal jemanden mit Diabetes. Der hätte das nicht gegessen."],
+    ["Kollege", "Wenn du jetzt den Schokoriegel isst, was passiert dann? Stirbst du?"],
+  ],
+  bolus: [
+    ["Bekannte", "Also ich könnte mir das nie selbst spritzen."],
+    ["Kollege", "Wie oft am Tag stichst du dich eigentlich?"],
+    ["Nachbar", "Und, tut das weh?"],
+    ["Kollegin", "Die Pumpe macht das doch alles von allein, oder?"],
+  ],
+  high: [
+    ["Onkel", "Hast du zu viel Zucker gegessen?"],
+    ["Kollegin", "Isst du denn nicht mehr gesund?"],
+  ],
+  low: [
+    ["Kollege", "Hast du dein Insulin dabei, falls du unterzuckerst?"],
+    ["Ersthelferin", "Muss ich dir dann die Notfallspritze ins Herz stechen?"],
+    ["Kollegin", "Du hast doch gerade erst gegessen."],
+  ],
+  day: [
+    ["Bekannte", "Du siehst gar nicht nach Diabetes aus."],
+    ["Nachbarin", "Hast du den schlimmen Typ oder den harmlosen?"],
+    ["Kollege", "Ist ja nur Diabetes, es gibt Schlimmeres."],
+    ["Tante", "In fünf Jahren gibt es bestimmt eine Heilung."],
+    ["Bekannter", "Hast du das eigentlich immer noch?"],
+    ["Hausarzt", "Wenn Sie abnehmen, wird das auch besser."],
+    ["Bekannte", "Hast du als Kind zu viel Süßes gegessen?"],
+    ["Trainer", "Du bist doch gar nicht dick."],
+  ],
+};
+let remarkAt = -1e9, remarkHour = -1, remarkT = null;
+const remarkUsed = new Set();
+function remark(kind){
+  if (!FULLDAY || asleep || hypoOn || eng.s.t - remarkAt < 90) return;
+  const pool = REMARKS[kind].filter(r => !remarkUsed.has(r[1]));
+  if (!pool.length) return;
+  const [who, txt] = pool[Math.floor(Math.random() * pool.length)];
+  remarkUsed.add(txt); remarkAt = eng.s.t;
+  $("rmWho").textContent = who; $("rmTxt").textContent = `„${txt}“`;
+  $("remark").classList.add("on");
+  clearTimeout(remarkT); remarkT = setTimeout(() => $("remark").classList.remove("on"), 7000);
+}
+/* Einmal pro simulierter Stunde: hoch gelaufen, oder einfach so am Tag. */
+function checkRemarks(){
+  const h = Math.floor(eng.s.t / 60);
+  if (h === remarkHour) return;
+  remarkHour = h;
+  if (eng.lastSensor > 250) remark("high");
+  else if (h % 24 >= 8 && h % 24 < 22 && Math.random() < .25) remark("day");
+}
 
 /* Hypoglykaemie verlangsamt die Bedienung. Das ist kein Effekt,
    das ist das Symptom. */
@@ -2230,6 +2473,7 @@ $("mealOK").onclick = () => {
   eng.logMeal(g, mealType, +$("mealD").value, f, pr);
   closeSheets(); renderLog();
   toast("meal", f || pr ? `${g} g KH · ${f} g Fett · ${pr} g Eiweiß` : `${g} g eingetragen`, $("cob").parentElement);
+  if (Math.random() < .5) setTimeout(() => remark("meal"), 2200);
 };
 function paintBasalSheet(){
   const r = +$("basalR").value, eff = eng.s.basalEff;
@@ -2270,6 +2514,7 @@ $("bolusOK").onclick = () => {
   toast("bolus", bolusShare >= 1
     ? `${U.toFixed(1)} U gespritzt`
     : `${(U*bolusShare).toFixed(1)} U jetzt, Rest verzögert`, $("iob").parentElement);
+  if (Math.random() < .4) setTimeout(() => remark("bolus"), 2200);
 };
 
 /* ─── Fortsetzen ───────────────────────────────────────────────
@@ -2393,7 +2638,7 @@ function paintNight(){
     const low = v <= ALARM_LOW;
     $("night").className = "night ring " + (low ? "lo" : "hi");
     $("nBody").hidden = true; $("alarmBox").hidden = false;
-    $("aValue").textContent = v;
+    $("aValue").textContent = bgv(v);
     $("aText").textContent = low ? "Tiefalarm" : "Hochalarm";
     beep();
   }
@@ -2426,7 +2671,7 @@ function updateReview(){
   const n = tr.length;
   $("rTir").textContent = Math.round(tr.filter(p=>p.sensor>=70&&p.sensor<=180).length/n*100)+" %";
   $("rLow").textContent = Math.round(tr.filter(p=>p.G<70).length/n*100)+" %";
-  $("rAvg").textContent = Math.round(tr.reduce((a,p)=>a+p.G,0)/n);
+  $("rAvg").textContent = bgv(tr.reduce((a,p)=>a+p.G,0)/n);
   $("rDec").textContent = eng.events.filter(e => e.kind === "meal" || e.kind === "bolus" || e.kind === "basal").length;
   $("rEmg").textContent = eng.events.filter(e => e.kind === "emg" && e.sev !== "ok").length;
   const mard = tr.reduce((a,p) => a + Math.abs(p.sensor - p.G)/p.G, 0)/n;
@@ -2455,7 +2700,7 @@ function updateReview(){
     const reac = ate.length
       ? ` · du hast ${Math.round(ate.reduce((a,e)=>a+e.est,0))} g gegessen, auf einen Messfehler`
       : alarm ? " · Tiefalarm ausgelöst, das Blut war nie tief" : "";
-    return { t:f.t, html:`<li><b>${fmtT(f.t)}</b><span class="miss">Sensor gedrückt, ${Math.max(5, f.end - f.t)} min · angezeigt ${f.sensorLow}, Blut ${f.bloodAtLow}${reac}</span></li>` };
+    return { t:f.t, html:`<li><b>${fmtT(f.t)}</b><span class="miss">Sensor gedrückt, ${Math.max(5, f.end - f.t)} min · angezeigt ${bgv(f.sensorLow)}, Blut ${bgv(f.bloodAtLow)}${reac}</span></li>` };
   });
   const evItems = eng.events.map(e => ({ t:e.t, html:revItem(e) }));
   $("revList").innerHTML = evItems.concat(faultItems)
@@ -2534,7 +2779,7 @@ function drawForecast(cv, F, pastMin, faults){
     c.strokeStyle = cc; c.globalAlpha = al; c.lineWidth = 1.2; c.setLineDash(g === 250 ? [3,4] : []);
     c.beginPath(); c.moveTo(padL, Y(g)+.5); c.lineTo(w - padR, Y(g)+.5); c.stroke(); c.setLineDash([]);
     c.fillStyle = cc; c.font = "500 10px 'DM Mono',monospace"; c.textAlign = "left";
-    c.fillText(String(g), w - padR + 8, Y(g) + 3.5); c.globalAlpha = 1;
+    c.fillText(bgv(g), w - padR + 8, Y(g) + 3.5); c.globalAlpha = 1;
   }
   for (const fl of faults || []){
     const a = Math.max(t0, fl.t - 5), b = Math.min(now, fl.end + 5); if (b <= a) continue;
@@ -2572,7 +2817,7 @@ function drawForecast(cv, F, pastMin, faults){
     const x = X(now + mi*F.stride), y = Y(F.blood[mi]);
     c.fillStyle = C.low; c.beginPath(); c.arc(x, y, 4, 0, 6.284); c.fill();
     c.font = "600 10px 'DM Mono',monospace"; c.textAlign = "center";
-    c.fillText(String(Math.round(F.blood[mi])), x, y + 15);
+    c.fillText(bgv(F.blood[mi]), x, y + 15);
   }
 }
 
@@ -2603,7 +2848,7 @@ function drawEffects(cv, F, pastMin){
   c.strokeStyle = `rgba(${C.rgbInk},.25)`; c.lineWidth = 1;
   c.beginPath(); c.moveTo(padL, mid + .5); c.lineTo(w - padR, mid + .5); c.stroke();
   c.fillStyle = `rgba(${C.rgbInk},.55)`; c.font = "500 10px 'DM Mono',monospace"; c.textAlign = "left";
-  c.fillText("+" + top, w - padR + 6, padT + 8); c.fillText("0", w - padR + 6, mid + 3.5); c.fillText("−" + bot, w - padR + 6, h - padB - 2);
+  c.fillText("+" + bgd(top), w - padR + 6, padT + 8); c.fillText("0", w - padR + 6, mid + 3.5); c.fillText("−" + bgd(bot), w - padR + 6, h - padB - 2);
 
   const plot = (s, sign) => {
     const pts = [];
@@ -2643,24 +2888,24 @@ function paintForecastText(F){
   const at = i => fmtT((now + i*F.stride) % 1440);
   const end = Math.round(B[B.length - 1]);
   const low = B[mi] < 70
-    ? ` <span class="lo">Unter 70 ab ${at(B.findIndex(g => g < 70))}, tiefster Wert ${Math.round(B[mi])} um ${at(mi)}.</span>`
-    : ` Tiefster Wert ${Math.round(B[mi])} um ${at(mi)}, höchster ${Math.round(B[ma])} um ${at(ma)}.`;
-  $("fcSum").innerHTML = `<span class="fcv">Wenn du nichts mehr tust: in zwölf Stunden etwa <b>${end} mg/dL</b>.${low}</span>` +
+    ? ` <span class="lo">Unter ${bgv(70)} ab ${at(B.findIndex(g => g < 70))}, tiefster Wert ${bgv(B[mi])} um ${at(mi)}.</span>`
+    : ` Tiefster Wert ${bgv(B[mi])} um ${at(mi)}, höchster ${bgv(B[ma])} um ${at(ma)}.`;
+  $("fcSum").innerHTML = `<span class="fcv">Wenn du nichts mehr tust: in zwölf Stunden etwa <b>${bgv(end)} ${UL()}</b>.${low}</span>` +
     `<span class="hint">Diese Kurve kennt nur die Simulation. Im echten Leben sieht niemand voraus — dort gibt es nur den Sensor von eben.</span>`;
   /* Flach, aber lang: die Raten ueber das Fenster aufsummiert [mg/dL]. */
   const sum = a => a ? Math.round(a.reduce((x, v) => x + v, 0) * F.stride/60) : 0;
   const sF = sum(F.fat), sP = sum(F.protein);
   const lang = sF >= 5 || sP >= 5
     ? " Klein, aber lang: Über das ganze Fenster zusammengerechnet " +
-      [sF >= 5 ? `hält Fett etwa ${sF} mg/dL im Blut, die das Insulin sonst herausgenommen hätte` : "",
-       sP >= 5 ? `bringt Eiweiß etwa ${sP} mg/dL` : ""].filter(Boolean).join(", ") + "."
+      [sF >= 5 ? `hält Fett etwa ${bgd(sF)} ${UL()} im Blut, die das Insulin sonst herausgenommen hätte` : "",
+       sP >= 5 ? `bringt Eiweiß etwa ${bgd(sP)} ${UL()}` : ""].filter(Boolean).join(", ") + "."
     : "";
   const moveNote = F.move.some(v => Math.abs(v) >= 1)
     ? " Die dunkle Linie ist Bewegung. Über null hebt sie den Wert, weil die Leber bei harter Belastung mehr Zucker abgibt. Unter null senkt sie ihn: Die Muskeln nehmen Zucker auf, und noch Stunden danach wirkt das Insulin stärker."
     : "";
   $("fxNote").textContent = (fxSplit
     ? "Schnelle Kohlenhydrate wirken früh und steil, langsame später und flacher. Fett bremst den Magen — die Kohlenhydrate kommen später — und macht das Insulin über Stunden schwächer: Die blaue gestrichelte Linie ist Zucker, den das Insulin sonst herausgenommen hätte. Aus Eiweiß macht die Leber spät etwas Zucker. Fett und Eiweiß sind an wenigen Studien kalibriert und streuen von Mensch zu Mensch stark." + lang
-    : "Wie viel Zucker dein Essen gerade ins Blut bringt und dein Insulin herausnimmt, in mg/dL pro Stunde. Der Wert bewegt sich nur um die Differenz. Tipp auf „Essen“, um es in Kohlenhydrate, Fett und Eiweiß aufzuteilen.") + moveNote;
+    : "Wie viel Zucker dein Essen gerade ins Blut bringt und dein Insulin herausnimmt, in " + UL() + " pro Stunde. Der Wert bewegt sich nur um die Differenz. Tipp auf „Essen“, um es in Kohlenhydrate, Fett und Eiweiß aufzuteilen.") + moveNote;
 }
 
 function toggleFxSplit(){
@@ -2690,7 +2935,7 @@ function revItem(e){
   if (e.kind === "basal")
     return `<li><b>${fmtT(e.t)}</b><span>Basal ${e.from.toFixed(2)} → ${e.to.toFixed(2)} U/h</span></li>`;
   if (e.kind === "alarm")
-    return `<li><b>${fmtT(e.t)}</b><span class="miss">${e.low ? "Tiefalarm" : "Hochalarm"} bei ${e.value}${e.snoozed ? " — weitergeschlafen" : ""}</span></li>`;
+    return `<li><b>${fmtT(e.t)}</b><span class="miss">${e.low ? "Tiefalarm" : "Hochalarm"} bei ${bgv(e.value)}${e.snoozed ? " — weitergeschlafen" : ""}</span></li>`;
   if (e.kind === "warn") return "";
   const p = Math.round((e.effective/e.units-1)*100);
   const cl = Math.abs(p) >= 15 ? ' class="miss"' : '';

@@ -7,8 +7,11 @@
 
    Erfunden (hier, und in der App als erfunden gekennzeichnet):
    Vorname, Alter, der Satz zum Alltag und das Aussehen. Das Alter ist grob
-   an den Maximalpuls angelehnt (220 minus Alter), mindestens 19 — der
-   Datensatz enthaelt weder Alter noch Geschlecht.
+   an den Maximalpuls angelehnt (220 minus Alter, mindestens 19) und nutzt
+   bei den vier niedrigsten Maximalpulsen die Streuung der Faustformel
+   (rund 10 /min) nach oben aus, bis 43. Aelter geben die Daten nicht her:
+   Alle 20 Koerper haben 187 bis 204 /min. Der Datensatz enthaelt weder
+   Alter noch Geschlecht.
 
    Auswahl: die zehn Subjekte, die sich bei Insulin, Mahlzeit, moderatem und
    hartem Sport und Koerpergewicht am staerksten unterscheiden (Maximin-Auswahl,
@@ -22,15 +25,15 @@ const PERSONAS = [
     look:{ skin:"#F1D0B8", hair:"#A57A45", style:"long",      shirt:"#3E6B8A" } },
   { id:"Patient_4",  name:"Jonas",  age:22, line:"macht eine Ausbildung zum Mechatroniker",
     look:{ skin:"#E7BD9B", hair:"#4A2F1E", style:"short",     shirt:"#6B7F5A" } },
-  { id:"Patient_6",  name:"Mira",   age:30, line:"arbeitet als Architektin",
+  { id:"Patient_6",  name:"Mira",   age:38, line:"arbeitet als Architektin",
     look:{ skin:"#D39B78", hair:"#221915", style:"bun",       shirt:"#4B4F6B", glasses:true } },
-  { id:"Patient_7",  name:"Aylin",  age:31, line:"ist Zahnärztin",
+  { id:"Patient_7",  name:"Aylin",  age:41, line:"ist Zahnärztin",
     look:{ skin:"#C68A62", hair:"#2A1A12", style:"ponytail",  shirt:"#8A4F3E" } },
   { id:"Patient_8",  name:"Malik",  age:25, line:"studiert Informatik",
     look:{ skin:"#8A5537", hair:"#16100E", style:"buzz",      shirt:"#5E7A7A", beard:true } },
-  { id:"Patient_11", name:"Tobias", age:33, line:"fährt Linienbus",
+  { id:"Patient_11", name:"Tobias", age:43, line:"fährt Linienbus",
     look:{ skin:"#EEC6AC", hair:"#9C4E27", style:"side",      shirt:"#2F4A5C", beard:true } },
-  { id:"Patient_13", name:"Jana",   age:26, line:"arbeitet als Erzieherin",
+  { id:"Patient_13", name:"Jana",   age:34, line:"arbeitet als Erzieherin",
     look:{ skin:"#F3D5C2", hair:"#6E3520", style:"bob",       shirt:"#7A5A7A" } },
   { id:"Patient_14", name:"Finn",   age:19, line:"hat gerade Abitur gemacht",
     look:{ skin:"#EFCDB3", hair:"#C9A05A", style:"curly",     shirt:"#9A7B3E" } },

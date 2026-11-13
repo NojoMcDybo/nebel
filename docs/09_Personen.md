@@ -9,7 +9,7 @@ Auf der Startseite wählt man, in wessen Körper man den Tag verbringt. Zehn Per
 | Echt, aus dem Datensatz | Erfunden, in der App als erfunden gekennzeichnet |
 |---|---|
 | Größe, Gewicht, Ruhepuls, HbA1c | Vorname |
-| Basalrate, KE-Faktor, Korrekturfaktor | Alter (grob nach 220 − Maximalpuls, mindestens 19) |
+| Basalrate, KE-Faktor, Korrekturfaktor | Alter (grob nach 220 − Maximalpuls, mindestens 19; bei den vier niedrigsten Maximalpulsen bis rund 10 Jahre älter, im Rahmen der Streuung der Faustformel, höchstens 43) |
 | alle Modellparameter, damit die ganze Physiologie | ein Satz Alltag |
 | | Aussehen des Avatars |
 
@@ -21,11 +21,11 @@ Der Datensatz enthält weder Alter noch Geschlecht. Die Figuren machen die Körp
 |---|---|---|---|---|---|---|
 | **Lena, 23** — studiert Grundschullehramt (Standard) | 10 | 170 cm / 71 kg | 67 | 0,46 | 14,0 | nah am Median in allem außer der Mahlzeit |
 | Jonas, 22 — Ausbildung Mechatroniker | 4 | 169 / 73 | 73 | 0,93 | 23,0 | empfindlich auf Insulin, starker Sport-Responder, harter Sport hebt stark |
-| Mira, 30 — Architektin | 6 | 169 / 65 | 58 | 0,59 | 15,5 | Sport senkt maximal, harter Sport hebt nicht |
-| Aylin, 31 — Zahnärztin | 7 | 168 / 62 | 65 | 2,00 | 19,8 | am unempfindlichsten auf Insulin, hoher Basalbedarf |
+| Mira, 38 — Architektin | 6 | 169 / 65 | 58 | 0,59 | 15,5 | Sport senkt maximal, harter Sport hebt nicht |
+| Aylin, 41 — Zahnärztin | 7 | 168 / 62 | 65 | 2,00 | 19,8 | am unempfindlichsten auf Insulin, hoher Basalbedarf |
 | Malik, 25 — studiert Informatik | 8 | 173 / 68 | 65 | 0,73 | 15,2 | mittlerer Sport-Responder, flache Mahlzeiten |
-| Tobias, 33 — fährt Linienbus | 11 | 175 / 84 | 64 | 1,77 | 19,8 | Sport bewirkt fast nichts |
-| Jana, 26 — Erzieherin | 13 | 165 / 70 | 59 | 1,26 | 15,5 | höchste Spitze nach dem Essen, Sport senkt maximal |
+| Tobias, 43 — fährt Linienbus | 11 | 175 / 84 | 64 | 1,77 | 19,8 | Sport bewirkt fast nichts |
+| Jana, 34 — Erzieherin | 13 | 165 / 70 | 59 | 1,26 | 15,5 | höchste Spitze nach dem Essen, Sport senkt maximal |
 | Finn, 19 — gerade Abitur | 14 | 180 / 77 | 70 | 0,51 | 18,0 | empfindlich, starker Sport-Responder, harter Sport hebt kaum |
 | Sofia, 24 — Buchhandel | 15 | 166 / 85 | 67 | 1,19 | 18,5 | kräftige Antwort auf Sport in beide Richtungen |
 | David, 20 — studiert BWL | 18 | 170 / 88 | 68 | 1,56 | 24,5 | Sport bewirkt wenig, flache Mahlzeiten |

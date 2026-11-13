@@ -270,4 +270,27 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   ok("… und heben weniger als eine harte Linie", iv.d < flat.d - 10, `${iv.d.toFixed(0)} statt ${flat.d.toFixed(0)} mg/dL`);
   ok("Bewegung steht in der Wirkung", iv.F.move.some(v => Math.abs(v) > 5), "max " + Math.max(...iv.F.move.map(Math.abs)).toFixed(0) + " mg/dL/h");
 }
+/* Achterbahn: nur mit variability. Drift im Rahmen, Mittel nahe 1;
+   ein geknickter Katheter treibt den Wert hoch, nach 2 h ueber 250 wird gewechselt. */
+{
+  const e = new Engine(4242, 9);
+  const off = e._drift(600);
+  e.variability = true;
+  const ds = []; for (let t = 0; t < 30*1440; t += 60) ds.push(e._drift(t));
+  const mean = ds.reduce((a,b)=>a+b,0)/ds.length, lo = Math.min(...ds), hi = Math.max(...ds);
+  ok("Ohne Alltag keine Drift", off === 1, String(off));
+  ok("Drift im Rahmen, Mittel nahe 1", lo >= 0.5 && hi <= 2 && Math.abs(mean - 1) < 0.08,
+     `${lo.toFixed(2)}–${hi.toFixed(2)}, Mittel ${mean.toFixed(2)}`);
+  const sd = Math.sqrt(ds.reduce((a,b)=>a+Math.log(b)**2,0)/ds.length);
+  ok("Streuung wie angesetzt", sd > 0.15 && sd < 0.35, "log-sd " + sd.toFixed(2));
+
+  const k = new Engine(4242, 9); k.variability = true;
+  k._occ = [{ start: k.s.t, end: null }];
+  k.logMeal(60, "fast"); k.injectBolus(60/k.therapy.carbRatioGPerU, 1, 0);   // Bolus kommt nur zu 10 % an
+  const g0 = k.s.G; let mx = 0;
+  for (let i = 0; i < 12*60 && k._occ[0].end == null; i++){ k.step(); mx = Math.max(mx, k.s.G); }
+  ok("Katheterknick treibt hoch", mx > g0 + 100, `${g0.toFixed(0)} → ${mx.toFixed(0)} mg/dL`);
+  ok("… und wird nach 2 h über 250 gewechselt", k._occ[0].end != null && k.events.some(e => /Katheter/.test(e.name || "")),
+     k._occ[0].end != null ? "nach " + ((k._occ[0].end - k._occ[0].start)/60).toFixed(1) + " h" : "nicht gewechselt");
+}
 function fmtClock(t){ return String(Math.floor(t/60)%24).padStart(2,"0") + ":" + String(t%60).padStart(2,"0"); }

@@ -351,3 +351,19 @@ Szenario: Gleichgewicht, 60 min bei 55 % um 16 Uhr, 60 g mit Bolus um 19 Uhr, Na
 Einschränkungen: Beide Studien messen Kinder und Jugendliche, die 20 Subjekte sind Erwachsene. Linear in Dauer × Intensität, keine Sättigung. Abgesichert durch `tests/afterEffect.test.ts` und `scripts/check-adapter.cjs`.
 
 Quellen: Tsalikian et al. 2005, DirecNet, [DOI](https://doi.org/10.1016/j.jpeds.2005.04.065) · Taplin et al. 2010, [DOI](https://doi.org/10.1016/j.jpeds.2010.06.004) · Dalla Man, Breton, Cobelli 2009, [DOI](https://doi.org/10.1177/193229680900300107) · Breton 2008, [DOI](https://doi.org/10.1177/193229680800200127)
+
+## 10. Achterbahn und Körpergefühl (`app/adapter.js`, `app/template.html`, seit 13.11.2026)
+
+Nur im Modus „Ganzer Alltag“ (`eng.variability`). Im Modus „Gerät“ bleibt alles wie bisher.
+
+| Größe | Wert | Herkunft |
+|---|---|---|
+| `SI_SD` | 0,25 (log-normal, Mittel 1, begrenzt 0,5–2) | NEBEL-ANNAHME. Tag-zu-Tag-Streuung laut Ruan 2017 38–79 %; innerhalb eines Tages bewusst darunter. Mit fehlerfreien Boli (3 × 60 g, 20 Subjekte × 3 Seeds) Zeit im Ziel 93 → 65 % |
+| `SI_KNOT` | 240 min | NEBEL-ANNAHME. Laut Visentin 2016 und Hinshaw 2013 kein festes Tagesmuster, je Person verschieden |
+| `OCC_PER_DAY` | 0,10 | NEBEL-ANNAHME, deutlich häufiger als in echt (Kanapka 2022: etwa viermal im Jahr; Hughes 2023: 41 % mindestens einmal im Monat), damit es in einem gespielten Tag vorkommt |
+| `OCC_LEFT` | 0,1 | NEBEL-ANNAHME: Katheter geknickt, ein Zehntel kommt an |
+| Wechsel | Sensor 2 h am Stück über 250, sonst nach 12 h | Kriterium nach Kanapka 2022 (im Mittel 5,1 h über 250 bis zum Wechsel) |
+| Symptome | Blut < 70 „zittrig, schwitzig“, < 55 „zittrig, verwirrt“, > 250 „durstig, müde“, > 300 „Durst, Kopfweh“ | übliche Warnzeichen, folgen dem Blut, nicht dem Sensor. Wahrnehmungsstörung nicht abgebildet |
+| Unterzucker-Fenster | Blut < 62 oder Sensor < 70 | NEBEL-ANNAHME |
+
+Quellen: Ruan et al. 2017, [DOI](https://doi.org/10.1109/TBME.2016.2590498) · Visentin et al. 2016, [DOI](https://doi.org/10.1109/TBME.2016.2535241) · Hinshaw et al. 2013, [DOI](https://doi.org/10.2337/db12-1759) · Kanapka et al. 2022, [DOI](https://doi.org/10.1089/dia.2021.0548) · Hughes et al. 2023, [DOI](https://doi.org/10.1089/dia.2023.0005)

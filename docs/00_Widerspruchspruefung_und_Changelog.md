@@ -498,3 +498,39 @@ Der Echtzeit-Modus (Doc 06) braucht ein Gerät, das im Alltag mitläuft, und Ala
 **Getrennt, aber im selben Repo:** Die App liegt in `mobile/`, baut über einen eigenen Workflow und teilt mit der Website nur die Engine (`engine/src`) und die Logik in `app/adapter.js` und `app/personas.js`. Die Website bleibt unverändert; `pages.yml` baut bei Änderungen nur in `mobile/` nicht neu. Ein eigenes Repo hätte die Engine kopiert, und Kalibrierung und Tests wären auseinandergelaufen.
 
 **Ausnahme von „keine echten Werte“:** Puls ist ab jetzt als echte Eingabe erlaubt, nur in der App. Er steuert ausschließlich die Bewegung der simulierten Person über das vorhandene Ereignis `heartRate` (Doc 10, Nachwirkung in Nachtrag 19). Er wird nicht als Messwert der Nutzerin oder des Nutzers ausgewertet und verlässt das Gerät nicht. Glukose-, Insulin- und Bolus-Eingaben bleiben ausgeschlossen. Die Einordnung als Lernsystem ohne medizinische Zweckbestimmung (Doc 30) ändert sich dadurch nicht, weil aus dem Puls keine Aussage über die Person abgeleitet wird. Der Datenschutztext der App muss die Pulsdaten nennen, bevor die App an andere geht.
+
+## 28. Nachtrag 13.11.2026 — Reddit-Feedback: Einheit, Unterzucker im Alltag, Alter
+
+Anlass: erste Rückmeldungen in r/diabetes_t1 (24 Upvotes, rund 2.800 Aufrufe in der ersten Stunde). Fünf von neun Kommentaren wünschten mmol/L.
+
+**Einstellungen:** Neuer Knopf oben neben dem Hell/Dunkel-Schalter öffnet ein Blatt mit Einheit, Darstellung und Sprache. Die Sprache wechselt wie der bisherige Link auf die andere Fassung, jede Sprache behält ihren eigenen Spielstand. Der EN/DE-Link oben entfällt dafür, im Hinweisfenster beim ersten Start bleibt die Sprachwahl. Der Knopf öffnet und schließt das Blatt, „Fertig“ bestätigt mit demselben Haken wie „Verstanden“ im Hinweisfenster. Alle Umschalter federn leicht über.
+
+**mmol/L:** Gespeichert unter `nebel.unit` (für beide Sprachen). Ohne Wahl gilt mmol/L, wenn die Browsersprache `en-GB`, `-AU`, `-NZ`, `-CA`, `-IE` oder `-ZA` ist. Umgerechnet wird nur beim Anzeigen (Faktor 18,0182 wie `engine/src/units.ts`): Hauptwert, Differenz, Achsen, Nachtalarm, Protokoll, Auswertung, Vorhersagetext, Wirkungskarte, Personenkarte. Grenzen bleiben intern 70/180/250 mg/dL und erscheinen als 3,9/10,0/13,9. Die CSV-Ausgabe bleibt in mg/dL.
+
+**Unterzucker im Alltag** (nur im ganzen Alltag, siehe unten)**:** Ist man wach und zeigt der Sensor unter 70, hält die Zeit an. Ein Fenster nennt die Lage nach Uhrzeit (volle Bahn, Meeting, Supermarktkasse, Präsentation, Bus, Kino, Nacht; im Training „mitten im Training“) und bietet nur „15 g Traubenzucker essen“. Danach 15 simulierte Minuten „Sitzen bleiben“: Bewegung und Schlafen sind gesperrt. Liegt der Sensor dann noch unter 70, kommt das Fenster wieder (15-15-Regel). Die Wirkung des Zuckers rechnet die Engine wie jede Mahlzeit; der Sensor zeigt den Anstieg erst verzögert. Im Reality-Modus läuft die Zeit weiter.
+
+**Alter:** Die Altersangaben folgen 220 − Maximalpuls. Bei den vier niedrigsten Maximalpulsen ist die Streuung der Faustformel (rund 10 /min) nach oben genutzt: Mira 38, Aylin 41, Tobias 43, Jana 34. Älter geht ehrlich nicht, alle 20 Datensätze haben 187 bis 204 /min.
+
+**Gerät oder ganzer Alltag:** Neue Einstellung „Simulation“. Standard ist „Gerät“: nur Blutzucker, Sensor und die eigenen Entscheidungen, damit der erste Eindruck ruhig bleibt. „Ganzer Alltag“ (`nebel.mode = alltag`) schaltet die Unterzucker-Situationen und die Sprüche von außen zu. Wer zurückschaltet, verliert eine laufende Sitzsperre.
+
+**Sprüche von außen:** Sätze, die Menschen mit Typ 1 tatsächlich hören, gesammelt aus Erfahrungsberichten (Forum diabetes.co.uk, Thread „Type 1s: What stupid things have people said to you?“, Seiten 1–3; asweetlife.org „10 More Things Not to Say“) und sinngemäß übertragen. 22 Sätze in fünf Gruppen: beim Essen, beim Spritzen, wenn der Wert hoch ist (über 250), nach einem Unterzucker und einfach so tagsüber. Erscheinen als ruhige Karte oben mit Sprecher („Kollegin“, „Hausarzt“), sieben Sekunden lang, ohne Kommentar. Höchstens einer in 90 simulierten Minuten, jeder Satz nur einmal je Sitzung. „Zimt“ ist bewusst nicht dabei: In den gelesenen Berichten taucht er nicht auf.
+
+**Zurückgestellt:** MDI (eigenes Langzeitinsulin nötig), Menstruationszyklus (ein Tag ist zu kurz, Studienlage dünn).
+
+## 29. Nachtrag 13.11.2026 — Körpergefühl und Achterbahn
+
+Anlass: zwei weitere Reddit-Kommentare. Der Körper merkt einen Unterzucker oft vor dem Sensor, und echter Diabetes fährt Achterbahn: Mal wirkt kein Bolus, dann fällt der Wert plötzlich.
+
+**Körpergefühl** (nur ganzer Alltag): Symptom-Hinweise in der Zustandsleiste folgen dem Blut, nicht dem Sensor. Das Unterzucker-Fenster kommt auch bei Blut unter 62, wenn der Sensor noch normal zeigt, und sagt dann: „Dein Sensor zeigt noch nichts, aber dein Körper weiß es besser.“ Wer Unterzucker kaum spürt, ist nicht abgebildet.
+
+**Achterbahn** (nur ganzer Alltag): Die Insulinempfindlichkeit wandert über den Tag (glatter Zufallsverlauf, Stützstellen alle 4 h, sd 0,25 log-normal, rein aus Zeit und Seed, damit Lauf und Vorhersage übereinstimmen). In der Wirkungskarte zählt die Drift zum Insulin, nicht zur Bewegung. Dazu mit 10 % je Tag ein geknickter Katheter zwischen 8 und 20 Uhr: Nur ein Zehntel des Insulins kommt an. Gewechselt wird, sobald der Sensor 2 h am Stück über 250 liegt (Kriterium aus Kanapka 2022), sonst nach 12 h; erst dann steht es im Protokoll. Messung über 20 Subjekte × 3 Seeds mit fehlerfreien Boli: Zeit im Ziel 93 % ohne, 65 % mit Achterbahn. Werte und Quellen in der Registry, Abschnitt 10. Adapter-Check: fünf neue Prüfungen (Drift aus ohne Alltag, Rahmen und Streuung, Knick treibt hoch, Wechsel).
+
+**Grenze:** Wird der Modus mitten im Tag gewechselt, rechnet die Vorhersage die letzten Stunden mit dem neuen Modus nach.
+
+**Unterzucker-Fenster:** höchstens dreimal je Unterzucker (die 15-15-Regel kann sonst wegen des nachhinkenden Sensors lange nerven). Der Zähler beginnt neu, sobald Sensor und Blut wieder über der Grenze liegen. Der Hinweis zur Einstellung „Ganzer Alltag“ nennt jetzt auch Katheterknick und wechselnde Insulinwirkung.
+
+**Ideen für später** (Reddit, 13.11.2026), bewusst nicht umgesetzt:
+- **Person mit hohem Insulinbedarf.** Heute liegen die Faktoren der zehn Personen bei 14–24,5 g je IE. Ein Kommentar wünscht etwa 1:5, damit klar wird, dass 10 IE bei der einen Person einen Unterzucker machen und bei der anderen eine halbe Mahlzeit abdecken. Die Personen stammen aus der festen Testgruppe des Modells; eine neue bräuchte eigene Kalibrierung und Prüfung.
+- **Kohlenhydrate schätzen.** Mahlzeit als Bild, geschätzte statt exakte Gramm, Schätzfehler wirken auf den Bolus. Eigenes Vorhaben mit Bildmaterial und Lizenzfrage.
+- **Weiter zurückgestellt:** MDI, Menstruationszyklus (siehe Nachtrag 28), Unterzucker-Wahrnehmungsstörung.
+

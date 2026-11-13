@@ -418,11 +418,11 @@ On the start page you choose whose body you spend the day in. Ten people, each o
 |---|---|---|
 | Lena, 23 (default) | 10 | close to the median in everything except the meal |
 | Jonas, 22 | 4 | sensitive to insulin, hard exercise raises glucose strongly |
-| Mira, 30 | 6 | exercise lowers the most, hard exercise does not raise |
-| Aylin, 31 | 7 | least sensitive to insulin |
+| Mira, 38 | 6 | exercise lowers the most, hard exercise does not raise |
+| Aylin, 41 | 7 | least sensitive to insulin |
 | Malik, 25 | 8 | medium exercise responder, flat meals |
-| Tobias, 33 | 11 | exercise does almost nothing |
-| Jana, 26 | 13 | highest peak after eating |
+| Tobias, 43 | 11 | exercise does almost nothing |
+| Jana, 34 | 13 | highest peak after eating |
 | Finn, 19 | 14 | sensitive, hard exercise barely raises |
 | Sofia, 24 | 15 | strong response to exercise in both directions |
 | David, 20 | 18 | exercise does little, flat meals |

@@ -68,3 +68,12 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 | Rechtsgrundlage Impressum | § 18 Abs. 1 MStV, vorsorglich § 5 DDG; Datenschutz- und Änderungsdatum fest statt Baudatum (Rechtscheck, Doc 31) | 12.11.2026 |
 | iPhone-App | Eigenständige App im selben Repo (`mobile/`), Website bleibt unverändert; Plan in Doc 50 | 12.11.2026 |
 | Echter Puls | Einzige erlaubte echte Eingabe: Puls, nur in der App, steuert nur die Bewegung der simulierten Person, bleibt auf dem Gerät. Glukose, Insulin, Bolus weiter verboten | 12.11.2026 |
+| Einheit | Wählbar mg/dL oder mmol/L im neuen Einstellungsblatt; ohne Wahl mmol/L bei englischer Browsersprache aus GB, AU, NZ, CA, IE, ZA. Gerechnet wird weiter in mg/dL (Reddit-Feedback) | 13.11.2026 |
+| Unterzucker im Alltag | Nur im ganzen Alltag. Wach und Sensor unter 70: Zeit hält an, ein Fenster nennt die Situation (Bahn, Meeting, Kasse …) und lässt nur 15 g Traubenzucker zu. Danach 15 min sitzen, Bewegung und Schlafen gesperrt, dann erneut prüfen | 13.11.2026 |
+| Alter der Personen | Bei den vier niedrigsten Maximalpulsen bis 10 Jahre älter (Streuung von 220 − Alter), höchstens 43. Älter geben die 20 Datensätze nicht her | 13.11.2026 |
+| Gerät oder ganzer Alltag | Einstellung „Simulation“, Standard „Gerät“: nur Blutzucker, Sensor, Entscheidungen. „Ganzer Alltag“ schaltet Unterzucker-Situationen und Sprüche von außen zu. So bleibt der erste Eindruck ein ruhiges Gerät | 13.11.2026 |
+| Sprüche von außen | Nur im ganzen Alltag. Echte Sätze aus Erfahrungsberichten (Forum diabetes.co.uk, asweetlife.org), ohne Kommentar und Pointe, je einer höchstens alle 90 simulierten Minuten, jeder nur einmal | 13.11.2026 |
+| Körpergefühl | Im ganzen Alltag zeigen Hinweise wie „zittrig, schwitzig“ oder „durstig, müde“, was das **Blut** macht; das Unterzucker-Fenster kommt auch, wenn der Sensor noch nichts zeigt (Reddit-Feedback) | 13.11.2026 |
+| Achterbahn | Im ganzen Alltag wandert die Insulinempfindlichkeit (sd 0,25, alle 4 h), und mit 10 % je Tag knickt der Katheter; gewechselt wird nach 2 h über 250. Registry Abschnitt 10 | 13.11.2026 |
+| Unterzucker-Fenster | Höchstens dreimal je Unterzucker; erst wenn der Wert wieder über der Grenze war, zählt es neu | 13.11.2026 |
+| Ideen für später | Person mit hohem Insulinbedarf (etwa 1 IE auf 5 g statt heute 14–24,5 g), damit sichtbar wird, dass 10 IE je Person etwas anderes bedeuten; Kohlenhydrate schätzen nach Mahlzeitenbild; MDI; Zyklus. Details docs/00, Nachtrag 29 | 13.11.2026 |
