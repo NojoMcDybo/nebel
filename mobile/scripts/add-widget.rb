@@ -18,7 +18,8 @@ group.new_file("Info.plist")
 app_settings = app.build_configurations.first.build_settings
 ext.build_configurations.each do |c|
   c.build_settings.merge!(
-    "PRODUCT_BUNDLE_IDENTIFIER" => "#{app_settings["PRODUCT_BUNDLE_IDENTIFIER"]}.NebelWidget",
+    "PRODUCT_NAME" => "$(TARGET_NAME)",   # fehlt sonst: Produkt hiesse ".appex"
+    "PRODUCT_BUNDLE_IDENTIFIER" =>"#{app_settings["PRODUCT_BUNDLE_IDENTIFIER"]}.NebelWidget",
     "INFOPLIST_FILE" => "NebelWidget/Info.plist",
     "GENERATE_INFOPLIST_FILE" => "NO",
     "SWIFT_VERSION" => "5.0",
