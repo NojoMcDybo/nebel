@@ -115,7 +115,9 @@ Umgesetzt: `mobile/src/app.html` ist die einmalige Kopie von `app/template.html`
 - Hinweisfenster wie auf der Website (Bitte von Cinar: „nur Lernsystem, kein Medizinprodukt, keine Insulindosierung“ als Erstes beim Start).
 - **Abnahme:** App schließen, eine Stunde später öffnen, Verlauf ist korrekt nachgerechnet. Gleiche Eingaben wie auf der Website ergeben die gleiche Kurve.
 
-### Phase 3 — Puls steuert die Simulation
+### Phase 3 — Puls steuert die Simulation ✔ gebaut (13.11.2026), Test auf dem iPhone offen
+
+Umgesetzt: `mobile/src/belt.ts` (Verbindung, gemerkt, still beim Start) und `mobile/src/belt-engine.js` (`BeltEngine extends Engine`, ohne `app/adapter.js` anzufassen). Ein Minutenmittel wird zum `heartRate`-Ereignis ab jetzt; bei Gurt gelten Alltag und Training aus dem Plan nicht, das Bewegungsblatt ist gesperrt. Rückfall auf simuliert nach mehr als 2 Minuten ohne Ereignis, im Rechenschritt selbst, damit Nachholen nach einer Pause bitgleich bleibt (Test `tests/belt-engine.test.mjs`). Die Bewegungskarte zeigt „Quelle: Pulsgurt · NN bpm“ oder „Quelle: simuliert“. Der Puls wird nicht auf die Person umgerechnet (Ruhe-/Maximalpuls der Person bleiben die des Datensatzes). Im Hintergrund kommen noch keine Werte (Phase 4).
 
 - Gurt-Werte als ein `heartRate`-Ereignis pro Minute. Ohne Gurt (länger als 2 min kein Wert) gelten die simulierten Trainingsmuster.
 - Anzeige, welche Quelle gerade gilt (Gurt / simuliert).

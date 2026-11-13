@@ -924,6 +924,8 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
       <div class="sub" id="mvSub">Bewegung kommt, wie sie kommt.</div>
       <div class="bar" id="mvBarWrap" style="display:none"><b id="mvBar" style="width:0%"></b></div>
       <button class="mvx" id="mvCancel" type="button" hidden>Training absagen</button>
+      <div class="sub" id="mvSrc" style="margin-top:12px"></div>
+      <button class="mvx" id="btnBelt" type="button">Pulsgurt verbinden</button>
     </div>
 
     <div style="margin-top:18px;display:none">
@@ -1181,6 +1183,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
      aus py-mgipsim). Der Rest der Seite steht unter Apache 2.0. Siehe
      docs/30_Rechtliche_Einordnung.md, Abschnitt 7. -->
 <script src="personen-daten.js"></script>
+<script src="belt.js"></script>
 <script>
 "use strict";
 /*__ENGINE__*/
@@ -1223,7 +1226,7 @@ function readPerson(){
 let personId = readPerson();
 if (!PERSONAS.some(p => p.id === personId)) personId = DEFAULT_PERSONA;
 const PERSON = PERSONAS.find(p => p.id === personId);
-const eng = new Engine(undefined, Math.max(0, window.SUBJECTS.findIndex(s => s.id === personId)));
+const eng = new BeltEngine(undefined, Math.max(0, window.SUBJECTS.findIndex(s => s.id === personId)));
 
 (() => {
   /* Die Sensorverzoegerung steht an vier Stellen im Text. Sie kommt aus
@@ -1980,7 +1983,8 @@ function paintMove(){
   let cls = "move", beat = false, bar = -1;
   // Nur schreiben, wenn sich etwas geaendert hat. Vorher lief bei jedem
   // Einzelbild ein innerHTML-Schreibvorgang -- das allein hat gestottert.
-  const stamp = key + "|" + (a.left|0) + "|" + (a.inMin|0) + "|" + (a.pct|0);
+  const belted = eng.beltT != null;
+  const stamp = key + (belted ? "|B" : "") + "|" + (a.left|0) + "|" + (a.inMin|0) + "|" + (a.pct|0);
   const fresh = stamp !== lastMoveHTML;
   lastMoveHTML = stamp;
 
@@ -2008,6 +2012,12 @@ function paintMove(){
       $("mvWhen").textContent = `+${a.pct} %`;
       $("mvSub").textContent = `Insulin wirkt gerade ${a.pct} % stärker. Klingt erst über viele Stunden ab, auch nachts.`;
     }
+  } else if (belted){
+    if (fresh){
+      $("mvName").textContent = "Puls vom Gurt";
+      $("mvWhen").textContent = "";
+      $("mvSub").textContent = "Die Person bewegt sich so, wie du dich bewegst. Alltagsbewegung und Training aus dem Plan ruhen.";
+    }
   } else {
     if (fresh){
       $("mvName").textContent = eng.reality ? "Du planst selbst" : "Nichts geplant";
@@ -2026,6 +2036,11 @@ function paintMove(){
   // .gi behalten, sonst bricht das Neuzeichnen die Einblendung beim Seitenwechsel ab.
   card.className = cls + ["fresh","gi"].filter(c => card.classList.contains(c)).map(c => " " + c).join("");
   $("mvCancel").hidden = a.mode !== "soon";
+  put("mvSrc", belted ? `Quelle: Pulsgurt · ${beltBpmNow} bpm`
+    : beltState === "suche" ? "Quelle: simuliert · suche Pulsgurt …"
+    : beltState === "getrennt" ? "Quelle: simuliert · Gurt getrennt, verbinde neu …"
+    : "Quelle: simuliert" + (beltMsg ? " · " + beltMsg : ""));
+  $("btnBelt").hidden = belted;
   $("mvBeat").style.display = beat ? "block" : "none";
   $("mvBarWrap").style.display = bar >= 0 ? "block" : "none";
   if (bar >= 0) $("mvBar").style.width = clamp(bar, 0, 100).toFixed(1) + "%";
@@ -2202,6 +2217,7 @@ function paintMoveSheet(){
 wireSeg($("moveInt"), b => { moveInt = +b.dataset.i; paintMoveSheet(); });
 $("moveDur").oninput = e => $("mvDurTxt").textContent = e.target.value;
 $("btnMove").onclick = guarded(() => {
+  if (eng.beltT != null){ toast("move", "Der Gurt misst deine Bewegung", null); return; }
   paintMoveSheet();
   openSheet("sheetMove");
   requestAnimationFrame(() => moveKnob($("moveInt")));
@@ -2742,6 +2758,24 @@ $("btnReset").onclick = () => {
   if (confirm("Alles zurücksetzen und von vorn beginnen?")) resetAll();
 };
 
+/* ─── Pulsgurt ──────────────────────────────────────────────────
+   Jede Sekunde ein Wert vom Gurt; die Engine bekommt ein Mittel pro Minute als
+   heartRate-Ereignis (BeltEngine). Rohwerte bleiben nicht erhalten: gespeichert
+   werden nur diese Minutenereignisse im Stand der Sitzung. */
+let beltState = "aus", beltMsg = "", beltBpmNow = 0;
+const beltAvg = new NebelBelt.MinuteAverager();
+const belt = NebelBelt.createBelt({
+  onBpm(bpm){
+    beltBpmNow = bpm;
+    const now = Date.now();
+    if (eng.beltT == null) eng.beltBpm(bpm);                 // erster Wert gilt sofort
+    const m = beltAvg.add(now, bpm);
+    if (m && now - m.minute < 120000) eng.beltBpm(m.bpm);    // veraltete Reste nach einer Pause nicht nehmen
+  },
+  onStatus(state, name, msg){ beltState = state; beltMsg = msg; if (state === "aus") beltBpmNow = 0; lastMoveHTML = ""; paintMove(); },
+});
+$("btnBelt").onclick = () => belt.connect(true);
+
 /* ─── Start ───────────────────────────────────────────────────── */
 const missed = restoreState();
 if (!eng.reality) startReality();     // frische Sitzung: immer Echtzeit
@@ -2762,6 +2796,7 @@ document.addEventListener("visibilitychange", () => {
 addEventListener("pagehide", saveState);
 setInterval(saveState, 20000);
 requestAnimationFrame(loop);
+if (belt.remembered()) belt.connect(false);     // gemerkter Gurt: still verbinden, nie die Auswahl öffnen
 </script>
 </body>
 </html>
