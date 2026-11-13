@@ -5,7 +5,16 @@ import { createBelt } from "./belt";
 const $ = (id: string) => document.getElementById(id) as HTMLElement;
 const btn = $("connect") as HTMLButtonElement;
 
-const counts = new Map<number, number>(); // Minute seit Epoche → Anzahl Werte
+// Minute seit Epoche → Anzahl Werte. Gespeichert, damit die Zählung einen Neustart der App übersteht.
+const COUNT_KEY = "nebel.hr.counts";
+const counts = new Map<number, number>((() => {
+  try { return JSON.parse(localStorage.getItem(COUNT_KEY) ?? "[]"); } catch { return []; }
+})());
+function saveCounts() {
+  const old = Math.floor(Date.now() / 60000) - 60;
+  for (const m of counts.keys()) if (m < old) counts.delete(m);
+  try { localStorage.setItem(COUNT_KEY, JSON.stringify([...counts])); } catch {}
+}
 const fmt = (m: number) => new Date(m * 60000).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
 function renderCounts() {
   const now = Math.floor(Date.now() / 60000);
@@ -14,12 +23,15 @@ function renderCounts() {
   $("counts").innerHTML = rows.join("");
 }
 setInterval(renderCounts, 5000);
-document.addEventListener("visibilitychange", renderCounts);
+document.addEventListener("visibilitychange", () => { saveCounts(); renderCounts(); });
+addEventListener("pagehide", saveCounts);
 
 const belt = createBelt({
   onBpm(bpm) {
     const m = Math.floor(Date.now() / 60000);
-    counts.set(m, (counts.get(m) ?? 0) + 1);
+    const n = (counts.get(m) ?? 0) + 1;
+    counts.set(m, n);
+    if (n === 1) saveCounts(); // neue Minute: die abgeschlossene einmal sichern
     $("bpm").textContent = String(bpm);
     $("last").textContent = "Letzter Wert: " + new Date().toLocaleTimeString("de-DE");
   },

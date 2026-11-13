@@ -44,18 +44,33 @@ function appReality(){
 }
 
 /* Pulsgurt: jede Sekunde ein Wert, die Engine bekommt ein Mittel pro Minute als
-   heartRate-Ereignis (BeltEngine). Rohwerte bleiben nicht erhalten. */
+   heartRate-Ereignis (BeltEngine). Rohwerte bleiben nicht erhalten.
+   Bei gesperrtem iPhone laufen die Gurtwerte weiter ins JavaScript (Test 13.11.2026:
+   60 je Minute), die Bildschleife aber nicht. Deshalb rechnet jeder Wert die
+   Simulation selbst bis jetzt nach, plant die Alarme neu und sichert den Stand. */
 var beltState = "aus", beltMsg = "", beltBpmNow = 0;
 const beltAvg = new NebelBelt.MinuteAverager();
+function catchUp(){
+  if (!eng.reality || !anchor) return;
+  let n = Math.min(4320, Math.floor(anchor.simT + (Date.now() - anchor.wall)/60000 - eng.s.t));
+  while (n-- > 0) eng.step();
+}
+function onBeltBpm(bpm){
+  beltBpmNow = bpm;
+  if (!eng.reality) return;
+  catchUp();                                               // Puls zur richtigen Minute, auch im Hintergrund
+  const now = Date.now();
+  if (eng.beltT == null) eng.beltBpm(bpm);                 // erster Wert gilt sofort
+  const m = beltAvg.add(now, bpm);
+  if (!m) return;
+  if (now - m.minute < 120000) eng.beltBpm(m.bpm);         // veraltete Reste nach einer Pause nicht nehmen
+  if (document.visibilityState === "hidden"){              // einmal pro Minute: Alarme und Stand
+    if (eng.s.t - alarmT >= 5) scheduleAlarms();
+    saveState();
+  }
+}
 const belt = NebelBelt.createBelt({
-  onBpm(bpm){
-    beltBpmNow = bpm;
-    if (!eng.reality) return;
-    const now = Date.now();
-    if (eng.beltT == null) eng.beltBpm(bpm);                 // erster Wert gilt sofort
-    const m = beltAvg.add(now, bpm);
-    if (m && now - m.minute < 120000) eng.beltBpm(m.bpm);    // veraltete Reste nach einer Pause nicht nehmen
-  },
+  onBpm: onBeltBpm,
   onStatus(state, name, msg){ beltState = state; beltMsg = msg; if (state === "aus") beltBpmNow = 0; lastMoveHTML = ""; paintMove(); },
 });
 $("btnBelt").onclick = () => belt.connect(true);

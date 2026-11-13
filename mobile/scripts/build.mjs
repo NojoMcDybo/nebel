@@ -53,4 +53,21 @@ await build({
   outfile: "www/puls.js", logLevel: "error",
 });
 cpSync("src/puls.html", "www/puls.html");
+
+/* alarm.wav: Weckton fuer die Mitteilungen. Ohne angegebenen Ton stellt iOS sie
+   lautlos zu. Drei Pieptoene, Pause, wiederholt; 28 s, iOS spielt hoechstens 30 s. */
+{
+  const rate = 11025, secs = 28, n = rate * secs, buf = Buffer.alloc(44 + n * 2);
+  buf.write("RIFF", 0); buf.writeUInt32LE(36 + n * 2, 4); buf.write("WAVEfmt ", 8);
+  buf.writeUInt32LE(16, 16); buf.writeUInt16LE(1, 20); buf.writeUInt16LE(1, 22);
+  buf.writeUInt32LE(rate, 24); buf.writeUInt32LE(rate * 2, 28); buf.writeUInt16LE(2, 32); buf.writeUInt16LE(16, 34);
+  buf.write("data", 36); buf.writeUInt32LE(n * 2, 40);
+  for (let i = 0; i < n; i++) {
+    const t = i / rate, p = t % 1.4, k = Math.floor(p / 0.25);      // 3 Toene à 0,15 s, dann Pause
+    const on = k < 3 && p - k * 0.25 < 0.15;
+    const v = on ? Math.sin(2 * Math.PI * (k === 1 ? 1320 : 880) * t) * 0.8 : 0;
+    buf.writeInt16LE(Math.round(v * 32767), 44 + i * 2);
+  }
+  writeFileSync("www/alarm.wav", buf);
+}
 console.log(`www/ gebaut: index.html ${(html.length / 1024).toFixed(0)} KB, ${core.PERSONAS.length} Personen`);

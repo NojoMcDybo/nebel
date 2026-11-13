@@ -35,7 +35,12 @@ async function doReplace(alarms: Alarm[]) {
   const next = alarms.filter((a) => a.at > now).slice(0, MAX);
   if (!next.length) return;
   await LocalNotifications.schedule({
-    notifications: next.map((a, i) => ({ id: i + 1, title: a.title, body: a.body, schedule: { at: new Date(a.at) } })),
+    // sound: ohne Angabe stellt iOS lautlos zu (Test 13.11.2026). alarm.wav baut build.mjs.
+    // timeSensitive: darf durch einen Fokus, soweit iOS das der App erlaubt.
+    notifications: next.map((a, i) => ({
+      id: i + 1, title: a.title, body: a.body, schedule: { at: new Date(a.at) },
+      sound: "alarm.wav", interruptionLevel: "timeSensitive" as const,
+    })),
   });
 }
 
