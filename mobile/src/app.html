@@ -758,6 +758,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   <div class="box">
     <div class="ghd"><h2 id="gateT">Bevor es losgeht</h2></div>
     <p><b>nebel. ist ein Lernsystem, kein Medizinprodukt.</b> Die Werte sind simuliert und taugen nicht für Insulindosierung oder andere Therapieentscheidungen. Dafür ist dein Diabetesteam da.</p>
+    <p>nebel. meldet sich mit Mitteilungen, wenn der simulierte Wert unter 80 fällt oder über 280 steigt, auch nachts. Abschalten kannst du das jederzeit.</p>
     <button type="button" id="gateOk"><span class="t">Verstanden</span><span class="ck"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
   </div>
 </div>
@@ -913,6 +914,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
       <button class="btn soft wide" id="btnMove">Bewegung starten</button>
       <button class="btn line wide" id="btnBasal">Basalrate</button>
       <button class="btn soft wide" id="btnSleep">Schlafen gehen</button>
+      <button class="btn line wide" id="btnAlarm">Alarme: an</button>
     </div>
 
     <div class="move" id="moveCard">
@@ -1019,7 +1021,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     <div class="nclock" id="nClock">23:40</div>
     <div class="nhint">Du schläfst. Der Sensor weckt dich, wenn es nötig wird.</div>
     <div class="nrow">
-      <button class="btn line" id="btnTempo">60×</button>
+      <button class="btn line" id="btnTempo" style="display:none">60×</button>
       <button class="btn soft" id="btnWake">Aufstehen</button>
     </div>
   </div>
@@ -1116,6 +1118,19 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   </div>
 </div></div>
 
+<!-- ══════════ SHEET: NACHT ══════════ -->
+<div class="sheet" id="sheetNight"><div class="panel">
+  <div class="grab"></div>
+  <h3>Schlafen gehen</h3>
+  <p style="font-size:15.5px;line-height:1.5;margin:0 0 16px" id="nightTxt"></p>
+  <p class="hint">Leg das Handy weg und sperr es. nebel. rechnet weiter, auch wenn die App zu ist. Im Lautlos-Modus oder mit dem Fokus „Schlafen“ klingelt nichts.</p>
+  <p class="hint">Im Schlaf liegt man manchmal auf dem Sensor. Dann misst er falsch tief, und der Alarm kommt trotzdem. Auch das gehört dazu.</p>
+  <div class="row2">
+    <button class="btn soft" data-close>Zurück</button>
+    <button class="btn" id="nightOK">Gute Nacht</button>
+  </div>
+</div></div>
+
 <!-- ══════════ SHEET: REALITY ══════════ -->
 <div class="sheet" id="sheetReality"><div class="panel">
   <div class="grab"></div>
@@ -1184,6 +1199,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
      docs/30_Rechtliche_Einordnung.md, Abschnitt 7. -->
 <script src="personen-daten.js"></script>
 <script src="belt.js"></script>
+<script src="alarms.js"></script>
 <script>
 "use strict";
 /*__ENGINE__*/
@@ -2046,6 +2062,7 @@ function paintMove(){
   if (bar >= 0) $("mvBar").style.width = clamp(bar, 0, 100).toFixed(1) + "%";
 }
 function renderLog(){
+  alarmDirty = true;                        // jede Eingabe landet hier: Alarme neu planen
   const line = e => {
     if (e.kind === "meal") return `${e.est} g ${MEAL_TYPES[e.type].label}` +
       (e.fat || e.protein ? ` + ${e.fat || 0} g Fett, ${e.protein || 0} g Eiweiß` : "") + ` · ${e.dur} min`;
@@ -2084,6 +2101,7 @@ function loop(ts){
     while (n-- > 0) eng.step();
   }
   if (asleep) paintNight();
+  if (eng.reality && (alarmDirty || eng.s.t - alarmT >= 5)) scheduleAlarms();
   paint(eng.s.t + (speed > 0 ? tSub : 0));
   requestAnimationFrame(loop);
 }
@@ -2121,6 +2139,7 @@ const GATE_KEY = "nebel.hinweis.v1";
   gate.hidden = false; pager.inert = true;
   $("gateOk").onclick = () => {
     try { localStorage.setItem(GATE_KEY, "1"); } catch(e){}
+    if (alarmPref() === null) askAlarms();
     const done = () => { gate.hidden = true; gate.classList.remove("out"); pager.inert = false; greetPage(page); };
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return done();
     $("gateOk").classList.add("ok");                       // Haken zeichnet sich
@@ -2354,7 +2373,7 @@ function resetAll(){
    eigenen Koerper -- und ob man auf ihn reagiert oder weiterschlaeft,
    ist die Entscheidung, die den naechsten Tag praegt. */
 let asleep = false, snoozeUntil = -1e9, alarmOn = false, audio = null;
-const ALARM_LOW = 70, ALARM_HIGH = 250;
+const ALARM_LOW = TRAIN_LOW, ALARM_HIGH = TRAIN_HIGH;   // dieselben Grenzen wie die Mitteilungen (alarm-plan.js)
 
 function beep(){
   try{
@@ -2386,9 +2405,8 @@ async function holdScreen(on){
 
 function goSleep(){
   asleep = true; eng.s.asleep = true;
-  // Der Bildschirm muss anbleiben, sonst schlaeft der Browser mit und
-  // der Alarm kommt nie. Seit Safari 18.4 auch auf dem iPhone moeglich.
-  holdScreen(true);
+  // In der App weckt die geplante Mitteilung; der Bildschirm darf ausgehen.
+  alarmDirty = true;
   $("night").hidden = false; $("alarmBox").hidden = true;
   $("nBody").hidden = false;
   pager.inert = true; $("btnWake").focus();
@@ -2400,7 +2418,7 @@ function goSleep(){
 }
 function endSleep(byAlarm){
   if (byAlarm) eng.sleepAlarm(eng.lastSensor < 100 ? "low" : "high", eng.lastSensor, false);
-  asleep = false; eng.s.asleep = false; alarmOn = false;
+  asleep = false; eng.s.asleep = false; alarmOn = false; alarmDirty = true;
   $("night").hidden = true; pager.inert = false;
   holdScreen(false); saveState();
   if (navigator.vibrate) navigator.vibrate(0);
@@ -2411,9 +2429,9 @@ function paintNight(){
   if (alarmOn) return;
   const v = eng.lastSensor;
   if (eng.s.t < snoozeUntil) return;
-  if (v <= ALARM_LOW || v >= ALARM_HIGH){
+  if (v < ALARM_LOW || v > ALARM_HIGH){
     alarmOn = true;
-    const low = v <= ALARM_LOW;
+    const low = v < ALARM_LOW;
     $("night").className = "night ring " + (low ? "lo" : "hi");
     $("nBody").hidden = true; $("alarmBox").hidden = false;
     $("aValue").textContent = v;
@@ -2421,11 +2439,17 @@ function paintNight(){
     beep();
   }
 }
-$("btnSleep").onclick = guarded(goSleep);
+$("btnSleep").onclick = guarded(() => {
+  $("nightTxt").textContent = alarmsOn
+    ? `Fällt der Wert von ${PERSON.name} unter ${TRAIN_LOW} oder steigt über ${TRAIN_HIGH}, klingelt dein iPhone. Auch um drei Uhr nachts. Die Alarme kannst du jederzeit abschalten.`
+    : "Die Alarme sind aus. Du wirst heute Nacht nicht geweckt, und nebel. rechnet trotzdem weiter.";
+  openSheet("sheetNight");
+});
+$("nightOK").onclick = () => { closeSheets(); goSleep(); };
 $("btnWake").onclick = () => endSleep(false);
 $("btnAct").onclick  = () => endSleep(true);
 $("btnSnooze").onclick = () => {
-  eng.sleepAlarm(eng.lastSensor <= ALARM_LOW ? "low" : "high", eng.lastSensor, true);
+  eng.sleepAlarm(eng.lastSensor < ALARM_LOW ? "low" : "high", eng.lastSensor, true);
   snoozeUntil = eng.s.t + 30;          // dreissig simulierte Minuten Ruhe
   alarmOn = false;
   $("night").className = "night";
@@ -2776,6 +2800,37 @@ const belt = NebelBelt.createBelt({
 });
 $("btnBelt").onclick = () => belt.connect(true);
 
+/* ─── Alarme ────────────────────────────────────────────────────
+   Vorausberechnet (alarm-plan.js) und als lokale Mitteilungen geplant. Neu
+   geplant nach jeder Eingabe, alle fuenf Minuten und beim Verlassen der App.
+   Standardmaessig an (Doc 06, „Die Nacht“), abschaltbar. */
+const ALARM_KEY = "nebel.alarme.v1";      // "an" | "aus"; fehlt = noch nie gefragt
+function alarmPref(){ try { return localStorage.getItem(ALARM_KEY); } catch(e){ return null; } }
+var alarmsOn = alarmPref() !== "aus", alarmT = -1e9, alarmDirty = true;
+function paintAlarmBtn(){ $("btnAlarm").textContent = alarmsOn ? "Alarme: an" : "Alarme: aus"; }
+async function askAlarms(){
+  const ok = await NebelAlarms.ask();
+  try { localStorage.setItem(ALARM_KEY, ok ? "an" : "aus"); } catch(e){}
+  alarmsOn = ok; alarmDirty = true; paintAlarmBtn();
+  if (!ok) toast("basal", "Mitteilungen in den iPhone-Einstellungen erlauben", null);
+}
+$("btnAlarm").onclick = () => {
+  if (!alarmsOn) return askAlarms();
+  alarmsOn = false; alarmDirty = true; paintAlarmBtn();
+  try { localStorage.setItem(ALARM_KEY, "aus"); } catch(e){}
+  toast("basal", "Alarme aus", null);
+};
+function scheduleAlarms(){
+  alarmT = eng.s.t; alarmDirty = false;
+  if (!alarmsOn || !anchor) return NebelAlarms.replace([]);
+  const a0 = anchor, who = PERSON.name;
+  NebelAlarms.replace(planAlarms(eng).map(a => ({
+    at: a0.wall + (a.t - a0.simT)*60000,
+    title: a.kind === "low" ? "Tiefalarm · nebel." : "Hochalarm · nebel.",
+    body: `Sensor von ${who}: ${a.v} mg/dL. Simulierter Wert, kein echter Messwert.`,
+  })));
+}
+
 /* ─── Start ───────────────────────────────────────────────────── */
 const missed = restoreState();
 if (!eng.reality) startReality();     // frische Sitzung: immer Echtzeit
@@ -2790,13 +2845,15 @@ addEventListener("resize", () => {
 });
 document.addEventListener("visibilitychange", () => {
   lastTS = 0;
-  if (document.visibilityState === "visible" && asleep) holdScreen(true);
-  if (document.visibilityState === "hidden") saveState();
+  if (document.visibilityState === "hidden"){ scheduleAlarms(); saveState(); }
 });
 addEventListener("pagehide", saveState);
 setInterval(saveState, 20000);
 requestAnimationFrame(loop);
 if (belt.remembered()) belt.connect(false);     // gemerkter Gurt: still verbinden, nie die Auswahl öffnen
+paintAlarmBtn();
+if (eng.s.asleep) goSleep();                     // nachts geschlossen, morgens geoeffnet: die Nacht laeuft noch
+try { if (localStorage.getItem(GATE_KEY) === "1" && alarmPref() === null) askAlarms(); } catch(e){}
 </script>
 </body>
 </html>

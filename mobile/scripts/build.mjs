@@ -41,6 +41,11 @@ await build({
   entryPoints: ["src/belt.ts"], bundle: true, format: "iife", globalName: "NebelBelt", target: "es2022",
   minify: true, outfile: "www/belt.js", logLevel: "error",
 });
+/* alarms.js: lokale Mitteilungen fuer die vorausberechneten Alarme (window.NebelAlarms). */
+await build({
+  entryPoints: ["src/alarms.ts"], bundle: true, format: "iife", globalName: "NebelAlarms", target: "es2022",
+  minify: true, outfile: "www/alarms.js", logLevel: "error",
+});
 await build({
   entryPoints: ["src/main.ts"], bundle: true, format: "iife", target: "es2022", minify: true,
   outfile: "www/puls.js", logLevel: "error",

@@ -124,7 +124,11 @@ Umgesetzt: `mobile/src/belt.ts` (Verbindung, gemerkt, still beim Start) und `mob
 - Puls-Rohwerte werden nicht dauerhaft gespeichert, nur die Minutenereignisse der Sitzung.
 - **Abnahme:** Zwei Minuten Treppe, die Bewegungslinie in der Wirkungskarte steigt, die Kurve reagiert. Gurt ablegen: App fällt auf simuliert zurück.
 
-### Phase 4 — Alarme und Hintergrund
+### Phase 4 — Alarme und Hintergrund — Teil 1 gebaut (13.11.2026), Test auf dem iPhone offen
+
+Teil 1 umgesetzt: vorausberechnete Alarme (`mobile/src/alarm-plan.js`: Kopie des Laufs 12 h ohne Eingaben weiterrechnen, Sensor unter 80 oder über 280, Wiederholung alle 30 min, Test `tests/alarm-plan.test.mjs` gegen den echten Lauf) als lokale Mitteilungen (`@capacitor/local-notifications` 8.3.1, `src/alarms.ts`). Neu geplant nach jeder Eingabe, alle 5 min und beim Verlassen der App. Standardmäßig an: Das Hinweisfenster kündigt sie an, danach fragt iOS; abschaltbar über „Alarme: an/aus“. „Schlafen gehen“ fragt vorher ausdrücklich (Blatt „Schlafen gehen“), hält den Bildschirm nicht mehr an, und eine offene Nacht kommt nach dem Öffnen zurück. Grenzen der Nachtansicht jetzt ebenfalls 80/280. `UIBackgroundModes: bluetooth-central` gesetzt; der Pulsgurt-Test zählt Werte pro Minute (Hintergrund-Test).
+
+Teil 2 hängt am Hintergrund-Test: Kommen bei gesperrtem Handy etwa 60 Werte pro Minute im JavaScript an, kann die WebView selbst rechnen und neu planen. Kommen keine oder alle erst beim Entsperren, braucht es eigenes Bluetooth und die Engine in JavaScriptCore (Swift).
 
 Erst einen Test-Spike: bekommt die App bei gesperrtem Handy weiter Pulswerte, und kann sie in JavaScriptCore das Engine-Bündel rechnen? Für diese Phase lieber Opus statt Sonnet.
 

@@ -22,7 +22,9 @@ export async function loadParts() {
   })).outputFiles[0].text;
   const adapter = readFileSync(resolve(root, "../app/adapter.js"), "utf8");
   const personas = readFileSync(resolve(root, "../app/personas.js"), "utf8");
-  const beltEngine = readFileSync(resolve(root, "src/belt-engine.js"), "utf8");
+  // BeltEngine (Phase 3) und Alarmplanung (Phase 4) erweitern den Adapter, ohne ihn anzufassen.
+  const beltEngine = readFileSync(resolve(root, "src/belt-engine.js"), "utf8") + "\n" +
+    readFileSync(resolve(root, "src/alarm-plan.js"), "utf8");
   const data = readFileSync(dataFile, "utf8");
 
   /* Ein Skriptkontext wie in der WebView: window.Nebel, window.SUBJECTS, dann Adapter und BeltEngine. */
@@ -32,6 +34,6 @@ export async function loadParts() {
   ctx.window.Nebel = ctx.Nebel;
   vm.runInContext(
     personas + "\n" + adapter + "\n" + beltEngine +
-    "\nglobalThis.__CORE = { PERSONAS, Engine, BeltEngine };", ctx);
+    "\nglobalThis.__CORE = { PERSONAS, Engine, BeltEngine, planAlarms, TRAIN_LOW, TRAIN_HIGH };", ctx);
   return { engine, adapter, personas, beltEngine, data, ctx, core: ctx.__CORE };
 }
