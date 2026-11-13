@@ -1,8 +1,8 @@
 // Baut www/: die Simulation (index.html) und den Pulsgurt-Test (puls.html).
 //
-// Die Oberflaeche src/app.html ist eine einmalige Kopie von app/template.html (12.11.2026)
-// und wird hier eigenstaendig weiterentwickelt.
+// Die Oberflaeche ist app/template.html der Website, beim Bauen gepatcht (app-patches.mjs).
 import { build } from "esbuild";
+import { applyPatches } from "./app-patches.mjs";
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import vm from "node:vm";
@@ -24,11 +24,13 @@ for (const p of core.PERSONAS) {
 }
 const profilesJs = `window.PROFILES = ${JSON.stringify(profiles)};`;
 
-const html = readFileSync("src/app.html", "utf8")
+let patched;
+try { patched = applyPatches(readFileSync("../app/template.html", "utf8")); } catch (e) { console.error(e.message); process.exit(1); }
+const html = patched
   .replace("/*__ENGINE__*/", () => engine)
   .replace("/*__ADAPTER__*/", () => adapter + "\n" + beltEngine)
   .replace("/*__PERSONAS__*/", () => personas + "\n" + profilesJs);
-if (/\/\*__[A-Z]+__\*\//.test(html)) throw new Error("app.html: Platzhalter nicht ersetzt");
+if (/\/\*__[A-Z]+__\*\//.test(html)) throw new Error("index.html: Platzhalter nicht ersetzt");
 for (const m of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) new vm.Script(m[1], { filename: "index.html" });
 writeFileSync("www/index.html", html);
 

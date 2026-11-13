@@ -11,6 +11,7 @@ on:
       - mobile/**
       - engine/src/**
       - engine/scripts/build-viewer.mjs
+      - app/template.html
       - app/adapter.js
       - app/personas.js
       - .github/workflows/mobile.yml

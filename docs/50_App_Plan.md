@@ -8,7 +8,7 @@ Der Echtzeit-Modus (`06_Echtzeit_Modus.md`) lebt davon, dass Nebel im Alltag mit
 
 ## Entschieden (12.11.2026)
 
-- **Eigenständige App, selbes Repo, Ordner `mobile/`.** Geteilt wird nur Logik: `engine/src`, `app/adapter.js`, `app/personas.js`. Die Oberfläche der App ist eigenständig und wird aus `app/template.html` höchstens einmal kopiert, danach frei weiterentwickelt. Ein eigenes Repo hätte die Engine kopiert, Kalibrierung und Tests wären auseinandergelaufen.
+- **Eigenständige App, selbes Repo, Ordner `mobile/`.** Geteilt wird nur Logik: `engine/src`, `app/adapter.js`, `app/personas.js`. Die Oberfläche der App ist `app/template.html`, beim Bauen gepatcht (`mobile/scripts/app-patches.mjs`), damit Website-Updates von selbst in die App kommen. Fehlt ein Anker, bricht der Build ab und der Patch wird nachgezogen. (Bis 13.11.2026 war es eine einmalige Kopie; die lief der Website nach dem Reddit-Update davon.) Zeitraffer bis 300× läuft wie auf der Website; erst der Reality-Modus schaltet Pulsgurt, Mitteilungs-Alarme und das Nachtblatt ein. Ein eigenes Repo hätte die Engine kopiert, Kalibrierung und Tests wären auseinandergelaufen.
 - **Echter Puls ist erlaubt**, nur in der App, nur als `heartRate`-Ereignis für die Bewegung der simulierten Person, bleibt auf dem Gerät. Glukose, Insulin, Bolus bleiben verboten.
 
 ## Ausgangslage

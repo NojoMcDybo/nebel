@@ -18,6 +18,7 @@ function cloneRun(eng){
     acts:eng.acts, reality:eng.reality, lastSensor:eng.lastSensor }));
   Object.assign(c.s, d.s); c.rng.setState(d.rng); c.restore(d.core);
   c.acts = d.acts; c.reality = d.reality; c.lastSensor = d.lastSensor;
+  c.variability = eng.variability; c._highSince = eng._highSince;   // „Ganzer Alltag“, nicht im snapshot
   c.trace = []; c.events = [];
   return c;
 }
