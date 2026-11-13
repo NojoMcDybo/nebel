@@ -293,4 +293,22 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   ok("… und wird nach 2 h über 250 gewechselt", k._occ[0].end != null && k.events.some(e => /Katheter/.test(e.name || "")),
      k._occ[0].end != null ? "nach " + ((k._occ[0].end - k._occ[0].start)/60).toFixed(1) + " h" : "nicht gewechselt");
 }
+/* Pen (MDI): Langzeitinsulin haelt den Wert wie die Pumpe; vergessen treibt ihn hoch. */
+{
+  /* exact: Tagesmenge ungerundet, damit nur die Mechanik verglichen wird. */
+  const run = (pen, inject, exact) => { const e = new Engine(777, 3, pen); e.acts = []; let g = [];
+    if (exact){ e.longDose = () => e.therapy.basalRateUPerH * 24; e.input[0].units = e.longDose(); }
+    for (let i = 0; i < 30*60; i++){ if (inject && e.s.t === 21*60) e.injectLong(e.longDose()); e.step(); if (e.s.t % 60 === 0) g.push(e.s.G); }
+    return { e, g }; };
+  const pu = run(false, false), pe = run(true, true), fo = run(true, false), ex = run(true, true, true);
+  const devX = Math.max(...ex.g.map((v,i) => Math.abs(v - pu.g[i])));
+  const dev = Math.max(...pe.g.map((v,i) => Math.abs(v - pu.g[i])));
+  ok("Pen mit Spritze um 21 Uhr wie Pumpe", devX < 1, "max Abweichung " + devX.toFixed(2) + " mg/dL");
+  ok("… auf ganze Einheiten gerundet nah dran", dev < 25, `${pe.e.longDose()} statt ${(pe.e.therapy.basalRateUPerH*24).toFixed(1)} U, max ${dev.toFixed(0)} mg/dL`);
+  ok("Pen vergessen: Wert steigt", fo.e.s.G > pe.e.s.G + 60, `${pe.e.s.G.toFixed(0)} statt ${fo.e.s.G.toFixed(0)} mg/dL am naechsten Mittag`);
+  ok("Langzeit zaehlt nicht als aktives Insulin", pe.e.iob() === 0, pe.e.iob().toFixed(2) + " U");
+  const k = new Engine(777, 3, true); k.variability = true; k._occ = [{ start:k.s.t, end:null }];
+  ok("Pen hat keinen Katheterknick", k._deliv(k.s.t + 5) === 1);
+  ok("Pumpenstand passt nicht zum Pen", !k.canRestore(new Engine(777, 3).snapshot()) && k.canRestore(k.snapshot()));
+}
 function fmtClock(t){ return String(Math.floor(t/60)%24).padStart(2,"0") + ":" + String(t%60).padStart(2,"0"); }

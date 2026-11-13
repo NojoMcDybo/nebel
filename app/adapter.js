@@ -80,6 +80,15 @@ const AFTER_SHOW = 0.03, AFTER_REFUEL = 0.06;
    deutlich haeufiger als in echt). Gewechselt wird nach Kanapkas Kriterium:
    2 h am Stueck ueber 250. */
 const SI_SD = 0.25, SI_KNOT = 240, OCC_PER_DAY = 0.10, OCC_LEFT = 0.1;
+/* ── Pen statt Pumpe (MDI) ──────────────────────────────────────────
+   Langzeitinsulin einmal am Tag. Laut Lepore 2000 ist Glargin spitzenlos,
+   wirkt fast 24 h (Ende 22 ± 4 h) und gleicht der Pumpe mit fester Basalrate
+   (doi:10.2337/diabetes.49.12.2142). Hier darum: dieselbe Tagesmenge wie die
+   Basalrate, gleichmaessig ueber genau 24 h ins Unterhautgewebe (NEBEL-ANNAHME,
+   ohne den spaeteren Wirkbeginn). Wer zu spaet spritzt, hat dazwischen kein
+   Basal; wer doppelt spritzt, hat doppelt. Die letzte Spritze vor dem Start
+   war um 21 Uhr am Vorabend. */
+const LONG_MIN = 1440, LONG_FIRST = -180;
 
 /* p: Belastungsmuster [Minuten, Anteil der HF-Reserve], wiederholt bis zum Ende.
    Fehlt es, bleibt die Belastung gleichmaessig bei i. Mit Muster ist i nur
@@ -116,7 +125,7 @@ class Engine {
      anderer Sensor. Der Zufall ist zaehlerbasiert — mit festem Seed saehe
      jede Sitzung gleich aus, und Variabilitaet (Lernziel 4) waere
      auswendig lernbar. Gespeicherte Sitzungen bringen ihren Seed mit. */
-  constructor(seed, subjectIndex = 0){
+  constructor(seed, subjectIndex = 0, pen = false){
     if (seed === undefined) seed = (typeof crypto !== "undefined" && crypto.getRandomValues)
       ? crypto.getRandomValues(new Uint32Array(1))[0] >>> 1
       : Math.floor(Math.random() * 2147483647);
@@ -168,7 +177,10 @@ class Engine {
       basalEff: this.therapy.basalRateUPerH,
       asleep: false, gly: 0.55, Z: 0, emg: null,
     };
-    this.pump = N.flatBasalProfile(this.therapy.basalRateUPerH);
+    /* Pen: keine Pumpe, das Basal kommt aus der Langzeitspritze. */
+    this.pen = !!pen;
+    this.pump = N.flatBasalProfile(this.pen ? 0 : this.therapy.basalRateUPerH);
+    if (this.pen) this.input.push({ kind:"bolus", t:LONG_FIRST, units:this.longDose(), durationMin:LONG_MIN, long:true });
     /* Zustand alle 30 min, damit die Vorhersage die letzten Stunden mit und
        ohne einzelne Entscheidungen nachrechnen kann. */
     this._snaps = [{ t:this.s.t, z:Array.from(this.z) }];
@@ -241,6 +253,20 @@ class Engine {
        gleich gespritzt. Das Feld bleibt, damit der Rueckblick rechnet. */
     this.events.push({ kind:"bolus", t, units: U, share, over, effective: U });
     this._boluses.push({ t, U, share, over });
+  }
+
+  /* Langzeitinsulin (nur Pen): die Tagesmenge, die der Basalrate entspricht. */
+  longDose(){ return Math.round(this.therapy.basalRateUPerH * 24); }
+  injectLong(U){
+    const t = this.s.t;
+    this.input.push({ kind:"bolus", t, units:U, durationMin:LONG_MIN, long:true });
+    this.events.push({ kind:"long", t, units:U });
+  }
+  /* Wann die letzte Langzeitspritze war und wann sie aufhoert zu wirken. */
+  lastLong(){
+    let t = -Infinity;
+    for (const e of this.input) if (e.long && e.t > t) t = e.t;
+    return t;
   }
 
   /* Basalaenderung als Ereignis in der Eingabeliste, nicht als neues
@@ -364,13 +390,14 @@ class Engine {
      die Kurve den alten Tag zeigt — und der Echtzeitmodus rechnet die
      verpasste Zeit von einem falschen Zustand aus nach. */
   snapshot(){
-    return { v:1, subjectId:this.subjectId, seed:this.seed,
+    return { v:1, subjectId:this.subjectId, seed:this.seed, pen:this.pen,
              z:N.serializeState(this.z), input:this.input,
              reserve:this._reserve, act:this._act, sensorIndex:this._sensorIndex,
              faults:this.sensorFaults, snaps:this._snaps, occ:this._occ };
   }
   canRestore(core){
-    return !!core && core.v === 1 && core.subjectId === this.subjectId && Number.isInteger(core.seed);
+    return !!core && core.v === 1 && core.subjectId === this.subjectId && Number.isInteger(core.seed)
+      && !!core.pen === this.pen;          // Pumpe und Pen haben verschiedene Vergangenheiten
   }
   restore(core){
     if (!this.canRestore(core)) return false;
@@ -385,8 +412,8 @@ class Engine {
     this._fault = this.sensorFaults.find(f => f.open) || null;
     this._snaps = core.snaps && core.snaps.length ? core.snaps : [{ t:this.s.t, z:Array.from(this.z) }];
     /* Aeltere Staende kannten Basalaenderungen nur als Pumpenprogramm. */
-    this.pump = N.flatBasalProfile(this.therapy.basalRateUPerH);
-    if (!this.input.some(e => e.kind === "basal") && Math.abs(this.s.basalSet - this.therapy.basalRateUPerH) > 1e-9)
+    this.pump = N.flatBasalProfile(this.pen ? 0 : this.therapy.basalRateUPerH);
+    if (!this.pen && !this.input.some(e => e.kind === "basal") && Math.abs(this.s.basalSet - this.therapy.basalRateUPerH) > 1e-9)
       this.input.push({ kind:"basal", t:this.s.t, rateUPerH:this.s.basalSet });
     this._sync();
     return true;
@@ -406,7 +433,7 @@ class Engine {
   }
   /* Anteil des Insulins, der ankommt: 0,1 bei geknicktem Katheter. */
   _deliv(t){
-    if (!this.variability) return 1;
+    if (!this.variability || this.pen) return 1;       // ein Pen hat keinen Katheter
     for (const o of this._occ) if (t >= o.start && (o.end == null || t < o.end)) return OCC_LEFT;
     return 1;
   }
@@ -467,7 +494,7 @@ class Engine {
     const v = Math.max(40, Math.min(400, Math.round(raw)));
     this.lastSensor = v;
     this._highSince = v > 250 ? (this._highSince ?? this.s.t) : null;
-    const occ = this._occ.find(o => o.end == null && this.s.t >= o.start);
+    const occ = this.pen ? null : this._occ.find(o => o.end == null && this.s.t >= o.start);
     if (occ && this.variability && this._highSince != null && this.s.t - this._highSince >= 120){
       occ.end = this.s.t;
       this.events.push({ kind:"state", t:this.s.t, name:"Seit 2 Stunden sehr hoch · Katheter gewechselt, er war geknickt" });
@@ -641,7 +668,7 @@ class Engine {
     return out;
   }
 
-  iob(){ return N.insulinOnBoardUnits(this.s.t, this.input); }
+  iob(){ return N.insulinOnBoardUnits(this.s.t, this.pen ? this.input.filter(e => !e.long) : this.input); }
   /* Kohlenhydrate aktiv: im Darm (D1, D2) plus, was nach fettem Essen noch
      im Magen liegt. Eiweiss zaehlt nicht mit — es ist kein Kohlenhydrat. */
   cob(){

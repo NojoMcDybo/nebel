@@ -62,7 +62,7 @@ It started with an interactive prototype (`index.html`) with its own simplified 
 |---|---|---|
 | Audience | Family and friends; school sport later | 22 Sep |
 | Engine core | ExtHovorka, 16 states, driven by heart rate | 15 Sep |
-| Therapy | Insulin pump (CSII), open loop | 09/2026 |
+| Therapy | Insulin pump (CSII), open loop; optionally pens (MDI) | 09/2026, pens 13 Nov 2026 |
 | Architecture | Standalone TypeScript module with a test suite, runs without an interface | 22 Sep |
 | Reference implementation | py-mgipsim only as a numerical comparison oracle, no code taken over | 22 Sep |
 | Units | SI internally (mmol/L, mmol, mU), conversion only at the display boundary | 22 Sep |
@@ -115,6 +115,8 @@ Rules enforced in the code:
 ### 3.3 Therapy
 
 nebel. models an insulin pump in an open loop: basal profile, bolus, extended bolus, temporary basal rate and pump suspend. The model takes insulin as a continuous flow, which fits a pump directly. There is no automated insulin delivery algorithm (AID).
+
+Since 13 Nov 2026 there is an option for pens (MDI): long-acting insulin once a day, rapid-acting for meals. According to Lepore et al. 2000, glargine works without a peak for almost 24 hours and resembles a pump with a fixed basal rate ([DOI](https://doi.org/10.2337/diabetes.49.12.2142)). nebel. therefore releases the daily dose evenly over 24 hours. Inject later and there is no basal in between; inject twice and there is twice as much. Temporary basal, extended bolus and kinked infusion sets do not apply.
 
 ### 3.4 What is deliberately missing
 

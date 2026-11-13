@@ -552,3 +552,14 @@ Alles nur im Modus „Ganzer Alltag“:
 
 
 **Release `v1.3.0`** am 13.11.2026 auf `70b7b4d`: fasst die Nachträge 25, 26 und 28 bis 30 zusammen (Durchsicht, Rechtscheck, Einstellungen mit mmol/L, Modus „Ganzer Alltag“ mit Unterzucker-Fenster, Körpergefühl, Achterbahn, langsamen Knöpfen, Tagesplan und Einladungen), dazu Sitemap und kanonische Adressen, Hell/Dunkel nur auf der Startseite und Hinweise über dem Verlauf. Nachtrag 27 (iPhone-App) ist nicht enthalten, die App ist noch nicht veröffentlicht.
+
+## 31. Nachtrag 13.11.2026 — Pen (MDI) als zweite Therapieform
+
+Anlass: Ein Moderator von r/diabetes_t1 wies darauf hin, dass nebel. nur eine Pumpe im offenen Regelkreis abbildet, während fast alle im Sub MDI oder AID nutzen.
+
+- **Einstellung „Insulin: Pumpe / Pen“** (`nebel.therapy`). Ein Wechsel beginnt einen neuen Tag; gespeicherte Stände tragen `pen` und passen nur zur selben Therapie (`canRestore`).
+- **Langzeitinsulin:** Tagesmenge = Basalrate × 24, auf ganze Einheiten gerundet, als Abgabe gleichmäßig über 1440 min (`bolus` mit `durationMin:1440, long:true`). Laut Lepore 2000 ist Glargin spitzenlos, Wirkende 22 ± 4 h, Profil wie CSII (doi:10.2337/diabetes.49.12.2142). NEBEL-ANNAHME: genau 24 h, ohne den späteren Wirkbeginn (1,5 h statt 0,5 h). Die letzte Spritze vor dem Start war um 21 Uhr am Vorabend. Die Pumpe läuft im Pen-Modus mit Basalrate 0.
+- **Bedienung:** Der Basal-Knopf wird „Langzeitinsulin · fällig um …“, nach Ablauf „fällig seit …“ mit einmaliger Erinnerung. Das Blatt zeigt, bis wann die letzte Spritze wirkt; Einheiten frei wählbar (4–60), vorbelegt mit der Tagesmenge der Person, wie die Basalrate bei der Pumpe. Keine Aufteilung beim Bolus. Personenkarte: „U/Tag“ und „Pen“.
+- **Entfällt beim Pen:** temporäre Basalrate, verzögerter Bolus, Katheterknick, der Spruch „Die Pumpe macht das doch alles von allein“. Langzeitinsulin zählt nicht als aktives Insulin.
+- **Prüfung (check:adapter):** Pen mit Spritze um 21 Uhr liegt mit ungerundeter Menge exakt auf der Pumpe (0,00 mg/dL), gerundet bis 12 mg/dL daneben (22 statt 22,2 U). Vergessen treibt den Wert bis zum nächsten Mittag von 117 auf 577 mg/dL; echtes Glargin klingt langsamer aus, das ist hier zu hart.
+- **AID bewusst nicht:** Die Regler echter Systeme sind nicht offen, ein eigener würde sich anders verhalten; automatische Korrekturen wären im Kern ein Bolusrechner.

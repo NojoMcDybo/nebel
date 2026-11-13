@@ -33,7 +33,7 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 |---|---|---|
 | Primäre Zielgruppe | Angehörige und Freunde von Menschen mit Typ-1-Diabetes; Schulsport/Lehramt später | 22.09.2026 |
 | Engine-Kern | ExtHovorka (Rashid et al. 2019, AG Cinar), 16 Zustände, herzfrequenzgetrieben | 15.09.2026 |
-| Therapieform | Pumpentherapie CSII, Open Loop | 09/2026 |
+| Therapieform | Pumpentherapie CSII, Open Loop; seit 13.11.2026 wahlweise Pen (MDI) | 09/2026 |
 | Architektur | Separates TypeScript-Modul mit Testsuite, headless lauffähig | 22.09.2026 |
 | Referenzimplementierung | py-mgipsim nur als numerisches Vergleichsorakel, kein Codeport (GPL-3.0) | 22.09.2026 |
 | Einheiten | Intern SI (mmol/L, mmol, mU), Umrechnung nur an der UI-Grenze | 22.09.2026 |
@@ -76,6 +76,7 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 | Körpergefühl | Im ganzen Alltag zeigen Hinweise wie „zittrig, schwitzig“ oder „durstig, müde“, was das **Blut** macht; das Unterzucker-Fenster kommt auch, wenn der Sensor noch nichts zeigt (Reddit-Feedback) | 13.11.2026 |
 | Achterbahn | Im ganzen Alltag wandert die Insulinempfindlichkeit (sd 0,25, alle 4 h), und mit 10 % je Tag knickt der Katheter; gewechselt wird nach 2 h über 250. Registry Abschnitt 10 | 13.11.2026 |
 | Unterzucker-Fenster | Höchstens dreimal je Unterzucker; erst wenn der Wert wieder über der Grenze war, zählt es neu | 13.11.2026 |
-| Ideen für später | Person mit hohem Insulinbedarf (etwa 1 IE auf 5 g statt heute 14–24,5 g), damit sichtbar wird, dass 10 IE je Person etwas anderes bedeuten; Kohlenhydrate schätzen nach Mahlzeitenbild; MDI; Zyklus. Details docs/00, Nachtrag 29 | 13.11.2026 |
+| Ideen für später | Person mit hohem Insulinbedarf (etwa 1 IE auf 5 g statt heute 14–24,5 g), damit sichtbar wird, dass 10 IE je Person etwas anderes bedeuten; Kohlenhydrate schätzen nach Mahlzeitenbild; MDI (inzwischen umgesetzt, siehe unten); Zyklus. Details docs/00, Nachtrag 29 | 13.11.2026 |
 | Unterzucker macht langsam | Im ganzen Alltag reagieren Essen, Insulin, Bewegung und Schlafen bei Blut unter 70 erst nach 0,7 s, unter 55 nach 1,5 s. Bei Blut über 250 antwortet man gereizt auf Sprüche (Reddit-Feedback) | 13.11.2026 |
 | Tagesplan und Einladungen | Im ganzen Alltag zeigt morgens eine Karte, was ansteht (Spontanes wie „Bus verpasst“ nicht). An 60 % der Tage kommt eine Einladung (Pizza, Kuchen, Sushi, Popcorn): Zeit hält an, „Mitessen“ oder „Lieber nicht“. Die Kohlenhydrate nennt niemand, im Protokoll steht nur der Name, erst der Rückblick zeigt die Menge | 13.11.2026 |
+| Pen (MDI) als Therapie | In den Einstellungen „Insulin: Pumpe oder Pen“. Pen: Langzeitinsulin einmal am Tag, gleichmäßig über 24 h (Glargin laut Lepore 2000 spitzenlos, fast 24 h); keine Basalrate, kein verzögerter Bolus, kein Katheterknick. Wechsel beginnt neu. Anlass: Hinweis eines Moderators von r/diabetes_t1, dass kaum noch jemand Open-Loop-Pumpe nutzt. AID bewusst nicht (Regler echter Systeme nicht offen, automatische Korrekturen wären ein Bolusrechner) | 13.11.2026 |

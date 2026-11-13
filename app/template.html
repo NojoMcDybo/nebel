@@ -14,7 +14,7 @@
 <link rel="preload" href="fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/dm-mono-400.woff2" as="font" type="font/woff2" crossorigin>
 <meta name="theme-color" content="#EDF1F1">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230A0D0D'/%3E%3Ccircle cx='23' cy='22' r='3' fill='%23B8362B'/%3E%3Cpath d='M8 23V12.5c0-1.4 1.1-2.5 2.5-2.5h2c2.8 0 5 2.2 5 5V23' fill='none' stroke='%23EDF1F1' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230A0D0D'/%3E%3Cpath d='M11.25 22.5V12c0-1.4 1.1-2.5 2.5-2.5h2c2.8 0 5 2.2 5 5V22.5' fill='none' stroke='%23EDF1F1' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="nebel">
@@ -660,6 +660,7 @@ button.slow{opacity:.5; filter:blur(.7px); transition:opacity .3s, filter .3s}
 .btn.wide{grid-column:1/-1}
 .btn.soft{background:var(--card); color:var(--ink); box-shadow:var(--sh)}
 .btn.line{background:transparent; color:var(--ink2); box-shadow:inset 0 0 0 1.5px var(--hair); min-height:46px; font-size:13.5px; font-weight:600}
+.btn.line.due{color:var(--high); box-shadow:inset 0 0 0 1.5px var(--high)}
 
 .log{margin:22px 0 112px}
 .log h4{font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink3); font-weight:400; margin:0 0 10px}
@@ -1164,6 +1165,15 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     </div>
   </div>
   <div class="field">
+    <label><span>Insulin</span></label>
+    <div class="seg tall" id="therapySeg">
+      <span class="knob"></span>
+      <button data-th="pumpe" aria-pressed="true">Pumpe</button>
+      <button data-th="pen" aria-pressed="false">Pen</button>
+    </div>
+  </div>
+  <p class="hint">Pen: einmal am Tag Langzeitinsulin, zum Essen schnelles. Keine Basalrate, kein verzögerter Bolus, kein Katheter. Ein Wechsel beginnt einen neuen Tag.</p>
+  <div class="field">
     <label><span>Simulation</span></label>
     <div class="seg tall" id="modeSeg">
       <span class="knob"></span>
@@ -1171,7 +1181,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
       <button data-m="alltag" aria-pressed="false">Ganzer Alltag</button>
     </div>
   </div>
-  <p class="hint">Gerät: nur Blutzucker, Sensor und deine Entscheidungen. Ganzer Alltag: Dazu kommen ein Unterzucker mitten im Meeting, ein geknickter Katheter, Tage, an denen dasselbe Insulin anders wirkt, spontane Einladungen zum Essen und andere Leute, die sagen, was sie über Diabetes zu wissen glauben.</p>
+  <p class="hint">Gerät: nur Blutzucker, Sensor und deine Entscheidungen. Ganzer Alltag: Dazu kommen ein Unterzucker mitten im Meeting, ein geknickter Katheter (mit Pumpe), Tage, an denen dasselbe Insulin anders wirkt, spontane Einladungen zum Essen und andere Leute, die sagen, was sie über Diabetes zu wissen glauben.</p>
   <div class="field">
     <label><span>Darstellung</span></label>
     <div class="seg tall" id="themeSeg">
@@ -1244,6 +1254,22 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   </div>
 </div></div>
 
+<!-- ══════════ SHEET: LANGZEITINSULIN (Pen) ══════════ -->
+<div class="sheet" id="sheetLong"><div class="panel">
+  <div class="grab"></div>
+  <h3>Langzeitinsulin</h3>
+  <div class="field">
+    <label><span>Einheiten</span><b><span id="lU">20</span> U</b></label>
+    <input type="range" id="longU" min="4" max="60" step="1" value="20">
+  </div>
+  <p class="split" id="longTxt"></p>
+  <p class="hint">Wirkt ohne Spitze etwa einen Tag lang, wie eine feste Basalrate. Spritzt du später, fehlt dazwischen Insulin und der Wert steigt. Spritzt du zweimal, wirkt es doppelt, und zurückholen lässt es sich nicht.</p>
+  <div class="row2">
+    <button class="btn soft" data-close>Zurück</button>
+    <button class="btn" id="longOK">Spritzen</button>
+  </div>
+</div></div>
+
 <!-- ══════════ SHEET: INSULIN ══════════ -->
 <div class="sheet" id="sheetBolus"><div class="panel">
   <div class="grab"></div>
@@ -1252,7 +1278,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     <label><span>Einheiten</span><b><span id="bU">4.0</span> U</b></label>
     <input type="range" id="bolusU" min="0.5" max="15" step="0.5" value="4">
   </div>
-  <div class="field">
+  <div class="field" id="bolusSplitWrap">
     <label><span>Aufteilung</span></label>
     <div class="seg tall" id="bolusSplit">
       <span class="knob"></span>
@@ -1323,7 +1349,11 @@ function readPerson(){
 let personId = readPerson();
 if (!PERSONAS.some(p => p.id === personId)) personId = DEFAULT_PERSONA;
 const PERSON = PERSONAS.find(p => p.id === personId);
-const eng = new Engine(undefined, Math.max(0, window.SUBJECTS.findIndex(s => s.id === personId)));
+/* Pen (MDI) oder Pumpe. Ein Wechsel beginnt neu: die Vergangenheit passt nicht. */
+const THERAPY_KEY = "nebel.therapy";
+const PEN = (() => { try { return localStorage.getItem(THERAPY_KEY) === "pen"; } catch(e){ return false; } })();
+const eng = new Engine(undefined, Math.max(0, window.SUBJECTS.findIndex(s => s.id === personId)), PEN);
+if (PEN){ $("bolusSplitWrap").hidden = true; $("bolusOverWrap").hidden = true; }
 
 (() => {
   /* Die Sensorverzoegerung steht an vier Stellen im Text. Sie kommt aus
@@ -1637,7 +1667,8 @@ function syncCfg(){
   pressSeg($("unitSeg"), b => (b.dataset.u === "mmol") === MMOL);
   pressSeg($("themeSeg"), b => b.dataset.t === root.dataset.theme);
   pressSeg($("modeSeg"), b => (b.dataset.m === "alltag") === FULLDAY);
-  ["unitSeg","modeSeg","themeSeg","langSeg"].forEach(id => moveKnob($(id)));
+  pressSeg($("therapySeg"), b => (b.dataset.th === "pen") === PEN);
+  ["unitSeg","therapySeg","modeSeg","themeSeg","langSeg"].forEach(id => moveKnob($(id)));
 }
 $("cfg").onclick = () => { if ($("sheetCfg").classList.contains("on")) return closeSheets(); $("cfg").classList.add("on"); openSheet("sheetCfg"); requestAnimationFrame(syncCfg); };
 wireSeg($("unitSeg"), b => {
@@ -1657,6 +1688,13 @@ wireSeg($("modeSeg"), b => {
   fcKey = "";
   try { localStorage.setItem(MODE_KEY, FULLDAY ? "alltag" : "geraet"); } catch(e){}
   if (!FULLDAY){ hypoUntil = -1; hypoRound = 0; invPick = null; $("remark").classList.remove("on"); }
+});
+wireSeg($("therapySeg"), b => {
+  const pen = b.dataset.th === "pen";
+  if (pen === PEN) return;
+  if (eng.trace.length > 12 && !confirm(pen ? "Mit dem Pen neu beginnen? Der bisherige Verlauf geht verloren." : "Mit der Pumpe neu beginnen? Der bisherige Verlauf geht verloren.")) return syncCfg();
+  try { localStorage.setItem(THERAPY_KEY, pen ? "pen" : "pumpe"); } catch(e){}
+  resetAll();
 });
 wireSeg($("themeSeg"), b => { if (b.dataset.t !== root.dataset.theme) $("theme").click(); });
 wireSeg($("langSeg"), b => { if (b.dataset.href){ saveState(); location.href = b.dataset.href + "#person=" + personId; } });   // die andere Sprache beginnt mit derselben Person
@@ -1812,12 +1850,12 @@ function showPerson(id, tapped){
   const vals = [
     [d.height, v => fmtDE(v) + " cm"], [d.BW, v => fmtDE(v) + " kg"],
     [s.subject.HRrest, v => fmtDE(v) + " /min"], [d.HbA1c, v => fmtDE(v, 1) + " %"],
-    [th.basalRateUPerH, v => fmtDE(v, 2) + " U/h"], [th.carbRatioGPerU, v => fmtDE(v, 1) + " g/U"],
-    [th.correctionFactor, v => bgd(v) + " " + UL() + "/U"], [null, () => "Insulinpumpe"],
+    PEN ? [Math.round(th.basalRateUPerH*24), v => fmtDE(v, 0) + " U/Tag"] : [th.basalRateUPerH, v => fmtDE(v, 2) + " U/h"], [th.carbRatioGPerU, v => fmtDE(v, 1) + " g/U"],
+    [th.correctionFactor, v => bgd(v) + " " + UL() + "/U"], [null, () => PEN ? "Pen" : "Insulinpumpe"],
   ];
   const old = prev ? subjOf(prev) : null;
   const oldVals = old ? [old.demo.height, old.demo.BW, old.subject.HRrest, old.demo.HbA1c,
-    old.therapy.basalRateUPerH, old.therapy.carbRatioGPerU, old.therapy.correctionFactor, null] : [];
+    PEN ? Math.round(old.therapy.basalRateUPerH*24) : old.therapy.basalRateUPerH, old.therapy.carbRatioGPerU, old.therapy.correctionFactor, null] : [];
   vals.forEach(([v, fmt], i) => v == null ? ($("pcV"+i).textContent = fmt()) : tweenText($("pcV"+i), oldVals[i], v, fmt));
   CMP.forEach((m, i) => {
     const r = cmpRange(m.key), me = window.PROFILES[id][m.key];
@@ -2131,6 +2169,7 @@ function paintReserve(){
 
 let lastBasal = "";
 function paintBasal(){
+  if (PEN) return paintLong();
   const set = eng.s.basalSet, eff = eng.s.basalEff;
   const key = set.toFixed(2) + "|" + eff.toFixed(2);
   if (key === lastBasal) return;
@@ -2138,6 +2177,14 @@ function paintBasal(){
   $("btnBasal").textContent = Math.abs(set - eff) < 0.02
     ? `Basalrate · ${set.toFixed(2)} U/h`
     : `Basalrate · ${eff.toFixed(2)} → ${set.toFixed(2)} U/h`;
+}
+/* Pen: wann die letzte Langzeitspritze aufhoert. Einmal erinnern, wenn sie faellig ist. */
+let longRemind = -1;
+function paintLong(){
+  const due = eng.lastLong() + 1440, late = eng.s.t >= due;
+  const txt = late ? `Langzeitinsulin · fällig seit ${fmtT(due)}` : `Langzeitinsulin · fällig um ${fmtT(due)}`;
+  if (txt !== lastBasal){ lastBasal = txt; $("btnBasal").textContent = txt; $("btnBasal").classList.toggle("due", late); }
+  if (late && !asleep && longRemind !== due){ longRemind = due; toast("bolus", "Langzeitinsulin ist fällig", null); }
 }
 let lastMoveHTML = "";
 function paintMove(){
@@ -2208,6 +2255,7 @@ function renderLog(){
       : `${e.units.toFixed(1)} U · ${Math.round(e.share*100)} % sofort, Rest über ${e.over} min`;
     if (e.kind === "alarm") return `${e.low ? "Tiefalarm" : "Hochalarm"} bei ${bgv(e.value)}${e.snoozed ? " — weitergeschlafen" : ""}`;
     if (e.kind === "basal") return `Basal ${e.from.toFixed(2)} → ${e.to.toFixed(2)} U/h`;
+    if (e.kind === "long") return `${e.units} U Langzeitinsulin`;
     if (e.kind === "warn") return `${e.name} in ${e.inMin} min angekündigt`;
     if (e.kind === "emg") return e.name;
     if (e.kind === "state") return e.name;
@@ -2395,7 +2443,7 @@ const REMARKS = {
     ["Bekannte", "Also ich könnte mir das nie selbst spritzen."],
     ["Kollege", "Wie oft am Tag stichst du dich eigentlich?"],
     ["Nachbar", "Und, tut das weh?"],
-    ["Kollegin", "Die Pumpe macht das doch alles von allein, oder?"],
+    ["Kollegin", "Die Pumpe macht das doch alles von allein, oder?", "pumpe"],
   ],
   high: [
     ["Onkel", "Hast du zu viel Zucker gegessen?"],
@@ -2421,7 +2469,7 @@ let remarkAt = -1e9, remarkHour = -1, remarkT = null;
 const remarkUsed = new Set();
 function remark(kind){
   if (!FULLDAY || asleep || hypoOn || eng.s.t - remarkAt < 90) return;
-  const pool = REMARKS[kind].filter(r => !remarkUsed.has(r[1]));
+  const pool = REMARKS[kind].filter(r => !remarkUsed.has(r[1]) && !(PEN && r[2] === "pumpe"));
   if (!pool.length) return;
   const [who, txt] = pool[Math.floor(Math.random() * pool.length)];
   remarkUsed.add(txt); remarkAt = eng.s.t;
@@ -2579,7 +2627,21 @@ function paintBasalSheet(){
     : `wirksam gerade ${eff.toFixed(2)} U/h — stellt sich über etwa drei Stunden um`;
 }
 $("basalR").oninput = paintBasalSheet;
+function paintLongSheet(){
+  const U = +$("longU").value, last = eng.lastLong(), due = last + 1440;
+  $("lU").textContent = U;
+  $("longTxt").textContent = eng.s.t >= due
+    ? `Die letzte Spritze wirkt seit ${fmtT(due)} nicht mehr.`
+    : `Die letzte Spritze um ${fmtT(((last % 1440) + 1440) % 1440)} wirkt noch bis ${fmtT(due)}.`;
+}
+$("longU").oninput = paintLongSheet;
+$("longOK").onclick = () => {
+  const U = +$("longU").value;
+  eng.injectLong(U); closeSheets(); renderLog();
+  toast("bolus", `${U} U Langzeit gespritzt`, null);
+};
 $("btnBasal").onclick = guarded(() => {
+  if (PEN){ $("longU").value = eng.longDose(); paintLongSheet(); return openSheet("sheetLong"); }
   $("basalR").value = eng.s.basalSet.toFixed(2);
   paintBasalSheet();
   openSheet("sheetBasal");
@@ -2595,7 +2657,7 @@ function paintBolusSheet(){
   const U = +$("bolusU").value, over = +$("bolusOver").value;
   $("bU").textContent = U.toFixed(1);
   $("bOverTxt").textContent = over;
-  $("bolusOverWrap").hidden = bolusShare >= 1;
+  $("bolusOverWrap").hidden = PEN || bolusShare >= 1;
   $("bolusSplitTxt").textContent = bolusShare >= 1
     ? `${U.toFixed(1)} U auf einmal`
     : `${(U*bolusShare).toFixed(1)} U sofort · ${(U*(1-bolusShare)).toFixed(1)} U über ${over} min`;
@@ -2768,7 +2830,7 @@ function updateReview(){
   $("rTir").textContent = Math.round(tr.filter(p=>p.sensor>=70&&p.sensor<=180).length/n*100)+" %";
   $("rLow").textContent = Math.round(tr.filter(p=>p.G<70).length/n*100)+" %";
   $("rAvg").textContent = bgv(tr.reduce((a,p)=>a+p.G,0)/n);
-  $("rDec").textContent = eng.events.filter(e => e.kind === "meal" || e.kind === "bolus" || e.kind === "basal").length;
+  $("rDec").textContent = eng.events.filter(e => e.kind === "meal" || e.kind === "bolus" || e.kind === "basal" || e.kind === "long").length;
   $("rEmg").textContent = eng.events.filter(e => e.kind === "emg" && e.sev !== "ok").length;
   const mard = tr.reduce((a,p) => a + Math.abs(p.sensor - p.G)/p.G, 0)/n;
   $("rMard").textContent = (mard*100).toFixed(1) + " %";
@@ -3032,6 +3094,8 @@ function revItem(e){
     return `<li><b>${fmtT(e.t)}</b><span>${e.name}</span></li>`;
   if (e.kind === "basal")
     return `<li><b>${fmtT(e.t)}</b><span>Basal ${e.from.toFixed(2)} → ${e.to.toFixed(2)} U/h</span></li>`;
+  if (e.kind === "long")
+    return `<li><b>${fmtT(e.t)}</b><span>${e.units} U Langzeitinsulin</span></li>`;
   if (e.kind === "alarm")
     return `<li><b>${fmtT(e.t)}</b><span class="miss">${e.low ? "Tiefalarm" : "Hochalarm"} bei ${bgv(e.value)}${e.snoozed ? " — weitergeschlafen" : ""}</span></li>`;
   if (e.kind === "warn") return "";

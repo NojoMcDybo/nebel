@@ -62,7 +62,7 @@ Am Anfang standen ein interaktiver Prototyp (`index.html`) mit einer eigenen, ve
 |---|---|---|
 | Zielgruppe | Angehörige und Freunde; Schulsport später | 22.09. |
 | Engine-Kern | ExtHovorka, 16 Zustände, herzfrequenzgetrieben | 15.09. |
-| Therapieform | Insulinpumpe (CSII), offener Regelkreis | 09/2026 |
+| Therapieform | Insulinpumpe (CSII), offener Regelkreis; wahlweise Pen (MDI) | 09/2026, Pen 13.11.2026 |
 | Architektur | Eigenständiges TypeScript-Modul mit Testsuite, ohne Oberfläche lauffähig | 22.09. |
 | Referenzimplementierung | py-mgipsim nur als numerisches Vergleichsorakel, kein Code übernommen | 22.09. |
 | Einheiten | Intern SI (mmol/L, mmol, mU), Umrechnung nur an der Anzeigegrenze | 22.09. |
@@ -115,6 +115,8 @@ Regeln, die im Code durchgesetzt werden:
 ### 3.3 Therapieform
 
 nebel. bildet eine Insulinpumpe im offenen Regelkreis ab: Basalprofil, Bolus, verzögerter Bolus, temporäre Basalrate und Pumpenstopp. Das Modell nimmt Insulin als kontinuierlichen Strom an, das passt direkt zur Pumpe. Ein automatischer Regelalgorithmus (AID) ist nicht enthalten.
+
+Seit dem 13.11.2026 gibt es wahlweise den Pen (MDI): Langzeitinsulin einmal am Tag, zum Essen schnelles. Laut Lepore et al. 2000 wirkt Glargin ohne Spitze fast 24 Stunden und gleicht einer Pumpe mit fester Basalrate ([DOI](https://doi.org/10.2337/diabetes.49.12.2142)). nebel. gibt die Tagesmenge darum gleichmäßig über 24 Stunden ab. Wer später spritzt, hat dazwischen kein Basal, wer doppelt spritzt, doppelt. Temporäre Basalrate, verzögerter Bolus und Katheterknick entfallen.
 
 ### 3.4 Was bewusst fehlt
 
