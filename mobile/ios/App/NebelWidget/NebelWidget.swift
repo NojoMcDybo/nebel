@@ -57,46 +57,54 @@ struct LockView: View {
     let stale: Bool
 
     var body: some View {
+        // iOS erlaubt hoechstens 160 pt Hoehe; so sind es etwa 150.
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
-                Text("nebel.").font(.system(size: 15, weight: .heavy)).tracking(-0.5).foregroundStyle(ink)
+                Text("nebel.").font(.system(size: 17, weight: .heavy)).tracking(-0.6).foregroundStyle(ink)
                 Spacer(minLength: 8)
-                Text("SIMULATION · \(s.name.uppercased())").font(mono(9)).tracking(1.6).foregroundStyle(ink3).lineLimit(1)
+                Text("SIMULATION · \(s.name.uppercased())").font(mono(10)).tracking(1.6).foregroundStyle(ink3).lineLimit(1)
             }
-            HStack(alignment: .center, spacing: 12) {
-                VStack(alignment: .leading, spacing: 5) {
-                    HStack(alignment: .center, spacing: 5) {
-                        Text(s.value).font(.system(size: 44, weight: .heavy)).tracking(-2.6).monospacedDigit()
-                        Arrow(a: s.arrow).font(.system(size: 18, weight: .bold))
-                        Text(s.delta).font(mono(15)).foregroundStyle(ink2)
+            // Mitte des Graphen auf Hoehe der Mitte des Werts
+            HStack(alignment: .valueMid, spacing: 14) {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(alignment: .center, spacing: 6) {
+                        Text(s.value).font(.system(size: 56, weight: .bold)).tracking(-2.8).monospacedDigit()
+                        Arrow(a: s.arrow).font(.system(size: 22, weight: .semibold))
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(s.delta).font(mono(17)).foregroundStyle(ink2)
+                            Text(s.unit.uppercased()).font(mono(10)).tracking(1.8).foregroundStyle(ink3)
+                        }
                     }
                     .foregroundStyle(toneColor(s.tone))
-                    Text(s.unit.uppercased()).font(mono(9)).tracking(1.8).foregroundStyle(ink3)
-                    HStack(spacing: 8) {
+                    .alignmentGuide(.valueMid) { $0[VerticalAlignment.center] }
+                    HStack(spacing: 10) {
                         Pulse(bpm: s.bpm)
-                        HStack(spacing: 0) {   // laeuft auf dem Sperrbildschirm selbst weiter
-                            Text("vor ")
-                            Text(timerInterval: s.at...s.at.addingTimeInterval(8 * 3600), countsDown: false, showsHours: false)
-                                .frame(width: 40, alignment: .leading)
-                        }
-                        .font(mono(11)).foregroundStyle(ink3)
+                        // Timer-Text nimmt sonst alle Breite und quetscht "vor" um
+                        (Text("vor ") + Text(timerInterval: s.at...s.at.addingTimeInterval(8 * 3600), countsDown: false, showsHours: false))
+                            .font(mono(12)).foregroundStyle(ink3).lineLimit(1).frame(width: 82, alignment: .leading)
                     }
                 }
                 .fixedSize()
-                Graph(g: s.points).frame(height: 78)
+                Graph(g: s.points).frame(height: 72)
+                    .alignmentGuide(.valueMid) { $0[VerticalAlignment.center] }
             }
         }
-        .padding(14)
+        .padding(.horizontal, 18).padding(.vertical, 15)
         .opacity(stale ? 0.5 : 1)   // kein neuer Wert seit 15 min: App zu oder Gurt weg
     }
+}
+
+private extension VerticalAlignment {
+    enum ValueMid: AlignmentID { static func defaultValue(in d: ViewDimensions) -> CGFloat { d[VerticalAlignment.center] } }
+    static let valueMid = VerticalAlignment(ValueMid.self)
 }
 
 struct Pulse: View {
     let bpm: Int
     var body: some View {
         HStack(spacing: 3) {
-            Image(systemName: "heart.fill").font(.system(size: 9))
-            Text("\(bpm)").font(mono(11)) + Text(" BPM").font(mono(8)).tracking(1)
+            Image(systemName: "heart.fill").font(.system(size: 10))
+            Text("\(bpm)").font(mono(12)) + Text(" BPM").font(mono(9)).tracking(1)
         }
         .foregroundStyle(ink2)
     }
