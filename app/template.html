@@ -531,7 +531,12 @@ canvas{width:100%; height:206px; display:block; touch-action:pan-y}
 }
 .remark.on{transform:translate(-50%, 0); opacity:1}
 .remark .who{font-family:var(--mono); font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink3)}
-.remark .txt{font-size:15px; line-height:1.4; margin-top:3px; color:var(--ink)}
+.remark .txt{font-size:15px; line-height:1.4; margin-top:3px; color:var(--ink); white-space:pre-line}
+.remark .me{font-size:14px; line-height:1.4; margin-top:8px; color:var(--high); font-weight:600}
+.remark .me:empty{display:none}
+/* Unterzucker macht langsam: der Knopf haengt kurz, bevor er reagiert */
+button.slow{opacity:.5; filter:blur(.7px); transition:opacity .3s, filter .3s}
+.gate .alt{color:var(--ink); background:transparent; box-shadow:inset 0 0 0 1.5px var(--hair); margin-top:9px}
 
 @keyframes edge{
   0%{box-shadow:inset 0 0 0 0 var(--ink), var(--sh)}
@@ -1065,7 +1070,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
 </div>
 
 <div class="toast" id="toast" aria-live="polite"></div>
-<div class="remark" id="remark" role="status" aria-live="polite"><div class="who" id="rmWho"></div><div class="txt" id="rmTxt"></div></div>
+<div class="remark" id="remark" role="status" aria-live="polite"><div class="who" id="rmWho"></div><div class="txt" id="rmTxt"></div><div class="me" id="rmMe"></div></div>
 
 <div id="rail">
   <button data-p="0" aria-current="true" aria-label="Start"><i></i></button>
@@ -1166,7 +1171,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
       <button data-m="alltag" aria-pressed="false">Ganzer Alltag</button>
     </div>
   </div>
-  <p class="hint">Gerät: nur Blutzucker, Sensor und deine Entscheidungen. Ganzer Alltag: Dazu kommen ein Unterzucker mitten im Meeting, ein geknickter Katheter, Tage, an denen dasselbe Insulin anders wirkt, und andere Leute, die sagen, was sie über Diabetes zu wissen glauben.</p>
+  <p class="hint">Gerät: nur Blutzucker, Sensor und deine Entscheidungen. Ganzer Alltag: Dazu kommen ein Unterzucker mitten im Meeting, ein geknickter Katheter, Tage, an denen dasselbe Insulin anders wirkt, spontane Einladungen zum Essen und andere Leute, die sagen, was sie über Diabetes zu wissen glauben.</p>
   <div class="field">
     <label><span>Darstellung</span></label>
     <div class="seg tall" id="themeSeg">
@@ -1196,6 +1201,16 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     <p id="hypoS"></p>
     <button type="button" id="hypoOk"><span class="t">15 g Traubenzucker essen</span></button>
     <p class="hnote">Danach heißt es sitzen bleiben. Erst nach 15 Minuten wird nachgemessen.</p>
+  </div>
+</div>
+
+<div class="gate hypo" id="invite" role="dialog" aria-modal="true" aria-labelledby="invT" aria-describedby="invS" hidden>
+  <div class="box">
+    <div class="ghd"><h2 id="invT"></h2></div>
+    <p id="invS"></p>
+    <button type="button" id="invYes"><span class="t">Mitessen</span></button>
+    <button type="button" class="alt" id="invNo"><span class="t">Lieber nicht</span></button>
+    <p class="hnote">Wie viele Kohlenhydrate drin sind, sagt dir keiner. Den Bolus schätzt du selbst.</p>
   </div>
 </div>
 
@@ -1641,7 +1656,7 @@ wireSeg($("modeSeg"), b => {
   FULLDAY = eng.variability = b.dataset.m === "alltag";
   fcKey = "";
   try { localStorage.setItem(MODE_KEY, FULLDAY ? "alltag" : "geraet"); } catch(e){}
-  if (!FULLDAY){ hypoUntil = -1; hypoRound = 0; $("remark").classList.remove("on"); }
+  if (!FULLDAY){ hypoUntil = -1; hypoRound = 0; invPick = null; $("remark").classList.remove("on"); }
 });
 wireSeg($("themeSeg"), b => { if (b.dataset.t !== root.dataset.theme) $("theme").click(); });
 wireSeg($("langSeg"), b => { if (b.dataset.href){ saveState(); location.href = b.dataset.href + "#person=" + personId; } });   // die andere Sprache beginnt mit derselben Person
@@ -2029,7 +2044,7 @@ function paint(tNow){
   put("behind", uiFade > .4 ? "schwer zu lesen" : "dein Körper vor etwa " + LAG_TXT);
 
   // Zustandsanzeigen brauchen keine 60 Bilder pro Sekunde.
-  if ((frame++ & 7) === 0){ paintMove(); paintReserve(); paintChips(); paintCrit(); paintBasal(); checkHypo(); checkRemarks(); }
+  if ((frame++ & 7) === 0){ paintMove(); paintReserve(); paintChips(); paintCrit(); paintBasal(); checkHypo(); checkRemarks(); checkPlan(); checkInvite(); }
   viewH = lerp(viewH, rangeH, .12);
   if (prog > 0.02 && prog < LAST){
     /* Nur zeichnen, wenn sich die Kurve um ein Geraetepixel verschoben haette,
@@ -2185,6 +2200,7 @@ function paintMove(){
 }
 function renderLog(){
   const line = e => {
+    if (e.kind === "meal" && e.name) return `${e.name} · ${e.dur} min`;
     if (e.kind === "meal") return `${e.est} g ${MEAL_TYPES[e.type].label}` +
       (e.fat || e.protein ? ` + ${e.fat || 0} g Fett, ${e.protein || 0} g Eiweiß` : "") + ` · ${e.dur} min`;
     if (e.kind === "bolus") return e.share >= 1
@@ -2409,10 +2425,80 @@ function remark(kind){
   if (!pool.length) return;
   const [who, txt] = pool[Math.floor(Math.random() * pool.length)];
   remarkUsed.add(txt); remarkAt = eng.s.t;
-  $("rmWho").textContent = who; $("rmTxt").textContent = `„${txt}“`;
-  $("remark").classList.add("on");
-  clearTimeout(remarkT); remarkT = setTimeout(() => $("remark").classList.remove("on"), 7000);
+  showCard(who, `„${txt}“`, 7000);
+  /* Hoher Zucker macht gereizt: man faehrt die Leute an, obwohl man es nicht will. */
+  if (eng.s.G > 250){
+    const s = SNAPS[Math.floor(Math.random() * SNAPS.length)];
+    setTimeout(() => { if ($("remark").classList.contains("on")) $("rmMe").textContent = `Du: „${s}“`; }, 1800);
+  }
 }
+const SNAPS = ["Kannst du mich einfach in Ruhe lassen?", "Ja. Danke. Wirklich.", "Ich weiß selbst, was ich tue.", "Nicht jetzt."];
+function showCard(who, txt, ms){
+  $("rmWho").textContent = who; $("rmTxt").textContent = txt; $("rmMe").textContent = "";
+  $("remark").classList.add("on");
+  clearTimeout(remarkT); remarkT = setTimeout(() => $("remark").classList.remove("on"), ms);
+}
+
+/* ─── Tagesplan und Ueberraschungen (nur im ganzen Alltag) ──────
+   Morgens zeigt eine Karte, was heute ansteht, grob auf halbe Stunden.
+   Was nicht drauf steht, kommt trotzdem: eine Einladung zum Essen,
+   bei der niemand die Kohlenhydrate kennt. Hoechstens eine am Tag. */
+let planDay = -1;
+function checkPlan(){
+  const day = Math.floor(eng.s.t / 1440), h = (eng.s.t / 60) % 24;
+  if (!FULLDAY || asleep || hypoOn || day === planDay || h < 7 || h >= 11 || !$("gate").hidden) return;
+  planDay = day;
+  const items = eng.acts.filter(a => !a.spont && !a.dead && !a.logged && Math.floor(a.start / 1440) === day && a.start > eng.s.t)
+    .map(a => `gegen ${fmtT(Math.round(a.start / 30) * 30)} · ${a.name}`);
+  showCard("Heute", items.concat("dazu, was keiner plant").join("\n"), 9000);
+}
+const INVITES = [
+  { from:11.5, to:13.5, who:"Mittagspause", txt:"Die anderen gehen spontan zum Italiener und fragen, ob du mitkommst.", food:"Pizza beim Italiener", g:95, type:"fatty", dur:30 },
+  { from:14.5, to:16.5, who:"Im Büro", txt:"Jemand hat Geburtstag, auf dem Tisch steht Kuchen. Alle nehmen sich ein Stück.", food:"Ein Stück Kuchen", g:40, type:"fatty", dur:10 },
+  { from:18.5, to:20.5, who:"Zu Hause", txt:"Es wird Sushi bestellt, du bist schon mit eingeplant.", food:"Sushi bestellt", g:85, type:"mixed", dur:25 },
+  { from:19.5, to:21.5, who:"Kino", txt:"Spontan ins Kino. Die anderen holen eine große Tüte Popcorn zum Teilen.", food:"Popcorn im Kino", g:50, type:"mixed", dur:60 },
+];
+let invDay = -1, invAt = -1, invPick = null;
+function checkInvite(){
+  const t = eng.s.t, day = Math.floor(t / 1440);
+  if (!FULLDAY) return;
+  if (day !== invDay){
+    invDay = day; invPick = null;
+    if (Math.random() < .6){
+      invPick = INVITES[Math.floor(Math.random() * INVITES.length)];
+      invAt = day*1440 + Math.round((invPick.from + Math.random()*(invPick.to - invPick.from)) * 60);
+    }
+  }
+  if (!invPick || t < invAt || hypoOn || asleep || eng.s.emg || !$("gate").hidden) return;
+  const p = invPick; invPick = null;
+  if (t > invAt + 90) return;                              // verschlafen oder verpasst
+  hypoOn = true; closeSheets(); pager.inert = true;        // haelt die Zeit an wie das Unterzucker-Fenster
+  $("invT").textContent = p.who; $("invS").textContent = p.txt;
+  const g = $("invite"), close = () => {
+    g.classList.add("out");
+    setTimeout(() => { g.hidden = true; g.classList.remove("out"); pager.inert = false; hypoOn = false; }, 420);
+  };
+  $("invYes").onclick = () => {
+    eng.logMeal(p.g, p.type, p.dur, undefined, undefined, p.food); renderLog(); close();
+    toast("meal", `${p.food} · wie viel KH, musst du schätzen`, $("cob").parentElement);
+  };
+  $("invNo").onclick = close;
+  g.hidden = false; $("invYes").focus({ preventScroll:true });
+}
+
+/* Unterzucker macht langsam: Im ganzen Alltag haengen die Hauptknoepfe kurz,
+   unter 55 laenger. Der Klick wird abgefangen und spaeter nachgeholt. */
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("#btnMeal, #btnBolus, #btnMove, #btnSleep");
+  if (!b) return;
+  if (b.dataset.pass){ delete b.dataset.pass; return; }
+  const ms = !FULLDAY || asleep ? 0 : eng.s.G < 55 ? 1500 : eng.s.G < 70 ? 700 : 0;
+  if (!ms) return;
+  e.stopImmediatePropagation(); e.preventDefault();
+  if (b.classList.contains("slow")) return;
+  b.classList.add("slow");
+  setTimeout(() => { b.classList.remove("slow"); if (b.disabled) return; b.dataset.pass = "1"; b.click(); }, ms);
+}, true);
 /* Einmal pro simulierter Stunde: hoch gelaufen, oder einfach so am Tag. */
 function checkRemarks(){
   const h = Math.floor(eng.s.t / 60);
@@ -2928,6 +3014,8 @@ $("fxFood").addEventListener("click", toggleFxSplit);
 $("revFx").addEventListener("click", toggleFxSplit);
 
 function revItem(e){
+  if (e.kind === "meal" && e.name)
+    return `<li><b>${fmtT(e.t)}</b><span>${e.name} · tatsächlich ${Math.round(e.truth)} g KH, ${Math.round(e.fatTruth || 0)} g Fett, ${Math.round(e.proteinTruth || 0)} g Eiweiß</span></li>`;
   if (e.kind === "meal"){
     const d = Math.round(e.truth - e.est);
     const cl = Math.abs(d) >= 10 ? ' class="miss"' : '';

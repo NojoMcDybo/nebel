@@ -534,3 +534,19 @@ Anlass: zwei weitere Reddit-Kommentare. Der Körper merkt einen Unterzucker oft 
 - **Kohlenhydrate schätzen.** Mahlzeit als Bild, geschätzte statt exakte Gramm, Schätzfehler wirken auf den Bolus. Eigenes Vorhaben mit Bildmaterial und Lizenzfrage.
 - **Weiter zurückgestellt:** MDI, Menstruationszyklus (siehe Nachtrag 28), Unterzucker-Wahrnehmungsstörung.
 
+## 30. Nachtrag 13.11.2026 — Langsam, gereizt, Tagesplan und Einladungen
+
+Anlass: zweite Runde Reddit-Kommentare. Unterzucker macht dumm und langsam, hohe Werte machen gereizt; die Ereignisse im Tag wirken zufällig; im echten Leben weiß man selten, was im Essen steckt.
+
+Alles nur im Modus „Ganzer Alltag“:
+- **Langsam:** Bei Blut unter 70 hängen die Knöpfe Essen, Insulin, Bewegung und Schlafen 0,7 s, unter 55 1,5 s (blass und leicht unscharf), dann reagieren sie. NEBEL-ANNAHME, nur Darstellung.
+- **Gereizt:** Kommt bei Blut über 250 ein Spruch, antwortet man nach kurzer Zeit schroff („Nicht jetzt.“). Vier eigene Sätze, als Reaktion der gespielten Person, nicht als Zitat.
+- **Tagesplan:** Zwischen 7 und 11 Uhr einmal am Tag eine Karte „Heute“ mit den geplanten Bewegungen, auf halbe Stunden gerundet. Treppenhaus und Bus verpasst sind als spontan markiert (`s:1` in ALLTAG) und stehen nicht drauf.
+- **Einladungen:** An 60 % der Tage eine von vier (Pizza mittags, Kuchen im Büro, Sushi abends, Popcorn im Kino). Die Zeit hält an wie beim Unterzucker-Fenster. „Mitessen“ trägt das Essen unter seinem Namen ein, mit üblicher Menge und der Streuung des Mahlzeitentyps; Bolus schätzt man selbst. Das Protokoll zeigt nur den Namen, der Rückblick die tatsächlichen Gramm. Höchstens eine am Tag, verpasst nach 90 min (z. B. im Schlaf).
+
+**Ideen für später** (zusätzlich zu Nachtrag 29):
+- Fertige Gerichte statt Nährwerte, mit verborgenem Verlauf (Reddit).
+- Ketoazidose und Krankheitstage: kein belegtes Modell, nah an Therapieentscheidungen.
+- Schwangerschaft: passt nicht in einen Tag.
+- Aus den 42 Faktoren von diaTribe (Adam Brown, geprüft 2018) fehlen machbar: Koffein, zu wenig Trinken, Tageszeit beim Sport. Bewusst nicht (unbelegte Multiplikatoren, siehe adapter.js): Stress, Schlafmangel, Krankheit, Alkohol, Unterzucker nach Unterzucker. Nicht in einem Tag: Steroide, Niacin, Zöliakie, Pubertät, Höhe, Temperatur, Sonnenbrand, abgelaufenes Insulin, Narbengewebe, Denkfehler.
+

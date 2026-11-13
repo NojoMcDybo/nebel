@@ -51,9 +51,9 @@ const ALLTAG = [
   {n:"Zur Uni gelaufen",    i:0.30, d:[18,32]},
   {n:"Einkaufen",           i:0.25, d:[25,45]},
   {n:"Rad zum Bahnhof",     i:0.42, d:[10,18]},
-  {n:"Treppenhaus",         i:0.45, d:[4,7]},
+  {n:"Treppenhaus",         i:0.45, d:[4,7],   s:1},   // s: passiert einfach, steht in keinem Tagesplan
   {n:"Wohnung geputzt",     i:0.28, d:[25,45]},
-  {n:"Bus verpasst",        i:0.68, d:[4,8]},
+  {n:"Bus verpasst",        i:0.68, d:[4,8],   s:1},
   {n:"Spaziergang",         i:0.22, d:[30,55]},
 ];
 /* Unter oder ueber diesem Sensorwert startet niemand ein geplantes Training.
@@ -192,7 +192,7 @@ class Engine {
     for (let i = 0; i < 2; i++){
       const a = pick(ALLTAG, 100+i);
       this.acts.push({ name:a.n, inten:a.i, start: base + 9*60 + Math.floor(u(110+i)*600),
-                       dur: Math.round(span(a.d, 120+i)), warn: 0 });
+                       dur: Math.round(span(a.d, 120+i)), warn: 0, spont: !!a.s });
     }
     /* Im Reality-Modus plant die Nutzerin ihr Training selbst.
        Alltagsbewegung laeuft weiter — die plant niemand. */
@@ -209,7 +209,9 @@ class Engine {
   /* fatEst/protEst: geschaetztes Fett und Eiweiss [g]. Fehlen sie, gilt die
      Voreinstellung des Mahlzeitentyps. Der Schaetzfehler trifft alles gleich:
      eine groessere Portion hat von allem mehr. */
-  logMeal(gEst, type = "fast", dur = 0, fatEst, protEst){
+  /* name: fuer Essen, das andere gemacht haben (Einladung) — die Menge kennt
+     dann niemand, die Oberflaeche zeigt nur den Namen. */
+  logMeal(gEst, type = "fast", dur = 0, fatEst, protEst, name){
     const mt = MEAL_TYPES[type] ?? MEAL_TYPES.fast;
     /* Die geschaetzte Menge ist nicht die gegessene. Genau darum geht es. */
     const err = Math.max(0, 1 + mt.cv * N.normalAt(this.seed + 31, this.tick));
@@ -225,8 +227,8 @@ class Engine {
        der Schaetzung gegenueber — das ist die Lehre der Mahlzeit. */
     this.events.push({ kind:"meal", t, est: Math.round(gEst), truth: gReal,
                        fat: Math.round(fEst), protein: Math.round(pEst),
-                       fatTruth: fReal, proteinTruth: pReal, type, dur: eat });
-    this.meals.push({ t, gEst, gReal, type, label: mt.label });
+                       fatTruth: fReal, proteinTruth: pReal, type, dur: eat, ...(name ? { name } : {}) });
+    this.meals.push({ t, gEst, gReal, type, label: name ?? mt.label });
     return gReal;
   }
 
