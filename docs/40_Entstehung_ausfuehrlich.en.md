@@ -51,6 +51,8 @@ It started with an interactive prototype (`index.html`) with its own simplified 
 | 9 Nov 2026 | Language choice in the notice. Reserves fill up when eating, "ravenous" hint. Exercise system made consistent, training can be cancelled. Long aftereffect of exercise calibrated |
 | 10 Nov 2026 | Swipe gesture for the iPhone reworked. These texts on how nebel. came about added to the start page, in German and English |
 | 11 Nov 2026 | Web app for the iPhone home screen. Training types alternate hard and easy minutes, exercise shows up in the effect chart, the sensor scatters less. Release v1.2.0 |
+| 12 Nov 2026 | Review and legal check of the live site. Start of the iPhone app with real heart rate from a chest strap |
+| 13 Nov 2026 | After Reddit feedback: settings with mmol/L, "Full daily life" mode with lows at the wrong time, body feeling, rollercoaster, remarks, day plan and invitations. Sitemap for Google. Release v1.3.0 |
 
 ---
 

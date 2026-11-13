@@ -550,3 +550,5 @@ Alles nur im Modus „Ganzer Alltag“:
 - Schwangerschaft: passt nicht in einen Tag.
 - Aus den 42 Faktoren von diaTribe (Adam Brown, geprüft 2018) fehlen machbar: Koffein, zu wenig Trinken, Tageszeit beim Sport. Bewusst nicht (unbelegte Multiplikatoren, siehe adapter.js): Stress, Schlafmangel, Krankheit, Alkohol, Unterzucker nach Unterzucker. Nicht in einem Tag: Steroide, Niacin, Zöliakie, Pubertät, Höhe, Temperatur, Sonnenbrand, abgelaufenes Insulin, Narbengewebe, Denkfehler.
 
+
+**Release `v1.3.0`** am 13.11.2026 auf `70b7b4d`: fasst die Nachträge 25, 26 und 28 bis 30 zusammen (Durchsicht, Rechtscheck, Einstellungen mit mmol/L, Modus „Ganzer Alltag“ mit Unterzucker-Fenster, Körpergefühl, Achterbahn, langsamen Knöpfen, Tagesplan und Einladungen), dazu Sitemap und kanonische Adressen, Hell/Dunkel nur auf der Startseite und Hinweise über dem Verlauf. Nachtrag 27 (iPhone-App) ist nicht enthalten, die App ist noch nicht veröffentlicht.
