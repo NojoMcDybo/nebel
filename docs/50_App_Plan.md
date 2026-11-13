@@ -106,7 +106,9 @@ Nach einem iOS-Update kann die Pairing-Datei ungültig werden; dann Schritt 3 wi
 - Helio am PC läuft gleichzeitig weiter (falls an).
 - Website-Bau unverändert, Engine-Tests grün.
 
-### Phase 2 — Simulation in der App
+### Phase 2 — Simulation in der App ✔ gebaut (13.11.2026), Test auf dem iPhone offen
+
+Umgesetzt: `mobile/src/app.html` ist die einmalige Kopie von `app/template.html` (Stand 12.11.), die Website hatte Echtzeit-Modus, Speichern und Nachholen schon. Änderungen in der Kopie: nur Echtzeit (Tempo-Wahl, Entstehungskarte, Englisch-Link, Datenexport und Impressum-Links ausgeblendet), jede neue Sitzung stellt die Uhr auf die echte Tageszeit, der Anker (Simulationsminute zu Zeitstempel) wird mitgespeichert, sodass beim Öffnen keine Teilminute verloren geht (höchstens drei Tage nachgerechnet, danach neuer Anker). Speicher ist `localStorage` der WebView, nicht `@capacitor/preferences`. Der Pulsgurt-Test aus Phase 1 liegt weiter unter „Pulsgurt-Test“ (`puls.html`). `build.mjs` füllt die Platzhalter aus `engine/src`, `app/adapter.js`, `app/personas.js`; Parametersätze, Schriften und Lizenztexte kommen aus `engine/dist/site` (der Workflow erzeugt sie in einem Linux-Job). Geprüft im Vorschaufenster: 90 min Pause nachgerechnet ergibt denselben Blutzucker wie ein durchgehender Lauf (Abweichung nur durch Rundung im Speicher).
 
 - Engine (esbuild-Bündel aus `engine/src/index.ts`), `adapter.js`, `personas.js`, Parameterdaten in die App. Oberfläche: Kurve, Essen, Personen, als einmalige Übernahme aus `template.html`, danach eigenständig.
 - Echtzeit-Lauf nach Doc 06: Speichern (Anker, Seed, Subjekt, Zustand, Ereignisse, letzte Minute) mit `@capacitor/preferences` oder Dateien, Nachholen beim Öffnen.

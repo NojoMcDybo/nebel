@@ -1,5 +1,7 @@
 # Baut die iPhone-App (mobile/) als unsignierte nebel.ipa. Signiert wird später auf dem Handy (SideStore).
-# Phase 1 braucht die Engine noch nicht; ab Phase 2 kommt npm ci in engine/ dazu.
+#
+# Zwei Jobs: Die Parametersaetze, Schriften und Lizenztexte erzeugt engine/ unter Linux
+# (oracle:fetch braucht sha256sum, das der macOS-Runner nicht hat). Der macOS-Job holt sie als Artefakt.
 name: iPhone-App bauen
 
 on:
@@ -8,6 +10,7 @@ on:
     paths:
       - mobile/**
       - engine/src/**
+      - engine/scripts/build-viewer.mjs
       - app/adapter.js
       - app/personas.js
       - .github/workflows/mobile.yml
@@ -17,13 +20,41 @@ permissions:
   contents: read
 
 jobs:
+  daten:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: engine/package-lock.json
+      - run: npm ci
+      - name: py-mgipsim holen (festgehaltener Stand, geprueft)
+        run: npm run oracle:fetch
+      - name: Seite bauen (liefert Parametersaetze, Schriften, Lizenztexte)
+        run: npm run viewer
+      - uses: actions/upload-artifact@v4
+        with:
+          name: engine-site
+          path: engine/dist/site
+          retention-days: 1
+
   ipa:
+    needs: daten
     runs-on: macos-26
     defaults:
       run:
         working-directory: mobile
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: engine-site
+          path: engine/dist/site
       - uses: actions/setup-node@v4
         with:
           node-version: 22
