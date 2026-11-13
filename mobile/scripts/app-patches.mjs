@@ -71,9 +71,44 @@ function onBeltBpm(bpm){
 }
 const belt = NebelBelt.createBelt({
   onBpm: onBeltBpm,
-  onStatus(state, name, msg){ beltState = state; beltMsg = msg; if (state === "aus") beltBpmNow = 0; lastMoveHTML = ""; paintMove(); },
+  onStatus(state, name, msg){
+    if (state === "getrennt") beltLost();
+    if (state === "verbunden") tryFillGap();
+    beltState = state; beltMsg = msg; if (state === "aus") beltBpmNow = 0; lastMoveHTML = ""; paintMove();
+  },
 });
 $("btnBelt").onclick = () => belt.connect(true);
+
+/* Luecken aus Apple Health (rewind.js): Reisst der Gurt ab, wird der ganze Zustand
+   gesichert und jede Eingabe mitgeschrieben. Beim Oeffnen der App und beim
+   Wiederverbinden holt sie den Puls der Luecke aus Health und rechnet ab dort neu. */
+const GAP_KEY = "nebel.gap.v1";
+var gap = null, filling = false, healthAsked = false, health = NebelBelt.health;
+try { gap = JSON.parse(localStorage.getItem(GAP_KEY)); } catch(e){}
+function saveGap(){ try { gap ? localStorage.setItem(GAP_KEY, JSON.stringify(gap)) : localStorage.removeItem(GAP_KEY); } catch(e){} }
+const rewindJ = journalInputs(eng, () => gap, saveGap);
+function beltLost(){
+  if (!eng.reality || !anchor || gap || eng.beltT == null) return;
+  catchUp(); gap = openGap(eng, Date.now()); saveGap();
+}
+async function tryFillGap(){
+  if (!gap || filling || !eng.reality || !anchor || document.visibilityState !== "visible") return;
+  if (Date.now() - gap.wall > 3*864e5){ gap = null; saveGap(); return; }   // shortcut: nach drei Tagen aufgeben
+  filling = true;
+  try {
+    if (!healthAsked){ healthAsked = true; await health.ask(); }
+    const { samples } = await health.heartRate({ from: gap.wall - 120000, to: Date.now() });
+    if (!samples.length) return;
+    catchUp();
+    const a = anchor, r = fillGap(eng, gap, samples.map(s => ({ t: a.simT + (s.t - a.wall)/60000, bpm: s.bpm })), rewindJ);
+    if (!r) return;
+    gap = null; saveGap();
+    lastCount = -1; lastMoveHTML = ""; renderLog(); saveState();
+    toast("move", \`Puls aus Health nachgetragen: \${fmtT(r.first)}–\${fmtT(r.last + 1)}\`, $("moveCard"));
+  } catch(e){ /* Health nicht erlaubt oder keine App: Luecke bleibt offen */ }
+  finally { filling = false; }
+}
+setInterval(tryFillGap, 120000);          // Zepp schreibt das Training oft erst nach ein paar Minuten
 
 /* Alarme: vorausberechnet (alarm-plan.js), als lokale Mitteilungen geplant. Neu
    geplant nach jeder Eingabe, alle fuenf Minuten und beim Verlassen der App.
@@ -180,7 +215,8 @@ export const PATCHES = [
   ["const ALARM_LOW = 70, ALARM_HIGH = 250;", "var ALARM_LOW = 70, ALARM_HIGH = 250;   // App: paintApp setzt in Reality 80/280"],
   ["  holdScreen(true);\n  $(\"night\").hidden = false;",
    "  if (!eng.reality) holdScreen(true);\n  alarmDirty = true;\n  $(\"night\").hidden = false;"],
-  ["asleep = false; eng.s.asleep = false; alarmOn = false;", (m) => m + " alarmDirty = true;"],
+  ["asleep = false; eng.s.asleep = false; alarmOn = false;", "asleep = false; eng.setAsleep(false); alarmOn = false; alarmDirty = true;"],
+  ["asleep = true; eng.s.asleep = true;", "asleep = true; eng.setAsleep(true);   // App: Methode, damit rewind.js sie mitschreibt"],
   ['$("btnSleep").onclick = guarded(goSleep);',
    `$("btnSleep").onclick = guarded(() => {
   if (!eng.reality) return goSleep();
@@ -199,10 +235,11 @@ if (eng.reality){ speed = 1; [...$("speed").children].forEach(x => x.setAttribut
   ['if (document.visibilityState === "visible" && asleep) holdScreen(true);',
    'if (document.visibilityState === "visible" && asleep && !eng.reality) holdScreen(true);'],
   ['if (document.visibilityState === "hidden") saveState();',
-   'if (document.visibilityState === "hidden"){ scheduleAlarms(); saveState(); }'],
+   'if (document.visibilityState === "hidden"){ scheduleAlarms(); saveState(); } else tryFillGap();'],
   ["requestAnimationFrame(loop);\n</script>",
    `requestAnimationFrame(loop);
 paintAlarmBtn();
+tryFillGap();
 if (eng.reality && belt.remembered()) belt.connect(false);   // gemerkter Gurt: still verbinden, nie die Auswahl oeffnen
 if (eng.s.asleep) goSleep();                                  // nachts geschlossen, morgens geoeffnet: die Nacht laeuft noch
 try { if (eng.reality && localStorage.getItem(GATE_KEY) === "1" && (alarmPref() === null || alarmsOn)) askAlarms(); } catch(e){}   // alarmsOn: einmal nach dem Wecker fragen (AlarmKit), sonst still

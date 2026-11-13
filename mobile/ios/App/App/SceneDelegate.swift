@@ -1,6 +1,7 @@
 import UIKit
 import Capacitor
 import SwiftUI
+import HealthKit
 #if canImport(AlarmKit)
 import AlarmKit
 #endif
@@ -32,6 +33,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 class NebelBridgeViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
         bridge?.registerPluginInstance(NebelAlarmPlugin())
+        bridge?.registerPluginInstance(NebelHealthPlugin())
     }
 }
 
@@ -114,4 +116,44 @@ public class NebelAlarmPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
     #endif
+}
+
+/// Puls aus Apple Health (Phase 5): fuellt Luecken, in denen der Gurt nicht verbunden
+/// war, etwa wenn das Handy beim Sport auf der Bank lag und Zepp das Training
+/// spaeter nach Health schreibt. Nur lesen, nur Herzfrequenz, alles bleibt auf dem iPhone.
+/// JS: NebelHealth.heartRate({ from, to }) -> { samples: [{ t: ms seit Epoche, bpm }] }
+@objc(NebelHealthPlugin)
+public class NebelHealthPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "NebelHealthPlugin"
+    public let jsName = "NebelHealth"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "ask", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "heartRate", returnType: CAPPluginReturnPromise),
+    ]
+    private let store = HKHealthStore()
+    private let hr = HKObjectType.quantityType(forIdentifier: .heartRate)!
+
+    @objc func ask(_ call: CAPPluginCall) {
+        guard HKHealthStore.isHealthDataAvailable() else { return call.resolve(["ok": false, "error": "unavailable"]) }
+        store.requestAuthorization(toShare: nil, read: [hr]) { ok, err in
+            call.resolve(["ok": ok, "error": err.map { "\($0)" } ?? ""])
+        }
+    }
+
+    @objc func heartRate(_ call: CAPPluginCall) {
+        guard HKHealthStore.isHealthDataAvailable() else { return call.resolve(["samples": [JSObject]()]) }
+        let from = Date(timeIntervalSince1970: (call.getDouble("from") ?? 0) / 1000)
+        let to = Date(timeIntervalSince1970: (call.getDouble("to") ?? 0) / 1000)
+        let pred = HKQuery.predicateForSamples(withStart: from, end: to, options: [])
+        let sort = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
+        let unit = HKUnit.count().unitDivided(by: .minute())
+        let q = HKSampleQuery(sampleType: hr, predicate: pred, limit: HKObjectQueryNoLimit, sortDescriptors: [sort]) { _, results, err in
+            if let err = err { return call.reject("\(err)") }
+            let out: [JSObject] = (results as? [HKQuantitySample] ?? []).map {
+                ["t": $0.startDate.timeIntervalSince1970 * 1000, "bpm": $0.quantity.doubleValue(for: unit)]
+            }
+            call.resolve(["samples": out])
+        }
+        store.execute(q)
+    }
 }

@@ -33,6 +33,8 @@ class BeltEngine extends Engine {
     super.step();
   }
 
+  /* Schlafen und Aufwachen als Methode statt Feldzuweisung, damit rewind.js es mitschreiben kann. */
+  setAsleep(v){ this.s.asleep = v; }
   snapshot(){ return { ...super.snapshot(), beltT:this.beltT }; }
   restore(core){
     const ok = super.restore(core);

@@ -82,6 +82,12 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/ipa/Payload"
           cp -R "$RUNNER_TEMP/App.xcarchive/Products/Applications/App.app" "$RUNNER_TEMP/ipa/Payload/"
+          # Ad-hoc signieren, nur damit die Berechtigungen (HealthKit) im Programm stehen.
+          # SideStore liest sie dort aus und signiert neu.
+          APP="$RUNNER_TEMP/ipa/Payload/App.app"
+          for f in "$APP"/Frameworks/*.framework; do codesign --force --sign - "$f"; done
+          codesign --force --sign - --entitlements ios/App/App/App.entitlements "$APP"
+          codesign -d --entitlements - "$APP"
           (cd "$RUNNER_TEMP/ipa" && zip -qr "$GITHUB_WORKSPACE/nebel.ipa" Payload)
       - uses: actions/upload-artifact@v4
         with:

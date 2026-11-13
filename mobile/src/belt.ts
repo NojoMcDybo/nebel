@@ -1,6 +1,7 @@
 // Pulsgurt über Bluetooth (0x180D / 0x2A37). Eine Verbindung, automatisches Neuverbinden,
 // letztes Gerät wird gemerkt. Es kommen nur BPM-Werte heraus; Rohwerte bleiben nicht erhalten.
 import { BleClient, type BleDevice } from "@capacitor-community/bluetooth-le";
+import { registerPlugin } from "@capacitor/core";
 import { MinuteAverager, parseHeartRate } from "./hr";
 
 export { MinuteAverager };
@@ -100,3 +101,9 @@ export function createBelt(h: BeltHandlers) {
 
   return { connect, remembered: () => remembered() !== null };
 }
+
+/** Puls aus Apple Health (NebelHealthPlugin in ios/App/App/SceneDelegate.swift), für Lücken. */
+export const health = registerPlugin<{
+  ask(): Promise<{ ok: boolean; error: string }>;
+  heartRate(o: { from: number; to: number }): Promise<{ samples: { t: number; bpm: number }[] }>;
+}>("NebelHealth");

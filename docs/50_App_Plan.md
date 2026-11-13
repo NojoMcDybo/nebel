@@ -142,6 +142,12 @@ Erst einen Test-Spike: bekommt die App bei gesperrtem Handy weiter Pulswerte, un
 ### Phase 5 — Weitere Quellen und Verteilung
 
 - Apple Health (HealthKit), Garmin über Haze.
+
+Apple Health als Lückenfüller gebaut (13.11.2026), Test auf dem iPhone offen. Anlass: Beim Basketball lag das Handy auf der Bank, der Gurt war außer Reichweite, die Bewegung fehlte in der Simulation. Zepp schreibt das Training aber nach Health. Ablauf (`mobile/src/rewind.js`, Anbindung in `app-patches.mjs`):
+- Reißt der Gurt in Reality ab, sichert die App den ganzen Engine-Zustand (`nebel.gap.v1`, rund 35 KB) und schreibt ab da jede Eingabe an die Engine mit (Essen, Bolus, Basal, Training, Schlaf, Gurtwerte).
+- Beim Öffnen, beim Wiederverbinden und alle 2 min holt sie die Herzfrequenz der Lücke aus Health (`NebelHealthPlugin` in `SceneDelegate.swift`, nur lesen), springt auf den gesicherten Zustand zurück und rechnet bis jetzt neu. Die Engine ist deterministisch: Test `tests/rewind.test.mjs` zeigt, dass das Ergebnis genau dem Lauf mit durchgehendem Gurt entspricht.
+- Minuten, in denen der Gurt selbst geliefert hat, bleiben unangetastet. Ohne Health-Werte bleibt die Lücke drei Tage offen, dann verfällt sie.
+- HealthKit braucht eine Berechtigung im Programm: `ios/App/App/App.entitlements`, eingebettet per Ad-hoc-Signatur im CI. Ob SideStore sie mit dem kostenlosen Konto übernimmt, zeigt der Test.
 - Datenschutztext der App (Pulsdaten), bevor die App an andere geht.
 - Entscheidung Developer Program und TestFlight.
 
