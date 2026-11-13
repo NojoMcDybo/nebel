@@ -1173,6 +1173,17 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     </div>
   </div>
   <p class="hint">Pen: einmal am Tag Langzeitinsulin, zum Essen schnelles. Keine Basalrate, kein verzögerter Bolus, kein Katheter. Ein Wechsel beginnt einen neuen Tag.</p>
+  <div id="iqWrap">
+  <div class="field">
+    <label><span>Basal-IQ</span></label>
+    <div class="seg tall" id="iqSeg">
+      <span class="knob"></span>
+      <button data-iq="aus" aria-pressed="true">Aus</button>
+      <button data-iq="an" aria-pressed="false">An</button>
+    </div>
+  </div>
+  <p class="hint">Die Pumpe schaltet die Basalrate ab, wenn sie für die nächsten 30 Minuten einen Wert unter 80 vorhersagt, und schaltet sie wieder ein, sobald der Wert steigt. Höchstens 2 Stunden am Stück. Mehr Insulin gibt sie nie.</p>
+  </div>
   <div class="field">
     <label><span>Simulation</span></label>
     <div class="seg tall" id="modeSeg">
@@ -1353,7 +1364,10 @@ const PERSON = PERSONAS.find(p => p.id === personId);
 const THERAPY_KEY = "nebel.therapy";
 const PEN = (() => { try { return localStorage.getItem(THERAPY_KEY) === "pen"; } catch(e){ return false; } })();
 const eng = new Engine(undefined, Math.max(0, window.SUBJECTS.findIndex(s => s.id === personId)), PEN);
-if (PEN){ $("bolusSplitWrap").hidden = true; $("bolusOverWrap").hidden = true; }
+if (PEN){ $("bolusSplitWrap").hidden = true; $("bolusOverWrap").hidden = true; $("iqWrap").hidden = true; }
+/* Basal-IQ: Abschalten bei drohendem Tief. Ein- und Ausschalten aendert nur die Zukunft. */
+const IQ_KEY = "nebel.basaliq";
+eng.basalIQ = !PEN && (() => { try { return localStorage.getItem(IQ_KEY) === "an"; } catch(e){ return false; } })();
 
 (() => {
   /* Die Sensorverzoegerung steht an vier Stellen im Text. Sie kommt aus
@@ -1668,7 +1682,8 @@ function syncCfg(){
   pressSeg($("themeSeg"), b => b.dataset.t === root.dataset.theme);
   pressSeg($("modeSeg"), b => (b.dataset.m === "alltag") === FULLDAY);
   pressSeg($("therapySeg"), b => (b.dataset.th === "pen") === PEN);
-  ["unitSeg","therapySeg","modeSeg","themeSeg","langSeg"].forEach(id => moveKnob($(id)));
+  pressSeg($("iqSeg"), b => (b.dataset.iq === "an") === eng.basalIQ);
+  ["unitSeg","therapySeg","iqSeg","modeSeg","themeSeg","langSeg"].forEach(id => moveKnob($(id)));
 }
 $("cfg").onclick = () => { if ($("sheetCfg").classList.contains("on")) return closeSheets(); $("cfg").classList.add("on"); openSheet("sheetCfg"); requestAnimationFrame(syncCfg); };
 wireSeg($("unitSeg"), b => {
@@ -1695,6 +1710,11 @@ wireSeg($("therapySeg"), b => {
   if (eng.trace.length > 12 && !confirm(pen ? "Mit dem Pen neu beginnen? Der bisherige Verlauf geht verloren." : "Mit der Pumpe neu beginnen? Der bisherige Verlauf geht verloren.")) return syncCfg();
   try { localStorage.setItem(THERAPY_KEY, pen ? "pen" : "pumpe"); } catch(e){}
   resetAll();
+});
+wireSeg($("iqSeg"), b => {
+  eng.basalIQ = b.dataset.iq === "an";
+  try { localStorage.setItem(IQ_KEY, eng.basalIQ ? "an" : "aus"); } catch(e){}
+  lastBasal = "";
 });
 wireSeg($("themeSeg"), b => { if (b.dataset.t !== root.dataset.theme) $("theme").click(); });
 wireSeg($("langSeg"), b => { if (b.dataset.href){ saveState(); location.href = b.dataset.href + "#person=" + personId; } });   // die andere Sprache beginnt mit derselben Person
@@ -2170,11 +2190,13 @@ function paintReserve(){
 let lastBasal = "";
 function paintBasal(){
   if (PEN) return paintLong();
-  const set = eng.s.basalSet, eff = eng.s.basalEff;
-  const key = set.toFixed(2) + "|" + eff.toFixed(2);
+  const set = eng.s.basalSet, eff = eng.s.basalEff, iq = eng._susp;
+  const key = set.toFixed(2) + "|" + eff.toFixed(2) + "|" + (iq ? iq.t : "");
   if (key === lastBasal) return;
   lastBasal = key;
-  $("btnBasal").textContent = Math.abs(set - eff) < 0.02
+  $("btnBasal").classList.toggle("due", !!iq);
+  $("btnBasal").textContent = iq ? `Basalrate · pausiert seit ${fmtT(iq.t)} (Basal-IQ)`
+    : Math.abs(set - eff) < 0.02
     ? `Basalrate · ${set.toFixed(2)} U/h`
     : `Basalrate · ${eff.toFixed(2)} → ${set.toFixed(2)} U/h`;
 }

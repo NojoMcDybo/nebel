@@ -311,4 +311,37 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   ok("Pen hat keinen Katheterknick", k._deliv(k.s.t + 5) === 1);
   ok("Pumpenstand passt nicht zum Pen", !k.canRestore(new Engine(777, 3).snapshot()) && k.canRestore(k.snapshot()));
 }
+/* Basal-IQ: zu viel Bolus ohne Essen. Mit Abschaltung bleibt der Wert hoeher,
+   nie mehr Insulin, hoechstens 2 h Pause in 2,5 h, Vorhersage rechnet sie nach. */
+{
+  const run = (iq, pen) => { const e = new Engine(1234, 3, pen); e.acts = []; e.basalIQ = iq;
+    let lo = 1e9, mu = 0; const uAt = [];
+    for (let i = 0; i < 10*60; i++){
+      if (i === 30) e.injectBolus(1.5);
+      const u = e._u(e.s.t, e.input).uInsulin; mu += u; uAt.push(u);
+      e.step(); lo = Math.min(lo, e.s.G);
+    }
+    return { e, lo, mu, uAt }; };
+  const off = run(false), on = run(true), pen = run(true, true);
+  const pauses = on.e.input.filter(x => x.iq);
+  ok("Basal-IQ pausiert bei drohendem Tief", pauses.length > 0, pauses.map(p => `${fmtClock(p.t)} ${p.durationMin} min`).join(", ") || "keine Pause");
+  ok("… Tief weniger tief", on.lo > off.lo + 3, `tiefster Wert ${off.lo.toFixed(0)} → ${on.lo.toFixed(0)} mg/dL`);
+  ok("… nie mehr Insulin als ohne", on.uAt.every((u,i) => u <= off.uAt[i] + 1e-9), `${(on.mu/1000).toFixed(2)} statt ${(off.mu/1000).toFixed(2)} U`);
+  let worst = 0;
+  for (let t = 7*60; t <= on.e.s.t; t += 5) worst = Math.max(worst, on.e._iqUsed(t));
+  ok("… höchstens 2 h Pause in 2,5 h", worst <= 120, worst + " min");
+  ok("… keine offene Pause länger als bis jetzt", pauses.every(p => p === on.e._susp || p.t + p.durationMin <= on.e.s.t));
+  const fc = on.e.forecast(360, 60);
+  ok("… Vorhersage rechnet die Pausen nach", Math.abs(fc.full[(fc.now - fc.from)/fc.stride] - on.e.s.G) < 1e-6);
+  ok("Aus: keine Pause", !off.e.input.some(x => x.iq));
+  ok("Pen: keine Pause", !pen.e.input.some(x => x.iq));
+  /* Mitten in einer Pause speichern und laden: sie laeuft weiter. */
+  const m = new Engine(1234, 3); m.acts = []; m.basalIQ = true;
+  for (let i = 0; i < 10*60 && !m._susp; i++){ if (i === 30) m.injectBolus(1.5); m.step(); }
+  const r = new Engine(1, 3); r.s.t = m.s.t; const snap = JSON.parse(JSON.stringify(m.snapshot()));
+  r.restore(snap);
+  ok("Pause übersteht Speichern", !!m._susp && !!r._susp && r._susp.t === m._susp.t);
+  m.basalIQ = false; m.step(); m.step(); m.step(); m.step(); m.step();
+  ok("Ausschalten beendet die Pause", !m._susp && m.events.some(x => /läuft wieder/.test(x.name || "")));
+}
 function fmtClock(t){ return String(Math.floor(t/60)%24).padStart(2,"0") + ":" + String(t%60).padStart(2,"0"); }

@@ -118,6 +118,8 @@ nebel. models an insulin pump in an open loop: basal profile, bolus, extended bo
 
 Since 13 Nov 2026 there is an option for pens (MDI): long-acting insulin once a day, rapid-acting for meals. According to Lepore et al. 2000, glargine works without a peak for almost 24 hours and resembles a pump with a fixed basal rate ([DOI](https://doi.org/10.2337/diabetes.49.12.2142)). nebel. therefore releases the daily dose evenly over 24 hours. Inject later and there is no basal in between; inject twice and there is twice as much. Temporary basal, extended bolus and kinked infusion sets do not apply.
 
+With the pump you can also switch on Basal-IQ, a suspend before low. It stops the basal rate when a value below 80 mg/dL is predicted within the next 30 minutes and restarts it as soon as glucose rises, for at most 2 hours within 2.5 hours. It never gives more insulin. According to PubMed, this system reduced time below 70 mg/dL by 31 % in the PROLOG trial without raising mean glucose ([DOI](https://doi.org/10.2337/dc18-0771)). In nebel. the prediction is a regression line through the last four sensor readings.
+
 ### 3.4 What is deliberately missing
 
 - No daily rhythm of insulin sensitivity, no dawn phenomenon. ExtHovorka has no such term. The clock is for display and for timing events, not a physiological factor.

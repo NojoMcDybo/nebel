@@ -563,3 +563,14 @@ Anlass: Ein Moderator von r/diabetes_t1 wies darauf hin, dass nebel. nur eine Pu
 - **Entfällt beim Pen:** temporäre Basalrate, verzögerter Bolus, Katheterknick, der Spruch „Die Pumpe macht das doch alles von allein“. Langzeitinsulin zählt nicht als aktives Insulin.
 - **Prüfung (check:adapter):** Pen mit Spritze um 21 Uhr liegt mit ungerundeter Menge exakt auf der Pumpe (0,00 mg/dL), gerundet bis 12 mg/dL daneben (22 statt 22,2 U). Vergessen treibt den Wert bis zum nächsten Mittag von 117 auf 577 mg/dL; echtes Glargin klingt langsamer aus, das ist hier zu hart.
 - **AID bewusst nicht:** Die Regler echter Systeme sind nicht offen, ein eigener würde sich anders verhalten; automatische Korrekturen wären im Kern ein Bolusrechner.
+
+## 32. Nachtrag 13.11.2026 — Basal-IQ als Option an der Pumpe
+
+Anlass: Frage nach dem Modus, der über Nacht die Basalrate senkt. Das ist kein Dexcom-Modus, sondern die Pumpe (Tandem). Control-IQ ist AID und bleibt draußen; Basal-IQ gibt nur weniger Insulin und hat offene Regeln.
+
+- **Einstellung „Basal-IQ: Aus / An“** (`nebel.basaliq`), nur mit Pumpe. Umschalten ändert nur die Zukunft, kein Neubeginn.
+- **Regeln** (FDA 510(k) K193483): Pause, wenn die 30-min-Vorhersage unter 80 mg/dL liegt oder der Sensor unter 70 zeigt; weiter, sobald der Sensorwert gegenüber dem vorigen steigt oder die Vorhersage wieder ab 80 liegt; höchstens 120 min Pause in 150 min. Boli laufen weiter. NEBEL-ANNAHME: Vorhersage als Kleinste-Quadrate-Gerade durch die letzten 4 Werte (Tandem: 3 der letzten 4, gegen Aussetzer).
+- **Mechanik:** Die Pause ist ein `tempBasal` mit Faktor 0 und `iq:true` in der Eingabeliste, angelegt mit der noch erlaubten Dauer und beim Wiedereinschalten gekürzt. Vorhersage und Rückblick rechnen sie so mit. Gespeicherte Stände tragen sie mit.
+- **Anzeige:** Basal-Knopf „Basalrate · pausiert seit … (Basal-IQ)“, Protokoll „Basal pausiert, ein Tief droht“ und „Basal läuft wieder nach … min“.
+- **Prüfung (check:adapter):** 1,5 U zu viel ohne Essen: tiefster Wert 28 → 65 mg/dL, Insulin 10,75 → 9,13 U, nie mehr als ohne, längste Pause 105 min in 2,5 h, Vorhersage rechnet die Pausen exakt nach, Pause übersteht Speichern, Ausschalten beendet sie. Laut PubMed (PROLOG, doi:10.2337/dc18-0771): Zeit unter 70 mg/dL 31 % weniger, im Mittel 104 min Pause am Tag.
+- **Grenze:** Die Vorhersage der App rechnet eine laufende Pause bis zu ihrem Höchstende weiter, nicht das automatische Wiedereinschalten.

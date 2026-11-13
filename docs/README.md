@@ -33,7 +33,7 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 |---|---|---|
 | Primäre Zielgruppe | Angehörige und Freunde von Menschen mit Typ-1-Diabetes; Schulsport/Lehramt später | 22.09.2026 |
 | Engine-Kern | ExtHovorka (Rashid et al. 2019, AG Cinar), 16 Zustände, herzfrequenzgetrieben | 15.09.2026 |
-| Therapieform | Pumpentherapie CSII, Open Loop; seit 13.11.2026 wahlweise Pen (MDI) | 09/2026 |
+| Therapieform | Pumpentherapie CSII, Open Loop; seit 13.11.2026 wahlweise Pen (MDI) und an der Pumpe Basal-IQ (Abschalten bei drohendem Tief) | 09/2026 |
 | Architektur | Separates TypeScript-Modul mit Testsuite, headless lauffähig | 22.09.2026 |
 | Referenzimplementierung | py-mgipsim nur als numerisches Vergleichsorakel, kein Codeport (GPL-3.0) | 22.09.2026 |
 | Einheiten | Intern SI (mmol/L, mmol, mU), Umrechnung nur an der UI-Grenze | 22.09.2026 |
@@ -80,3 +80,4 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 | Unterzucker macht langsam | Im ganzen Alltag reagieren Essen, Insulin, Bewegung und Schlafen bei Blut unter 70 erst nach 0,7 s, unter 55 nach 1,5 s. Bei Blut über 250 antwortet man gereizt auf Sprüche (Reddit-Feedback) | 13.11.2026 |
 | Tagesplan und Einladungen | Im ganzen Alltag zeigt morgens eine Karte, was ansteht (Spontanes wie „Bus verpasst“ nicht). An 60 % der Tage kommt eine Einladung (Pizza, Kuchen, Sushi, Popcorn): Zeit hält an, „Mitessen“ oder „Lieber nicht“. Die Kohlenhydrate nennt niemand, im Protokoll steht nur der Name, erst der Rückblick zeigt die Menge | 13.11.2026 |
 | Pen (MDI) als Therapie | In den Einstellungen „Insulin: Pumpe oder Pen“. Pen: Langzeitinsulin einmal am Tag, gleichmäßig über 24 h (Glargin laut Lepore 2000 spitzenlos, fast 24 h); keine Basalrate, kein verzögerter Bolus, kein Katheterknick. Wechsel beginnt neu. Anlass: Hinweis eines Moderators von r/diabetes_t1, dass kaum noch jemand Open-Loop-Pumpe nutzt. AID bewusst nicht (Regler echter Systeme nicht offen, automatische Korrekturen wären ein Bolusrechner) | 13.11.2026 |
+| Basal-IQ als Option | An der Pumpe abschaltbar: Basal aus, wenn in 30 min unter 80 mg/dL vorhergesagt oder Sensor unter 70; weiter bei steigendem Wert oder Vorhersage ab 80, höchstens 2 h Pause in 2,5 h (FDA 510(k) K193483, PROLOG-Studie). Erste Stufe der Automatik, die nur weniger Insulin gibt, darum kein Bolusrechner. Control-IQ und andere AID weiter bewusst nicht | 13.11.2026 |

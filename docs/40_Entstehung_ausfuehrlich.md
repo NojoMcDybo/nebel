@@ -118,6 +118,8 @@ nebel. bildet eine Insulinpumpe im offenen Regelkreis ab: Basalprofil, Bolus, ve
 
 Seit dem 13.11.2026 gibt es wahlweise den Pen (MDI): Langzeitinsulin einmal am Tag, zum Essen schnelles. Laut Lepore et al. 2000 wirkt Glargin ohne Spitze fast 24 Stunden und gleicht einer Pumpe mit fester Basalrate ([DOI](https://doi.org/10.2337/diabetes.49.12.2142)). nebel. gibt die Tagesmenge darum gleichmäßig über 24 Stunden ab. Wer später spritzt, hat dazwischen kein Basal, wer doppelt spritzt, doppelt. Temporäre Basalrate, verzögerter Bolus und Katheterknick entfallen.
 
+An der Pumpe lässt sich außerdem Basal-IQ einschalten, eine Abschaltung bei drohendem Tief. Sie stoppt die Basalrate, wenn für die nächsten 30 Minuten ein Wert unter 80 mg/dL vorhergesagt wird, und schaltet sie wieder ein, sobald der Wert steigt, höchstens 2 Stunden innerhalb von 2,5 Stunden. Mehr Insulin gibt sie nie. Laut PubMed senkte genau dieses System in der PROLOG-Studie die Zeit unter 70 mg/dL um 31 %, ohne den Mittelwert zu erhöhen ([DOI](https://doi.org/10.2337/dc18-0771)). Die Vorhersage ist in nebel. eine Regressionsgerade durch die letzten vier Sensorwerte.
+
 ### 3.4 Was bewusst fehlt
 
 - Kein Tagesrhythmus der Insulinempfindlichkeit, kein Dawn-Phänomen. ExtHovorka hat keinen solchen Term. Die Uhrzeit ist Anzeige und Ereignismerkmal, kein physiologischer Faktor.

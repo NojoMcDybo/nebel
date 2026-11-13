@@ -89,6 +89,14 @@ const SI_SD = 0.25, SI_KNOT = 240, OCC_PER_DAY = 0.10, OCC_LEFT = 0.1;
    Basal; wer doppelt spritzt, hat doppelt. Die letzte Spritze vor dem Start
    war um 21 Uhr am Vorabend. */
 const LONG_MIN = 1440, LONG_FIRST = -180;
+/* Basal-IQ (nur Pumpe, abschaltbar): schaltet die Basalrate ab, wenn in
+   30 min ein Wert unter 80 mg/dL vorhergesagt wird oder der Sensor unter 70
+   zeigt. Weiter, sobald der Sensorwert steigt oder die Vorhersage wieder ab
+   80 liegt, spaetestens nach 2 h Pause innerhalb von 2,5 h (FDA-510(k)
+   K193483; PROLOG-Studie, doi:10.2337/dc18-0771). Gibt nie mehr Insulin,
+   Boli laufen weiter. NEBEL-ANNAHME: Vorhersage als Regressionsgerade durch
+   die letzten 4 Sensorwerte (Tandem: 3 der letzten 4, gegen Aussetzer). */
+const IQ_PRED = 80, IQ_LOW = 70, IQ_AHEAD = 30, IQ_MAX = 120, IQ_WIN = 150;
 
 /* p: Belastungsmuster [Minuten, Anteil der HF-Reserve], wiederholt bis zum Ende.
    Fehlt es, bleibt die Belastung gleichmaessig bei i. Mit Muster ist i nur
@@ -170,6 +178,7 @@ class Engine {
        wird trotzdem immer, damit derselbe Seed dieselben Ereignisse hat. */
     this.variability = false;
     this._occ = []; this._highSince = null;
+    this.basalIQ = false; this._susp = null;   // laufende Pause: das tempBasal-Ereignis
 
     this.s = {
       t: 7*60, G: 0, Gi: 0,
@@ -410,6 +419,7 @@ class Engine {
     this.sensorFaults = core.faults || [];
     this._occ = core.occ || [];
     this._fault = this.sensorFaults.find(f => f.open) || null;
+    this._susp = this.input.find(e => e.iq && e.t + e.durationMin > this.s.t) || null;
     this._snaps = core.snaps && core.snaps.length ? core.snaps : [{ t:this.s.t, z:Array.from(this.z) }];
     /* Aeltere Staende kannten Basalaenderungen nur als Pumpenprogramm. */
     this.pump = N.flatBasalProfile(this.pen ? 0 : this.therapy.basalRateUPerH);
@@ -505,6 +515,7 @@ class Engine {
     this._trackFault(v);
     this.trace.push({ t:this.s.t, G:this.s.G, gi:this.s.Gi, sensor:v, born:performance.now() });
     if (this.trace.length > 4032) this.trace.shift();   // 14 Tage
+    this._basalIQ(v);
 
     /* Sensorwechsel ins Protokoll — im echten Leben weiss man, wann man ihn
        gesetzt hat. Druck auf den Sensor dagegen NICHT: den muss die Nutzerin
@@ -514,6 +525,45 @@ class Engine {
     else if (idx !== this._sensorIndex){
       this._sensorIndex = idx;
       this.events.push({ kind:"state", t:this.s.t, name:"Sensor gewechselt — die ersten Stunden rauscht er mehr" });
+    }
+  }
+
+  /* Basal-IQ: Die Pause ist ein tempBasal mit Faktor 0 in der Eingabeliste,
+     zunaechst so lang, wie das 2-h-Limit noch erlaubt. Endet sie frueher,
+     wird sie auf die gelaufene Dauer gekuerzt. So rechnen Rueckblick und
+     Vorhersage dieselbe Vergangenheit nach. */
+  iqPred(){
+    const n = this.trace.length;
+    if (n < 4) return null;
+    const r = this.trace.slice(n - 4).map(p => p.sensor);
+    const slope = (-3*r[0] - r[1] + r[2] + 3*r[3]) / 50;       // mg/dL je min, Kleinste Quadrate, 5-min-Abstand
+    return (r[0] + r[1] + r[2] + r[3]) / 4 + slope * (7.5 + IQ_AHEAD);
+  }
+  _iqUsed(t){
+    let m = 0;
+    for (const e of this.input) if (e.iq) m += Math.max(0, Math.min(t, e.t + e.durationMin) - Math.max(t - IQ_WIN, e.t));
+    return m;
+  }
+  _iqEnd(t){
+    const s = this._susp; this._susp = null;
+    if (t < s.t + s.durationMin) s.durationMin = t - s.t;
+    this.events.push({ kind:"state", t, name:`Basal-IQ · Basal läuft wieder nach ${s.durationMin} min` });
+  }
+  _basalIQ(v){
+    const t = this.s.t, s = this._susp;
+    if (s && t >= s.t + s.durationMin) this._iqEnd(t);       // 2-h-Limit erreicht
+    if (this.pen || !this.basalIQ){ if (this._susp) this._iqEnd(t); return; }
+    const pred = this.iqPred();
+    if (pred == null) return;
+    if (this._susp){
+      const prev = this.trace[this.trace.length - 2].sensor;
+      if (v > prev || pred >= IQ_PRED) this._iqEnd(t);
+    } else if (pred < IQ_PRED || v < IQ_LOW){
+      const left = IQ_MAX - this._iqUsed(t);
+      if (left < 5) return;
+      this._susp = { kind:"tempBasal", t, durationMin:left, factor:0, iq:true };
+      this.input.push(this._susp);
+      this.events.push({ kind:"state", t, sev:"warn", name:"Basal-IQ · Basal pausiert, ein Tief droht" });
     }
   }
 
