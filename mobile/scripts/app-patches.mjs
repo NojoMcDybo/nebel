@@ -18,7 +18,7 @@ const NIGHT_SHEET = `<!-- ══════════ SHEET: NACHT (App) ═�
   <div class="grab"></div>
   <h3>Schlafen gehen</h3>
   <p style="font-size:15.5px;line-height:1.5;margin:0 0 16px" id="nightTxt"></p>
-  <p class="hint">Leg das Handy weg und sperr es. nebel. rechnet weiter, auch wenn die App zu ist. Im Lautlos-Modus oder mit dem Fokus „Schlafen“ klingelt nichts.</p>
+  <p class="hint">Leg das Handy weg und sperr es. nebel. rechnet weiter, auch wenn die App zu ist. Hast du den Wecker erlaubt, klingelt es wie der iPhone-Wecker, auch im Lautlos-Modus. Sonst kommt eine Mitteilung, und Lautlos oder ein Fokus können sie stumm schalten.</p>
   <p class="hint">Im Schlaf liegt man manchmal auf dem Sensor. Dann misst er falsch tief, und der Alarm kommt trotzdem. Auch das gehört dazu.</p>
   <div class="row2">
     <button class="btn soft" data-close>Zurück</button>
@@ -102,6 +102,7 @@ function scheduleAlarms(){
     at: a0.wall + (a.t - a0.simT)*60000,
     title: a.kind === "low" ? "Tiefalarm · nebel." : "Hochalarm · nebel.",
     body: \`Sensor von \${who}: \${bgv(a.v)} \${UL()}. Simulierter Wert, kein echter Messwert.\`,
+    short: \`\${a.kind === "low" ? "Tief" : "Hoch"} · \${who} \${bgv(a.v)} \${UL()} · simuliert\`,
   })));
 }
 
@@ -204,7 +205,7 @@ if (eng.reality){ speed = 1; [...$("speed").children].forEach(x => x.setAttribut
 paintAlarmBtn();
 if (eng.reality && belt.remembered()) belt.connect(false);   // gemerkter Gurt: still verbinden, nie die Auswahl oeffnen
 if (eng.s.asleep) goSleep();                                  // nachts geschlossen, morgens geoeffnet: die Nacht laeuft noch
-try { if (eng.reality && localStorage.getItem(GATE_KEY) === "1" && alarmPref() === null) askAlarms(); } catch(e){}
+try { if (eng.reality && localStorage.getItem(GATE_KEY) === "1" && (alarmPref() === null || alarmsOn)) askAlarms(); } catch(e){}   // alarmsOn: einmal nach dem Wecker fragen (AlarmKit), sonst still
 </script>`],
 ];
 
