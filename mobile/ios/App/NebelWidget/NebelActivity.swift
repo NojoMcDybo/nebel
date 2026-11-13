@@ -11,11 +11,11 @@ struct NebelActivityAttributes: ActivityAttributes {
         var value: String      // fertig formatiert, mg/dL oder mmol/L
         var unit: String
         var arrow: String
+        var delta: String      // zum vorigen Wert, mit Vorzeichen, wie in der App
         var tone: String       // "low" | "high" | "ok"
         var name: String       // simulierte Person
         var bpm: Int           // Puls jetzt: Gurt, sonst simuliert
         var at: Date           // Zeit des Sensorwerts
         var points: [Double]   // letzte Stunde in mg/dL, alle 5 min
-        var pulse: [Double]    // Puls zu denselben Zeitpunkten
     }
 }

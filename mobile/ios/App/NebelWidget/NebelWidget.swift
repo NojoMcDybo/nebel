@@ -10,7 +10,7 @@ struct NebelWidgets: WidgetBundle {
 
 // Dunkles Schema der App (app/template.html, html[data-theme="dark"]).
 private func rgb(_ r: Double, _ g: Double, _ b: Double) -> Color { Color(red: r / 255, green: g / 255, blue: b / 255) }
-private let paper = rgb(14, 18, 19), card = rgb(25, 30, 32)
+private let paper = rgb(14, 18, 19)
 private let ink = rgb(233, 239, 239), ink2 = rgb(163, 174, 174), ink3 = rgb(126, 138, 138)
 private let low = rgb(255, 112, 99), high = rgb(232, 180, 74)
 
@@ -39,7 +39,7 @@ struct NebelLive: Widget {
                     Pulse(bpm: s.bpm).padding(.trailing, 6)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Graph(g: s.points, hr: s.pulse).frame(height: 46).padding(.horizontal, 6)
+                    Graph(g: s.points).frame(height: 46).padding(.horizontal, 6)
                 }
             } compactLeading: {
                 Text(s.value).font(.system(size: 15, weight: .heavy)).foregroundStyle(toneColor(s.tone))
@@ -68,19 +68,22 @@ struct LockView: View {
                     HStack(alignment: .center, spacing: 5) {
                         Text(s.value).font(.system(size: 44, weight: .heavy)).tracking(-2.6).monospacedDigit()
                         Arrow(a: s.arrow).font(.system(size: 18, weight: .bold))
+                        Text(s.delta).font(mono(15)).foregroundStyle(ink2)
                     }
                     .foregroundStyle(toneColor(s.tone))
                     Text(s.unit.uppercased()).font(mono(9)).tracking(1.8).foregroundStyle(ink3)
                     HStack(spacing: 8) {
                         Pulse(bpm: s.bpm)
-                        Text(s.at, style: .time).font(mono(11)).foregroundStyle(ink3)
+                        HStack(spacing: 0) {   // laeuft auf dem Sperrbildschirm selbst weiter
+                            Text("vor ")
+                            Text(timerInterval: s.at...s.at.addingTimeInterval(8 * 3600), countsDown: false, showsHours: false)
+                                .frame(width: 40, alignment: .leading)
+                        }
+                        .font(mono(11)).foregroundStyle(ink3)
                     }
                 }
                 .fixedSize()
-                Graph(g: s.points, hr: s.pulse)
-                    .padding(8)
-                    .background(card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .frame(height: 86)
+                Graph(g: s.points).frame(height: 78)
             }
         }
         .padding(14)
@@ -112,11 +115,10 @@ struct Arrow: View {
 }
 
 /// Letzte Stunde wie der Verlauf in der App: Sensorwerte als Punkte auf log. Skala
-/// 40–400 mit Zielband 70–180, Puls als Linie (40–190 bpm). Ganz rechts die
-/// Nebelzone: Der Sensor zeigt den Zucker von vor fuenf Minuten, der Puls reicht bis jetzt.
+/// 40–400 mit Zielband 70–180. Ganz rechts die Nebelzone: Der Sensor zeigt den
+/// Zucker von vor fuenf Minuten.
 struct Graph: View {
     let g: [Double]
-    let hr: [Double]
 
     var body: some View {
         Canvas { c, size in
@@ -127,7 +129,6 @@ struct Graph: View {
             let slot = (w - r) / CGFloat(n)              // n-1 Abstaende plus ein Feld Nebel
             let x = { (i: Int) -> CGFloat in r + CGFloat(i) * slot }
             let gy = { (v: Double) -> CGFloat in r + (h - 2 * r) * CGFloat(1 - log(min(max(v, 40), 400) / 40) / log(10)) }
-            let py = { (b: Double) -> CGFloat in r + (h - 2 * r) * CGFloat(1 - (min(max(b, 40), 190) - 40) / 150) }
             let now = x(n - 1)
 
             c.fill(Path(CGRect(x: 0, y: gy(180), width: now + 3, height: gy(70) - gy(180))), with: .color(ink.opacity(0.06)))
@@ -137,22 +138,10 @@ struct Graph: View {
             }
 
             c.fill(Path(CGRect(x: now, y: 0, width: w - now, height: h)),
-                   with: .linearGradient(Gradient(colors: [card.opacity(0), card.opacity(0.98)]),
+                   with: .linearGradient(Gradient(colors: [paper.opacity(0), paper.opacity(0.98)]),
                                          startPoint: CGPoint(x: now, y: 0), endPoint: CGPoint(x: w, y: 0)))
             var fog = Path(); fog.move(to: CGPoint(x: now, y: 0)); fog.addLine(to: CGPoint(x: now, y: h))
             c.stroke(fog, with: .color(ink.opacity(0.22)), style: StrokeStyle(lineWidth: 1, dash: [2, 3]))
-
-            if hr.count > 1 {
-                var p = Path()
-                for (i, b) in hr.enumerated() {
-                    let pt = CGPoint(x: x(i + 1), y: py(b))   // eine Stelle rechts: Puls ohne Verzoegerung
-                    if i == 0 { p.move(to: pt) } else { p.addLine(to: pt) }
-                }
-                var area = p
-                area.addLine(to: CGPoint(x: x(hr.count), y: h)); area.addLine(to: CGPoint(x: x(1), y: h)); area.closeSubpath()
-                c.fill(area, with: .color(ink.opacity(0.07)))
-                c.stroke(p, with: .color(ink.opacity(0.5)), style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
-            }
 
             for (i, v) in g.enumerated() {
                 c.fill(Path(ellipseIn: CGRect(x: x(i) - 2.5, y: gy(v) - 2.5, width: 5, height: 5)), with: .color(toneColor(mg: v)))
