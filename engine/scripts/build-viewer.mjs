@@ -25,7 +25,7 @@
  */
 import { build } from "esbuild";
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFileSync } from "node:fs";
-import { resolve, dirname } from "node:path";
+import { resolve, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 import { createHash } from "node:crypto";
@@ -129,6 +129,8 @@ const checkNoExternal = (html, name) => {
    innerHTML oder einen manipulierten Spielstand in die Seite geraet, laeuft nicht.
    Der Browser rechnet den Hash ueber den Text mit LF-Zeilenenden.
    shortcut: frame-ancestors geht nicht per <meta>; Schutz vor Einbettung braeuchte einen Host mit Kopfzeilen. */
+/* Fuer Suchmaschinen: jede Seite nennt ihre eigene Adresse, alle landen in sitemap.xml. */
+const SITE_URL = "https://nojomcdybo.github.io/nebel/", SITE_DIR = resolve(root, "dist/site"), sitemap = [];
 const writePage = (path, html) => {
   const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
     .map((m) => `'sha256-${createHash("sha256").update(m[1].replace(/\r\n?/g, "\n"), "utf8").digest("base64")}'`);
@@ -136,7 +138,9 @@ const writePage = (path, html) => {
     `img-src 'self' data:; manifest-src 'self' data:; base-uri 'none'; form-action 'none'`;
   const mark = '<meta charset="utf-8">';
   if (!html.includes(mark)) problem(`${path}: <meta charset> fehlt, keine CSP gesetzt`);
-  writeFileSync(path, html.replace(mark, `${mark}\n<meta http-equiv="Content-Security-Policy" content="${csp}">`), "utf8");
+  const url = SITE_URL + relative(SITE_DIR, path).replace(/\\/g, "/").replace(/index\.html$/, "");
+  if (!url.includes("..")) sitemap.push(url);
+  writeFileSync(path, html.replace(mark, `${mark}\n<meta http-equiv="Content-Security-Policy" content="${csp}">\n<link rel="canonical" href="${url}">`), "utf8");
 };
 
 /* ── 1. Viewer ── */
@@ -258,6 +262,8 @@ window.SUBJECTS = ${JSON.stringify(chosen, null, 1)};
   // Homebildschirm-Icon fuer iOS; /en/ verweist relativ, braucht also eine eigene Kopie.
   copies.push([resolve(root, "../app/apple-touch-icon.png"), "apple-touch-icon.png"], [resolve(root, "../app/apple-touch-icon.png"), "en/apple-touch-icon.png"]);
   copies.push([resolve(root, "vendor/py-mgipsim/LICENSE"), "lizenzen/GPL-3.0.txt"]);
+  // Nachweis fuer die Google Search Console, muss unveraendert im Wurzelordner liegen.
+  copies.push([resolve(root, "../app/google8e59aed9e27ffeff.html"), "google8e59aed9e27ffeff.html"]);
   for (const [from, to] of copies) {
     if (existsSync(from)) copyFileSync(from, resolve(site, to));
     else problem(`fehlt: ${from} (fuer ${to}) — npm install bzw. npm run oracle:fetch`);
@@ -297,6 +303,8 @@ window.SUBJECTS = ${JSON.stringify(chosen, null, 1)};
     }
   } else problem("app/text.html fehlt");
 
+  writeFileSync(resolve(site, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+    sitemap.map((u) => `  <url><loc>${u}</loc></url>\n`).join("") + `</urlset>\n`, "utf8");
   writeFileSync(resolve(site, ".nojekyll"), "", "utf8");
   /* Alter Doppelklick-Pfad bleibt gueltig */
   writeFileSync(resolve(root, "dist/nebel.html"),
