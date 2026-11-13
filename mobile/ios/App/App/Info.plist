@@ -28,6 +28,8 @@
 	<string>nebel. liest deinen Puls aus Health, wenn der Pulsgurt beim Sport nicht verbunden war, und rechnet die Bewegung nachträglich ein. Die Werte bleiben auf dem iPhone.</string>
 	<key>NSAlarmKitUsageDescription</key>
 	<string>nebel. weckt dich wie ein Wecker, wenn der simulierte Wert zu tief oder zu hoch wird. Auch im Lautlos-Modus.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>

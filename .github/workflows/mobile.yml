@@ -69,6 +69,10 @@ jobs:
           npm run typecheck
       - name: Web-Teil bauen und ins iOS-Projekt kopieren
         run: npm run sync
+      - name: Widget-Erweiterung ins Xcode-Projekt eintragen
+        run: |
+          ruby -e 'require "xcodeproj"' 2>/dev/null || sudo gem install xcodeproj
+          ruby scripts/add-widget.rb
       - name: Archiv bauen (ohne Signatur)
         run: |
           xcodebuild archive \
@@ -82,10 +86,12 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/ipa/Payload"
           cp -R "$RUNNER_TEMP/App.xcarchive/Products/Applications/App.app" "$RUNNER_TEMP/ipa/Payload/"
-          # Ad-hoc signieren, nur damit die Berechtigungen (HealthKit) im Programm stehen.
+          # Ad-hoc signieren, innen nach aussen, damit die Berechtigungen (HealthKit) im Programm stehen.
           # SideStore liest sie dort aus und signiert neu.
           APP="$RUNNER_TEMP/ipa/Payload/App.app"
           for f in "$APP"/Frameworks/*.framework; do codesign --force --sign - "$f"; done
+          for x in "$APP"/PlugIns/*.appex; do codesign --force --sign - "$x"; done
+          ls "$APP"/PlugIns
           codesign --force --sign - --entitlements ios/App/App/App.entitlements "$APP"
           codesign -d --entitlements - "$APP"
           (cd "$RUNNER_TEMP/ipa" && zip -qr "$GITHUB_WORKSPACE/nebel.ipa" Payload)

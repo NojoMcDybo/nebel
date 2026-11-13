@@ -2,6 +2,7 @@ import UIKit
 import Capacitor
 import SwiftUI
 import HealthKit
+import ActivityKit
 #if canImport(AlarmKit)
 import AlarmKit
 #endif
@@ -34,6 +35,7 @@ class NebelBridgeViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
         bridge?.registerPluginInstance(NebelAlarmPlugin())
         bridge?.registerPluginInstance(NebelHealthPlugin())
+        bridge?.registerPluginInstance(NebelLivePlugin())
     }
 }
 
@@ -155,5 +157,53 @@ public class NebelHealthPlugin: CAPPlugin, CAPBridgedPlugin {
             call.resolve(["samples": out])
         }
         store.execute(q)
+    }
+}
+
+/// Live-Aktivitaet auf dem Sperrbildschirm (Typ in NebelWidget/NebelActivity.swift).
+/// update startet sie, wenn keine laeuft; starten darf iOS nur die geoeffnete App,
+/// aktualisieren auch die gesperrte. Nach 8 h beendet iOS sie, beim naechsten
+/// Oeffnen startet eine neue. JS: NebelLive.update({ value, unit, arrow, tone, name,
+/// bpm, at: ms, points: [mg/dL] }) -> { state }, NebelLive.end()
+@objc(NebelLivePlugin)
+public class NebelLivePlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "NebelLivePlugin"
+    public let jsName = "NebelLive"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "update", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "end", returnType: CAPPluginReturnPromise),
+    ]
+
+    @objc func update(_ call: CAPPluginCall) {
+        guard #available(iOS 16.2, *) else { return call.resolve(["state": "unsupported"]) }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return call.resolve(["state": "off"]) }
+        let at = (call.getDouble("at") ?? Date().timeIntervalSince1970 * 1000) / 1000
+        let s = NebelActivityAttributes.ContentState(
+            value: call.getString("value") ?? "", unit: call.getString("unit") ?? "",
+            arrow: call.getString("arrow") ?? "", tone: call.getString("tone") ?? "ok",
+            name: call.getString("name") ?? "", bpm: call.getInt("bpm") ?? 0,
+            at: Date(timeIntervalSince1970: at),
+            points: (call.getArray("points") ?? []).compactMap { ($0 as? NSNumber)?.doubleValue })
+        let content = ActivityContent(state: s, staleDate: s.at.addingTimeInterval(15 * 60))
+        Task {
+            let all = Activity<NebelActivityAttributes>.activities
+            if let a = all.first(where: { $0.activityState == .active || $0.activityState == .stale }) {
+                await a.update(content)
+                return call.resolve(["state": "updated"])
+            }
+            for a in all { await a.end(nil, dismissalPolicy: .immediate) }   // abgelaufene weg
+            do {
+                _ = try Activity.request(attributes: NebelActivityAttributes(), content: content, pushType: nil)
+                call.resolve(["state": "started"])
+            } catch { call.resolve(["state": "failed", "error": "\(error)"]) }
+        }
+    }
+
+    @objc func end(_ call: CAPPluginCall) {
+        guard #available(iOS 16.2, *) else { return call.resolve() }
+        Task {
+            for a in Activity<NebelActivityAttributes>.activities { await a.end(nil, dismissalPolicy: .immediate) }
+            call.resolve()
+        }
     }
 }

@@ -107,3 +107,12 @@ export const health = registerPlugin<{
   ask(): Promise<{ ok: boolean; error: string }>;
   heartRate(o: { from: number; to: number }): Promise<{ samples: { t: number; bpm: number }[] }>;
 }>("NebelHealth");
+
+/** Live-Aktivität auf dem Sperrbildschirm (NebelLivePlugin, Widget in ios/App/NebelWidget). */
+export const live = registerPlugin<{
+  update(o: {
+    value: string; unit: string; arrow: string; tone: string; name: string;
+    bpm: number; at: number; points: number[];
+  }): Promise<{ state: string; error?: string }>;
+  end(): Promise<void>;
+}>("NebelLive");

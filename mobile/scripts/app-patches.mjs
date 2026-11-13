@@ -37,6 +37,7 @@ function paintApp(){
   // Nachtalarm am Bildschirm mit denselben Grenzen wie die Mitteilungen (< 80, > 280).
   ALARM_LOW = eng.reality ? TRAIN_LOW - 1 : 70;
   ALARM_HIGH = eng.reality ? TRAIN_HIGH + 1 : 250;
+  paintLive();
 }
 function appReality(){
   if (alarmPref() === null) askAlarms(); else alarmDirty = true;
@@ -66,6 +67,7 @@ function onBeltBpm(bpm){
   if (now - m.minute < 120000) eng.beltBpm(m.bpm);         // veraltete Reste nach einer Pause nicht nehmen
   if (document.visibilityState === "hidden"){              // einmal pro Minute: Alarme und Stand
     if (eng.s.t - alarmT >= 5) scheduleAlarms();
+    paintLive();
     saveState();
   }
 }
@@ -109,6 +111,31 @@ async function tryFillGap(){
   finally { filling = false; }
 }
 setInterval(tryFillGap, 120000);          // Zepp schreibt das Training oft erst nach ein paar Minuten
+
+/* Live-Aktivitaet auf dem Sperrbildschirm: in Reality mit jedem neuen Sensorwert
+   (alle 5 min), auch bei gesperrtem iPhone ueber die Gurtwerte. Starten kann sie
+   nur die geoeffnete App; beim Oeffnen wird deshalb neu angestossen (liveN = -1).
+   liveN 0 beim Start: ein Rest aus einer frueheren Reality-Sitzung wird beendet. */
+var liveN = 0, liveAct = NebelBelt.live;
+const LIVE_ARROW = { 3:"⇈", 2:"↑", 1:"↗", 0:"→", [-1]:"↘", [-2]:"↓", [-3]:"⇊" };
+function paintLive(){
+  if (!liveAct) return;                   // paintApp kann vor dieser Stelle laufen
+  if (!eng.reality || !anchor){
+    if (liveN !== null){ liveN = null; liveAct.end().catch(() => {}); }
+    return;
+  }
+  const trc = eng.trace, last = trc[trc.length - 1];
+  if (!last || trc.length === liveN) return;
+  liveN = trc.length;
+  const v = eng.lastSensor;
+  liveAct.update({
+    value: bgv(v), unit: UL(), arrow: LIVE_ARROW[trendClass(eng.trend())],
+    tone: v < 70 ? "low" : v > 180 ? "high" : "ok", name: PERSON.name,
+    bpm: eng.beltT != null ? beltBpmNow : 0,
+    at: anchor.wall + (last.t - anchor.simT)*60000,
+    points: trc.slice(-13).map(p => p.sensor),
+  }).catch(() => {});
+}
 
 /* Alarme: vorausberechnet (alarm-plan.js), als lokale Mitteilungen geplant. Neu
    geplant nach jeder Eingabe, alle fuenf Minuten und beim Verlassen der App.
@@ -235,11 +262,12 @@ if (eng.reality){ speed = 1; [...$("speed").children].forEach(x => x.setAttribut
   ['if (document.visibilityState === "visible" && asleep) holdScreen(true);',
    'if (document.visibilityState === "visible" && asleep && !eng.reality) holdScreen(true);'],
   ['if (document.visibilityState === "hidden") saveState();',
-   'if (document.visibilityState === "hidden"){ scheduleAlarms(); saveState(); } else tryFillGap();'],
+   'if (document.visibilityState === "hidden"){ scheduleAlarms(); saveState(); } else { tryFillGap(); liveN = -1; paintLive(); }'],
   ["requestAnimationFrame(loop);\n</script>",
    `requestAnimationFrame(loop);
 paintAlarmBtn();
 tryFillGap();
+paintLive();
 if (eng.reality && belt.remembered()) belt.connect(false);   // gemerkter Gurt: still verbinden, nie die Auswahl oeffnen
 if (eng.s.asleep) goSleep();                                  // nachts geschlossen, morgens geoeffnet: die Nacht laeuft noch
 try { if (eng.reality && localStorage.getItem(GATE_KEY) === "1" && (alarmPref() === null || alarmsOn)) askAlarms(); } catch(e){}   // alarmsOn: einmal nach dem Wecker fragen (AlarmKit), sonst still
