@@ -71,7 +71,11 @@ struct HomeView: View {
 
     private func small(_ s: NebelActivityAttributes.ContentState) -> some View {
         VStack(alignment: .leading, spacing: 3) {
-            logo
+            HStack(alignment: .firstTextBaseline) {
+                logo
+                Spacer(minLength: 6)
+                Text("SIMULATION").font(mono(9)).tracking(1.5).foregroundStyle(c.ink3).lineLimit(1)
+            }
             Spacer(minLength: 0)
             value(s)
             footer(s)
@@ -98,14 +102,16 @@ struct HomeView: View {
         }
     }
 
-    /// Wert so gross wie die Breite erlaubt (dreistellig schrumpft er), rechts daneben
-    /// die Differenz ueber dem Pfeil.
+    /// Wert so gross wie die Breite erlaubt, rechts daneben die Differenz ueber dem Pfeil.
+    /// Groesse nach Stellenzahl statt nur minimumScaleFactor: Der Zeichenabstand schrumpft
+    /// beim Verkleinern nicht mit, dreistellig stiessen die Ziffern sonst aneinander.
     private func value(_ s: NebelActivityAttributes.ContentState) -> some View {
-        HStack(alignment: .center, spacing: 5) {
-            Text(s.value).font(.system(size: 80, weight: .heavy)).tracking(-6).monospacedDigit()
+        let size: CGFloat = s.value.count >= 3 ? 54 : 80
+        return HStack(alignment: .center, spacing: 6) {
+            Text(s.value).font(.system(size: size, weight: .heavy)).tracking(-size * 0.055).monospacedDigit()
                 .minimumScaleFactor(0.5).lineLimit(1).layoutPriority(1)
                 .foregroundStyle(c.tone(s.tone))
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(s.delta).font(mono(15)).foregroundStyle(c.ink2).lineLimit(1)
                 Arrow(a: s.arrow).font(.system(size: 24, weight: .semibold)).foregroundStyle(c.tone(s.tone))
             }
