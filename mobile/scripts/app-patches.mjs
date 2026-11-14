@@ -51,6 +51,39 @@ function appReality(){
    Simulation selbst bis jetzt nach, plant die Alarme neu und sichert den Stand. */
 var beltState = "aus", beltMsg = "", beltBpmNow = 0;
 const beltAvg = new NebelBelt.MinuteAverager();
+
+/* Eigener Ruhepuls: Der Gurt misst dich, nicht die simulierte Person. Ins Modell geht
+   dein Puls um den Unterschied der Ruhepulse verschoben (eng.beltToBody). Quelle:
+   Apple Health (Mittel der letzten 7 Tage, meist von der Watch), sonst eigene Messung
+   aus den Gurtminuten (BeltEngine.restFrom). Nur auf dem Geraet, unter REST_KEY.
+   Gilt ab dem Start der App fest, damit Nachrechnen (rewind.js) dasselbe ergibt;
+   die laufende Messung wirkt erst beim naechsten Oeffnen. */
+const REST_KEY = "nebel.ruhepuls.v1";     // { health: bpm|null, healthDay, mins: [Gurt-Minutenmittel] }
+var rest = (() => { try { return JSON.parse(localStorage.getItem(REST_KEY)) || {}; } catch(e){ return {}; } })();
+rest.mins = Array.isArray(rest.mins) ? rest.mins : [];
+var restNow = null;                       // { bpm, src: "Health" | "gemessen" }
+function saveRest(){ try { localStorage.setItem(REST_KEY, JSON.stringify(rest)); } catch(e){} }
+function applyRest(){
+  const m = BeltEngine.restFrom(rest.mins);
+  restNow = rest.health ? { bpm: Math.round(rest.health), src: "Health" } : m != null ? { bpm: m, src: "gemessen" } : null;
+  BeltEngine.ownRest = restNow ? restNow.bpm : null;
+  eng.setOwnRest(BeltEngine.ownRest);
+}
+async function restFromHealth(){
+  if (rest.healthDay === new Date().toDateString()) return;   // einmal am Tag reicht
+  try {
+    if (!healthAsked){ healthAsked = true; await health.ask(); }
+    const r = await health.restingHeartRate({ days: 7 });
+    rest.health = r.bpm >= 35 && r.bpm <= 110 ? r.bpm : null;
+    rest.healthDay = new Date().toDateString(); saveRest();
+    if (rest.health && (!restNow || restNow.src !== "Health")){ applyRest(); lastMoveHTML = ""; paintMove(); }
+  } catch(e){ /* Health nicht erlaubt: eigene Messung */ }
+}
+function onBeltReady(){
+  restFromHealth().then(() => {
+    if (!restNow) toast("move", "Ruhepuls messen: zwei Minuten ruhig sitzen", $("moveCard"));
+  });
+}
 function catchUp(){
   if (!eng.reality || !anchor) return;
   let n = Math.min(4320, Math.floor(anchor.simT + (Date.now() - anchor.wall)/60000 - eng.s.t));
@@ -65,7 +98,12 @@ function onBeltBpm(bpm){
   if (eng.beltT == null) eng.beltBpm(bpm);                 // erster Wert gilt sofort
   const m = beltAvg.add(now, bpm);
   if (!m) return;
-  if (now - m.minute < 120000) eng.beltBpm(m.bpm);         // veraltete Reste nach einer Pause nicht nehmen
+  if (now - m.minute < 120000){                            // veraltete Reste nach einer Pause nicht nehmen
+    eng.beltBpm(m.bpm);
+    rest.mins.push(m.bpm); if (rest.mins.length > 3000) rest.mins.splice(0, rest.mins.length - 3000);
+    saveRest();
+    if (!restNow){ applyRest(); if (restNow){ lastMoveHTML = ""; toast("move", \`Ruhepuls gemessen: \${restNow.bpm} bpm\`, $("moveCard")); } }
+  }
   if (document.visibilityState === "hidden"){              // einmal pro Minute: Alarme und Stand
     if (eng.s.t - alarmT >= 5) scheduleAlarms();
     paintLive();
@@ -76,7 +114,7 @@ const belt = NebelBelt.createBelt({
   onBpm: onBeltBpm,
   onStatus(state, name, msg){
     if (state === "getrennt") beltLost();
-    if (state === "verbunden") tryFillGap();
+    if (state === "verbunden"){ tryFillGap(); onBeltReady(); }
     beltState = state; beltMsg = msg; if (state === "aus") beltBpmNow = 0; lastMoveHTML = ""; paintMove();
   },
 });
@@ -121,10 +159,11 @@ setInterval(tryFillGap, 120000);          // Zepp schreibt das Training oft erst
 var liveN = 0, liveAct = NebelBelt.live, liveLast = null;
 function liveBpm(bpm){
   if (!liveAct || !liveLast || liveN === null || bpm === liveLast.bpm) return;
-  liveLast.bpm = bpm; liveLast.hard = liveHard(bpm);
+  liveLast.bpm = bpm; liveLast.hard = liveHard(eng.beltToBody(bpm));
   liveAct.update(liveLast).catch(() => {});
 }
-/* Zone wie in der Engine (heartRateReserve): ueber der ventilatorischen Schwelle = anaerob. */
+/* Zone wie in der Engine (heartRateReserve): ueber der ventilatorischen Schwelle = anaerob.
+   bpm im Massstab der Person, Gurtwerte also vorher durch eng.beltToBody. */
 const liveHard = bpm => (bpm - eng.p.HRrest) / (eng.p.HRmax - eng.p.HRrest) > eng.p.VT_HRR;
 const LIVE_ARROW = { 3:"⇈", 2:"↑", 1:"↗", 0:"→", [-1]:"↘", [-2]:"↓", [-3]:"⇊" };
 function paintLive(){
@@ -142,7 +181,7 @@ function paintLive(){
     value: bgv(v), unit: UL(), arrow: LIVE_ARROW[trendClass(eng.trend())],
     tone: v < 70 ? "low" : v > 180 ? "high" : "ok", name: PERSON.name,
     delta: dlt === 0 ? "0" : (dlt > 0 ? "+" : "−") + bgd(Math.abs(dlt)),   // wie bgDelta in der App
-    bpm, hard: liveHard(bpm), dark: document.documentElement.dataset.theme === "dark",
+    bpm, hard: liveHard(eng.beltT != null ? eng.beltToBody(bpm) : bpm), dark: document.documentElement.dataset.theme === "dark",
     at: anchor.wall + (last.t - anchor.simT)*60000,
     points: trc.slice(-13).map(p => p.sensor),
   }).catch(() => {});
@@ -213,7 +252,7 @@ export const PATCHES = [
   [".page > .inner{width:100%; max-width:460px; padding:0 20px 1px; align-self:flex-start; min-height:100%}",
    (m) => m + CSS],
   ['<p class="legal"><a href="rechtliches.html">Impressum · Datenschutz · Lizenzen</a> · <a href="en/" lang="en" hreflang="en">English</a></p>',
-   '<p class="legal"><a href="puls.html">Pulsgurt-Test</a></p>', 2],
+   '<p class="legal"><a href="rechtliches.html">Impressum · Datenschutz · Lizenzen</a> · <a href="puls.html">Pulsgurt-Test</a></p>', 2],
 
   // Oberflaeche: Alarmknopf, Gurtzeile in der Bewegungskarte, Nachtblatt, Hinweis im Reality-Blatt
   ['<button class="btn soft wide" id="btnSleep">Schlafen gehen</button>',
@@ -247,7 +286,7 @@ export const PATCHES = [
       $("mvName").textContent = eng.reality ? "Du planst selbst" : "Nichts geplant";`],
   ['$("mvCancel").hidden = a.mode !== "soon";',
    (m) => m + `
-  if (eng.reality) put("mvSrc", belted ? \`Quelle: Pulsgurt · \${beltBpmNow} bpm\`
+  if (eng.reality) put("mvSrc", belted ? \`Quelle: Pulsgurt · \${beltBpmNow} bpm · \${restNow ? \`Ruhepuls \${restNow.bpm} (\${restNow.src})\` : "Ruhepuls wird gemessen"}\`
     : beltState === "suche" ? "Quelle: simuliert · suche Pulsgurt …"
     : beltState === "getrennt" ? "Quelle: simuliert · " + (beltMsg || "Gurt getrennt, verbinde neu …")
     : "Quelle: simuliert" + (beltMsg ? " · " + beltMsg : ""));
@@ -307,6 +346,7 @@ if (eng.reality){ speed = 1; [...$("speed").children].forEach(x => x.setAttribut
   ["requestAnimationFrame(loop);\n</script>",
    `requestAnimationFrame(loop);
 paintAlarmBtn();
+applyRest();
 ksMorning();
 tryFillGap();
 paintLive();

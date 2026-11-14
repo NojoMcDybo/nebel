@@ -106,6 +106,8 @@ export function createBelt(h: BeltHandlers) {
 export const health = registerPlugin<{
   ask(): Promise<{ ok: boolean; error: string }>;
   heartRate(o: { from: number; to: number }): Promise<{ samples: { t: number; bpm: number }[] }>;
+  /** Mittel der Ruhepuls-Tageswerte (meist von der Apple Watch); bpm 0 = keine Werte. */
+  restingHeartRate(o: { days: number }): Promise<{ bpm: number; n: number }>;
 }>("NebelHealth");
 
 /** Live-Aktivität auf dem Sperrbildschirm (NebelLivePlugin, Widget in ios/App/NebelWidget). */

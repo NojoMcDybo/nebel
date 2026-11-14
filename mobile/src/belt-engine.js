@@ -8,11 +8,23 @@
 const BELT_GRACE = 2;
 
 class BeltEngine extends Engine {
-  constructor(...a){ super(...a); this.beltT = null; }   // pen und Tagesmodus durchreichen
+  /* Eigener Ruhepuls des Gurttraegers, von der App gesetzt (app-patches.mjs). Steht
+     nicht im Snapshot, deshalb gilt er fuer jede neue Engine und nach restore. */
+  static ownRest = null;
 
-  /* Mittel der letzten Minute [bpm]. */
+  /* Ruhepuls aus eigenen Gurt-Minutenmitteln (ohne Apple Watch): erst ab zwei Minuten
+     Ruhemessung; dann das 5. Perzentil, mit wenigen Werten also der niedrigste. */
+  static restFrom(mins){
+    if (!Array.isArray(mins) || mins.length < 2) return null;
+    const s = [...mins].sort((a, b) => a - b);
+    return Math.round(s[Math.floor(0.05 * (s.length - 1))]);
+  }
+  constructor(...a){ super(...a); this.beltT = null; this.setOwnRest(BeltEngine.ownRest); }   // pen und Tagesmodus durchreichen
+
+  /* Mittel der letzten Minute [bpm], roh vom Gurt. Ins Modell geht es um den eigenen
+     Ruhepuls verschoben (beltToBody); das Journal (rewind.js) bleibt bei Rohwerten. */
   beltBpm(bpm){
-    this._setHeartRate([{ t:this.s.t, bpm }]);
+    this._setHeartRate([{ t:this.s.t, bpm:this.beltToBody(bpm) }]);
     if (this.beltT === null)
       this.events.push({ kind:"state", t:this.s.t, sev:"ok", name:"Puls vom Gurt — du bewegst die Person" });
     this.beltT = this.s.t;
@@ -38,7 +50,7 @@ class BeltEngine extends Engine {
   snapshot(){ return { ...super.snapshot(), beltT:this.beltT }; }
   restore(core){
     const ok = super.restore(core);
-    if (ok) this.beltT = core.beltT ?? null;
+    if (ok){ this.beltT = core.beltT ?? null; this.setOwnRest(BeltEngine.ownRest); }
     return ok;
   }
 }

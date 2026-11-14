@@ -64,6 +64,29 @@ describe("BeltEngine", () => {
     expect(e.events.some((x) => x.kind === "move")).toBe(false);
   });
 
+  it("Ruhepuls aus Gurtminuten: erst ab zwei Minuten, dann 5. Perzentil", () => {
+    expect(BeltEngine.restFrom([])).toBe(null);
+    expect(BeltEngine.restFrom([70])).toBe(null);
+    expect(BeltEngine.restFrom([72, 66])).toBe(66);
+    const many = Array.from({ length: 101 }, (_, i) => 50 + i);   // 50..150
+    expect(BeltEngine.restFrom(many)).toBe(55);
+  });
+
+  it("verschiebt den Gurtpuls um den eigenen Ruhepuls, auch nach restore und in Kopien", () => {
+    BeltEngine.ownRest = 50;
+    try {
+      const e = make();
+      const hr = e.p.HRrest;
+      e.beltBpm(80);
+      const last = e.input.filter((x) => x.kind === "heartRate").pop();
+      expect(JSON.stringify(last)).toContain(String(80 - 50 + hr));
+      expect(new BeltEngine(7, 0).ownRest).toBe(50);
+      const c = make(); c.restore(e.snapshot());
+      expect(c.ownRest).toBe(50);
+    } finally { BeltEngine.ownRest = null; }
+    expect(make().beltToBody(80)).toBe(80);   // ohne eigenen Ruhepuls roh
+  });
+
   it("reicht Pen und Tagesmodus an den Adapter durch", () => {
     const e = new BeltEngine(7, 0, true, { id: "schwanger", week: 34 });
     expect(e.pen).toBe(true);

@@ -37,6 +37,7 @@ writeFileSync("www/index.html", html);
 writeFileSync("www/personen-daten.js", data);
 cpSync(resolve(site, "fonts"), "www/fonts", { recursive: true });
 cpSync(resolve(site, "lizenzen"), "www/lizenzen", { recursive: true });
+cpSync(resolve(site, "rechtliches.html"), "www/rechtliches.html");   // Datenschutz auch in der App erreichbar
 
 /* belt.js: der Bluetooth-Teil als Skript fuer index.html (window.NebelBelt) und fuer puls.html. */
 await build({

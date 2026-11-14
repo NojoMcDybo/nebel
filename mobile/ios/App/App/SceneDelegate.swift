@@ -150,6 +150,8 @@ public class NebelAlarmPlugin: CAPPlugin, CAPBridgedPlugin {
 /// war, etwa wenn das Handy beim Sport auf der Bank lag und Zepp das Training
 /// spaeter nach Health schreibt. Nur lesen, nur Herzfrequenz, alles bleibt auf dem iPhone.
 /// JS: NebelHealth.heartRate({ from, to }) -> { samples: [{ t: ms seit Epoche, bpm }] }
+/// NebelHealth.restingHeartRate({ days }) -> { bpm: Mittel der Tageswerte oder 0, n }
+/// (Ruhepuls schreibt meist nur die Apple Watch; ohne sie misst die App selbst.)
 @objc(NebelHealthPlugin)
 public class NebelHealthPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "NebelHealthPlugin"
@@ -157,13 +159,15 @@ public class NebelHealthPlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "ask", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "heartRate", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "restingHeartRate", returnType: CAPPluginReturnPromise),
     ]
     private let store = HKHealthStore()
     private let hr = HKObjectType.quantityType(forIdentifier: .heartRate)!
+    private let rest = HKObjectType.quantityType(forIdentifier: .restingHeartRate)!
 
     @objc func ask(_ call: CAPPluginCall) {
         guard HKHealthStore.isHealthDataAvailable() else { return call.resolve(["ok": false, "error": "unavailable"]) }
-        store.requestAuthorization(toShare: nil, read: [hr]) { ok, err in
+        store.requestAuthorization(toShare: nil, read: [hr, rest]) { ok, err in
             call.resolve(["ok": ok, "error": err.map { "\($0)" } ?? ""])
         }
     }
@@ -181,6 +185,18 @@ public class NebelHealthPlugin: CAPPlugin, CAPBridgedPlugin {
                 ["t": $0.startDate.timeIntervalSince1970 * 1000, "bpm": $0.quantity.doubleValue(for: unit)]
             }
             call.resolve(["samples": out])
+        }
+        store.execute(q)
+    }
+
+    @objc func restingHeartRate(_ call: CAPPluginCall) {
+        guard HKHealthStore.isHealthDataAvailable() else { return call.resolve(["bpm": 0, "n": 0]) }
+        let days = Double(call.getInt("days") ?? 7)
+        let pred = HKQuery.predicateForSamples(withStart: Date().addingTimeInterval(-days * 86400), end: Date(), options: [])
+        let unit = HKUnit.count().unitDivided(by: .minute())
+        let q = HKSampleQuery(sampleType: rest, predicate: pred, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, results, _ in
+            let v = (results as? [HKQuantitySample] ?? []).map { $0.quantity.doubleValue(for: unit) }
+            call.resolve(["bpm": v.isEmpty ? 0 : v.reduce(0, +) / Double(v.count), "n": v.count])
         }
         store.execute(q)
     }
