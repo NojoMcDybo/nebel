@@ -900,7 +900,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
       <div class="unit"><span class="ul">mg/dL</span> · Sensor</div>
     </div>
     <!-- ausserhalb des Readouts: wird bei tiefen Werten nicht mit unscharf -->
-    <div class="behind" id="behind">dein Körper vor etwa einer Weile</div>
+    <div class="behind" id="behind">letzter Messwert gerade eben</div>
     <div class="crit" id="crit" role="status" hidden>
     <svg id="critSkull" viewBox="0 0 24 24" fill="none">
       <path d="M12 2C7.6 2 4 5.5 4 9.7c0 2.6 1.3 4.6 3 5.8V19a1 1 0 001 1h1.6v-2h1.1v2h2.6v-2h1.1v2H17a1 1 0 001-1v-3.5c1.7-1.2 3-3.2 3-5.8C21 5.5 16.4 2 12 2z"
@@ -2099,7 +2099,8 @@ function paint(tNow){
   // Am Element, nicht an der Wurzel: dort liesse jede Aenderung alle Stile der Seite neu rechnen.
   const fd = uiFade.toFixed(3);
   if (fd !== lastFade){ lastFade = fd; $("readout").style.setProperty("--fade", fd); }
-  put("behind", uiFade > .4 ? "schwer zu lesen" : "dein Körper vor etwa " + LAG_TXT);
+  const ago = eng.s.t - (eng.trace.length ? eng.trace[eng.trace.length - 1].t : eng.s.t);
+  put("behind", uiFade > .4 ? "schwer zu lesen" : ago < 1 ? "letzter Messwert gerade eben" : `letzter Messwert vor ${ago} min`);
 
   // Zustandsanzeigen brauchen keine 60 Bilder pro Sekunde.
   if ((frame++ & 7) === 0){ paintMove(); paintReserve(); paintChips(); paintCrit(); paintBasal(); checkHypo(); checkRemarks(); checkPlan(); checkInvite(); }

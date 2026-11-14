@@ -574,3 +574,7 @@ Anlass: Frage nach dem Modus, der über Nacht die Basalrate senkt. Das ist kein 
 - **Anzeige:** Basal-Knopf „Basalrate · pausiert seit … (Basal-IQ)“, Protokoll „Basal pausiert, ein Tief droht“ und „Basal läuft wieder nach … min“.
 - **Prüfung (check:adapter):** 1,5 U zu viel ohne Essen: tiefster Wert 28 → 65 mg/dL, Insulin 10,75 → 9,13 U, nie mehr als ohne, längste Pause 105 min in 2,5 h, Vorhersage rechnet die Pausen exakt nach, Pause übersteht Speichern, Ausschalten beendet sie. Laut PubMed (PROLOG, doi:10.2337/dc18-0771): Zeit unter 70 mg/dL 31 % weniger, im Mittel 104 min Pause am Tag.
 - **Grenze:** Die Vorhersage der App rechnet eine laufende Pause bis zu ihrem Höchstende weiter, nicht das automatische Wiedereinschalten.
+
+## 33. Nachtrag 14.11.2026 — Alter des Messwerts statt Körper-Verzögerung
+
+- Unter dem Sensorwert steht „letzter Messwert vor X min“ (1–4 min, „gerade eben“ direkt nach der Messung), englisch „last reading X min ago“. Bisher: „dein Körper vor etwa …“. Bei sehr tiefen Werten bleibt „schwer zu lesen“. Die Sensorverzögerung erklären weiter die Texte mit `.lagTxt`.
