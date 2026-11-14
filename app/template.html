@@ -591,6 +591,8 @@ canvas{width:100%; height:206px; display:block; touch-action:pan-y}
   transform:translate(-50%, -12px); opacity:0; transition:transform .5s var(--spring), opacity .35s var(--spring);
 }
 .remark.on{transform:translate(-50%, 0); opacity:1}
+.toast.on, .remark.on{pointer-events:auto}
+.wisch{touch-action:none; cursor:grab}
 .remark .who{font-family:var(--mono); font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink3)}
 .remark .txt{font-size:15px; line-height:1.4; margin-top:3px; color:var(--ink); white-space:pre-line}
 .remark .me{font-size:14px; line-height:1.4; margin-top:8px; color:var(--high); font-weight:600}
@@ -1489,7 +1491,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
    Werteingabe, kein Nachbilden echter Menschen (docs/30, docs/09).
    Gespeichert nur im Browser: Name, Aussehen, Antworten. */
 const EIGEN_KEY = "nebel.eigen.v1";
-const BODIES = PERSONAS.map(p => p.id);          // die zehn Figuren: Vergleichsbalken
+const BODIES = PERSONAS.map(p => p.id);          // die neun Figuren: Vergleichsbalken
 const POOL = window.SUBJECTS.filter(s => !s.derived).map(s => s.id);   // die 20 des Datensatzes: Grundlage der eigenen Person
 const FINE = [0.7, 0.85, 1, 1.2, 1.4];             // Insulinwirkung fein
 const EIGEN_Q = [
@@ -1577,7 +1579,7 @@ const LAG_TXT = (LAG_WORDS[LAG_MIN] ?? LAG_MIN) + " Minuten";
 /* KS-PURE-BEGIN */
 const KS_FIRST = "2026-11-14", KS_T0 = 7*60;
 const KS_MODES = ["normal", "luteal", "kurznacht", "hitze", "alkohol", "schwanger"];
-const KS_ALL = ["Patient_10", "Patient_4", "Patient_6", "Patient_7", "Patient_8", "Patient_11", "Patient_13", "Patient_15", "Patient_18"];
+const KS_ALL = ["Patient_10", "Patient_4", "Patient_6", "Patient_7", "Patient_8", "Patient_11", "Patient_13", "Patient_15", "Patient_9_Tim"];   // Tim seit 14.11. auf Davids Platz
 const KS_WOMEN = ["Patient_10", "Patient_6", "Patient_7", "Patient_13", "Patient_15"];   // Zyklus und Schwangerschaft nur bei Figuren, die als Frauen beschrieben sind
 const ksHash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; };
 const ksRand = (seed, k) => ksHash(seed + ":" + k) / 4294967296;
@@ -2181,7 +2183,7 @@ function buildPeople(){
             <div class="cmp"><div class="cl">${m.label}</div><div class="cv" id="pcC${i}"></div>
               <div class="cmpbar">${r.vals.map(v => `<i style="left:${r.pos(v)}"></i>`).join("")}<b id="pcB${i}"></b>
                 <span class="lo">${bgd(r.lo)}</span><span class="hi">${bgd(r.hi)}</span></div></div>`; }).join("")}
-          <p class="cmpfoot">Gleiche Handlung, zehn Körper. Die Striche sind alle zehn. Gerechnet in der Simulation ab ${bgv(108)} ${UL()}, ohne Sensorfehler — kein Maßstab für echte Menschen.</p>
+          <p class="cmpfoot">Gleiche Handlung, neun Körper. Die Striche sind alle neun. Gerechnet in der Simulation ab ${bgv(108)} ${UL()}, ohne Sensorfehler — kein Maßstab für echte Menschen.</p>
         </div></div></div>
       <div class="mark"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v13M1 7.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
     </div>
@@ -2694,6 +2696,33 @@ const ICON = {
   move:'<svg viewBox="0 0 16 16" fill="none"><path d="M9 2.2a1 1 0 100 .1M6.5 14l1.2-3.6L5.5 9l.8-3.4L4 6.8 3 8.8M8.5 7.4l2.2 1 1.3 2.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   basal:'<svg viewBox="0 0 16 16" fill="none"><path d="M8 1.8s4.2 4 4.2 6.7a4.2 4.2 0 11-8.4 0C3.8 5.8 8 1.8 8 1.8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
 };
+/* Wegwischen: jede Mitteilung laesst sich hoch oder zur Seite wegziehen. Knoepfe bleiben
+   Knoepfe. Gezogen wird mit translate, damit eigene transform-Animationen bleiben. */
+function swipeAway(card, onAway){
+  let sw = null;
+  card.classList.add("wisch");
+  card.addEventListener("pointerdown", e => {
+    if (e.button > 0 || e.target.closest("button, a, input, select, textarea")) return;
+    sw = { x:e.clientX, y:e.clientY }; card.style.transition = "none";
+    try { card.setPointerCapture(e.pointerId); } catch(_){}   // ohne aktiven Zeiger (z. B. Stift-Wechsel) einfach ohne Fang
+  });
+  card.addEventListener("pointermove", e => {
+    if (!sw) return;
+    const dx = e.clientX - sw.x, dy = Math.min(0, e.clientY - sw.y);
+    card.style.translate = `${dx}px ${dy}px`;
+    card.style.opacity = String(1 - Math.min(.7, (Math.abs(dx) - dy) / 300));
+  });
+  const end = e => {
+    if (!sw) return;
+    const dx = e.clientX - sw.x, dy = e.clientY - sw.y; sw = null; card.style.transition = "";
+    if (dy < -40 || Math.abs(dx) > 90){
+      card.style.translate = dy < -40 && Math.abs(dx) <= 90 ? "0 -160%" : `${dx > 0 ? 130 : -130}% 0`; card.style.opacity = "0";
+      onAway();
+      setTimeout(() => { card.style.translate = card.style.opacity = ""; }, 520);
+    } else { card.style.translate = ""; card.style.opacity = ""; }
+  };
+  card.addEventListener("pointerup", end); card.addEventListener("pointercancel", end);
+}
 let toastT = null;
 function toast(kind, text, cell){
   const el = $("toast");
@@ -2702,6 +2731,7 @@ function toast(kind, text, cell){
   el.classList.add("on");
   clearTimeout(toastT);
   toastT = setTimeout(() => el.classList.remove("on"), 1900);
+  if (!el.classList.contains("wisch")) swipeAway(el, () => { clearTimeout(toastT); el.classList.remove("on"); });
   if (cell){
     cell.classList.remove("edge"); void cell.offsetWidth; cell.classList.add("edge");
   }
@@ -2881,6 +2911,7 @@ function showCard(who, txt, ms){
   $("remark").classList.add("on");
   clearTimeout(remarkT); remarkT = setTimeout(() => $("remark").classList.remove("on"), ms);
 }
+swipeAway($("remark"), () => { clearTimeout(remarkT); $("remark").classList.remove("on"); });
 
 /* ─── Tagesplan und Ueberraschungen (nur im ganzen Alltag) ──────
    Morgens zeigt eine Karte, was heute ansteht, grob auf halbe Stunden.
@@ -2929,6 +2960,8 @@ function checkInvite(){
   $("invNo").onclick = close;
   g.hidden = false; $("invYes").focus({ preventScroll:true });
 }
+
+swipeAway($("invite").querySelector(".box"), () => $("invNo").click());   // wegwischen wie „Lieber nicht“
 
 /* Unterzucker macht langsam: Im ganzen Alltag haengen die Hauptknoepfe kurz,
    unter 55 laenger. Der Klick wird abgefangen und spaeter nachgeholt. */
@@ -3209,6 +3242,7 @@ $("btnSnooze").onclick = () => {
   $("alarmBox").hidden = true; $("nBody").hidden = false;
   if (navigator.vibrate) navigator.vibrate(0);
 };
+swipeAway($("alarmBox"), () => $("btnSnooze").click());   // wegwischen wie „Weiterschlafen“
 $("btnTempo").onclick = () => {
   if (eng.reality) return;
   const steps = [1, 20, 60, 300];
@@ -3760,30 +3794,11 @@ function ksAfterGate(){
     KSD.consent = yes; ksSave();
     if (yes) return ksEnter();
     g.classList.remove("on"); ksPaintBar();
-    setTimeout(() => { g.hidden = true; card.style.transform = card.style.opacity = ""; }, 500);
+    setTimeout(() => { g.hidden = true; }, 500);
   };
   $("ksAskYes").onclick = () => done(true);
   $("ksAskNo").onclick = () => done(false);
-  let sw = null;
-  card.addEventListener("pointerdown", e => {
-    if (e.target.closest("button")) return;
-    sw = { x: e.clientX, y: e.clientY }; card.setPointerCapture(e.pointerId); card.style.transition = "none";
-  });
-  card.addEventListener("pointermove", e => {
-    if (!sw) return;
-    const dx = e.clientX - sw.x, dy = Math.min(0, e.clientY - sw.y);
-    card.style.transform = `translate(${dx}px, ${dy}px)`;
-    card.style.opacity = String(1 - Math.min(.7, (Math.abs(dx) - dy) / 300));
-  });
-  const up = e => {
-    if (!sw) return;
-    const dx = e.clientX - sw.x, dy = e.clientY - sw.y; sw = null; card.style.transition = "";
-    if (dy < -40 || Math.abs(dx) > 90){
-      card.style.transform = dy < -40 ? "translateY(-160%)" : `translateX(${dx > 0 ? 130 : -130}%)`; card.style.opacity = "0";
-      done(false);
-    } else { card.style.transform = ""; card.style.opacity = ""; }
-  };
-  card.addEventListener("pointerup", up); card.addEventListener("pointercancel", up);
+  swipeAway(card, () => done(false));
 }
 
 /* ─── Start ───────────────────────────────────────────────────── */

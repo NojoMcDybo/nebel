@@ -82,3 +82,8 @@ Umsetzung der Ähnlichkeits-Fragen vom 26.09., auf dem zehnten Platz der Startse
 
 - Ersetzt „In der App stehen nur die Datensatzwerte“ oben. Tim läuft auf einem eigenen, aus Patient 9 abgeleiteten Körper mit allen Steckbriefwerten: 190 cm, 88 kg, Ruhepuls 50, HbA1c 6,1 %, Basal 1,0 U/h, KE 12 g/U, Korrektur 55 mg/dL/U. Maximalpuls bleibt 191 aus dem Datensatz.
 - Rechenweg und Folgen (Insulinwirkung ×1,30, KE 12 knapp) in `00_Widerspruchspruefung_und_Changelog.md`, Nachtrag 40.
+
+### Nachtrag am selben Tag: David entfällt
+
+- Auf Nojos Wunsch eine Figur weniger, gewählt wurde David (Patient 18). Es bleiben neun Figuren. Patient 18 steht der eigenen Person weiter zur Wahl.
+- Tim übernimmt Davids Platz in der Daily Dose. Das ersetzt „Nicht in der Daily Dose“ oben; Begründung in `00_Widerspruchspruefung_und_Changelog.md`, Nachtrag 41.

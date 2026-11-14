@@ -213,7 +213,7 @@ if (existsSync(appTpl)) {
     if (hits.length) console.error(`Hinweis: en: ${hits.length} Zeilen mit deutschem Rest (nur melden, nicht abbrechen)`);
   }
 
-  /* personen-daten.js — alle Koerper: zehn mit Figur, die uebrigen fuer die eigene Person. Eigene Lizenz. */
+  /* personen-daten.js — alle Koerper: neun mit Figur, die uebrigen fuer die eigene Person. Eigene Lizenz. */
   const ref = existsSync(resolve(root, "vendor/py-mgipsim/REF"))
     ? readFileSync(resolve(root, "vendor/py-mgipsim/REF"), "utf8").trim() : "unbekannt";
   const vm2 = vm.createContext({});

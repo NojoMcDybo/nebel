@@ -208,8 +208,8 @@ export const PAIRS = [
   ['${kv(0,"Größe")}${kv(1,"Gewicht")}${kv(2,"Ruhepuls")}${kv(3,"HbA1c")}', '${kv(0,"Height")}${kv(1,"Weight")}${kv(2,"Resting HR")}${kv(3,"HbA1c")}'],
   ['${kv(4,"Basal")}${kv(5,"KE-Faktor")}${kv(6,"Korrektur")}${kv(7,"Therapie")}', '${kv(4,"Basal")}${kv(5,"Carb ratio")}${kv(6,"Correction")}${kv(7,"Therapy")}'],
   ['<h3>Was das ausmacht</h3>', '<h3>What makes the difference</h3>'],
-  ["Gleiche Handlung, zehn Körper. Die Striche sind alle zehn. Gerechnet in der Simulation ab ${bgv(108)} ${UL()}, ohne Sensorfehler — kein Maßstab für echte Menschen.",
-   "Same action, ten bodies. The ticks are all ten. Calculated in the simulation from ${bgv(108)} ${UL()}, without sensor error — not a yardstick for real people."],
+  ["Gleiche Handlung, neun Körper. Die Striche sind alle neun. Gerechnet in der Simulation ab ${bgv(108)} ${UL()}, ohne Sensorfehler — kein Maßstab für echte Menschen.",
+   "Same action, nine bodies. The ticks are all nine. Calculated in the simulation from ${bgv(108)} ${UL()}, without sensor error — not a yardstick for real people."],
   ["Größe, Gewicht, Ruhepuls, HbA1c und Therapie stammen aus einem Steckbrief. Der Körper darunter ist aus einem veröffentlichten Forschungsdatensatz abgeleitet und daran angepasst. Alltag und Aussehen sind erfunden.",
    "Height, weight, resting heart rate, HbA1c and therapy come from a profile. The body underneath is derived from a published research data set and adjusted to it. Daily life and looks are invented."],
   ["Name, Alter, Alltag und Aussehen sind erfunden. Körper- und Therapiewerte stammen aus einem veröffentlichten Forschungsdatensatz.",
@@ -395,7 +395,6 @@ export const PAIRS = [
   ['line:"fährt Linienbus"', 'line:"drives a city bus"'],
   ['line:"arbeitet als Erzieherin"', 'line:"works as a nursery teacher"'],
   ['line:"arbeitet im Buchhandel"', 'line:"works in a bookshop"'],
-  ['line:"studiert BWL"', 'line:"studies business administration"'],
   ['line:"studiert Sport"', 'line:"studies sports science"'],
 
 

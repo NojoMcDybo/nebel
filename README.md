@@ -12,7 +12,7 @@ nebel. is explicitly **not** intended for the diagnosis, prevention, monitoring,
 
 - No dosing recommendations and no individual advice. There is no bolus calculator.
 - No real health data. There is no way to enter your own glucose, insulin or meal values.
-- The simulation covers **ten fictional adults**, plus your own person built from five rough questions. Children, adolescents and poorly controlled diabetes are not covered.
+- The simulation covers **nine fictional adults**, plus your own person built from five rough questions. Children, adolescents and poorly controlled diabetes are not covered.
 - No number from nebel. may ever inform a real therapy decision. That is the job of your diabetes care team.
 
 Legal assessment and the conditions for publishing (in German): `docs/30_Rechtliche_Einordnung.md`.
@@ -74,7 +74,7 @@ Open `engine/dist/site/index.html` in a browser. The viewer is a developer tool 
 - **py-mgipsim:** The reference implementation [py-mgipsim](https://github.com/illinoistech-itm/py-mgipsim) (GPL-3.0) serves as a numerical oracle in the test suite.
   - No code was copied from it.
   - Neither the library nor its parameter sets are part of this repository.
-- **The published app** ships all twenty py-mgipsim parameter sets; ten carry an invented character.
+- **The published app** ships all twenty py-mgipsim parameter sets; nine carry an invented character; one of them runs on a body derived from it.
   - They come as a separate file, `personen-daten.js`, **under GPL-3.0**, with source, license text and a modification notice.
   - The rest of the app is Apache 2.0.
   - Reasoning: `docs/30_Rechtliche_Einordnung.md`, section 7.

@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════
-   PERSONEN — zehn erfundene Figuren auf zehn veroeffentlichten Koerpern,
+   PERSONEN — neun erfundene Figuren auf neun veroeffentlichten Koerpern,
    dazu eine eigene Person aus Fragen ohne Zahlen (app/template.html,
    „Eigene Person“), die auf einem der 20 Koerper laeuft.
 
@@ -41,8 +41,6 @@ const PERSONAS = [
     look:{ skin:"#F3D5C2", hair:"#6E3520", style:"bob",       shirt:"#7A5A7A" } },
   { id:"Patient_15", name:"Sofia",  age:24, line:"arbeitet im Buchhandel",
     look:{ skin:"#D8A785", hair:"#3A2417", style:"curlylong", shirt:"#A36A4F" } },
-  { id:"Patient_18", name:"David",  age:20, line:"studiert BWL",
-    look:{ skin:"#A56D48", hair:"#1B1411", style:"short",     shirt:"#556B55", glasses:true } },
   /* Seit 14.11.2026: Tim, auf Nojos Wunsch mit seinem Steckbrief. Koerper siehe DERIVED. */
   { id:"Patient_9_Tim", name:"Tim",    age:21, line:"studiert Sport",
     look:{ skin:"#EAC4A6", hair:"#7A5232", style:"side",      shirt:"#3F5F7A" } },

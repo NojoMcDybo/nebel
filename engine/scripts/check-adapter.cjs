@@ -184,7 +184,7 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
     const e = new Engine(7, ti); e.setOwnRest(66);
     ok("… Verschiebung: 150 wird 134, Unsinn wird verworfen", e.beltToBody(150) === 134 && (e.setOwnRest(5), e.beltToBody(150) === 150) && (e.setOwnRest(NaN), e.ownRest === null));
   }
-  ok("Zehn Personen (dazu die eigene)", P.length === 10, P.map(p => p.name).join(", "));
+  ok("Neun Personen (dazu die eigene)", P.length === 9, P.map(p => p.name).join(", "));
   ok("… jede auf einem vorhandenen Subjekt", P.every(p => window.SUBJECTS.some(s => s.id === p.id)));
   ok("… keine doppelt", new Set(P.map(p => p.id)).size === P.length && new Set(P.map(p => p.name)).size === P.length);
   ok("Standardperson ist dabei", P.some(p => p.id === globalThis.__DEF), globalThis.__DEF);
