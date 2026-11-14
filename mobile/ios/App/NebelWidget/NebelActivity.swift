@@ -22,13 +22,22 @@ struct NebelActivityAttributes: ActivityAttributes {
     }
 }
 
-/// Gemeinsamer Speicher von App und Startbildschirm-Widget (App Group). SideStore haengt
-/// beim Signieren die Team-ID an den Gruppennamen und schreibt den echten nach ALTAppGroups.
+/// Gemeinsamer Speicher von App und Startbildschirm-Widget (App Group). SideStore benennt
+/// Gruppe und Bundle-ID beim Signieren um (Team-ID angehaengt). Deshalb mehrere Kandidaten;
+/// es gilt der erste, fuer den iOS wirklich einen gemeinsamen Ordner hat.
 enum NebelShared {
-    static let defaults: UserDefaults? = {
-        let g = (Bundle.main.object(forInfoDictionaryKey: "ALTAppGroups") as? [String])?.first ?? "group.de.nojo.nebel"
-        return UserDefaults(suiteName: g)
+    static let candidates: [String] = {
+        var ids = (Bundle.main.object(forInfoDictionaryKey: "ALTAppGroups") as? [String]) ?? []
+        if var app = Bundle.main.bundleIdentifier {
+            if app.hasSuffix(".NebelWidget") { app.removeLast(".NebelWidget".count) }
+            ids.append("group." + app)
+        }
+        return ids + ["group.de.nojo.nebel"]
     }()
+    static let group = candidates.first { FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: $0) != nil }
+    static let defaults = group.flatMap { UserDefaults(suiteName: $0) }
+    // shortcut: Diagnose im leeren Widget, bis die App Group auf dem iPhone sicher laeuft
+    static var diag: String { "\(group ?? "keine App Group") · \(Bundle.main.bundleIdentifier ?? "?") · \(candidates.joined(separator: ", "))" }
 }
 
 @available(iOS 16.1, *)

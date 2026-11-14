@@ -48,6 +48,7 @@ struct HomeView: View {
                     Text("nebel.").font(.system(size: 15, weight: .heavy)).tracking(-0.5).foregroundStyle(c.ink)
                     Spacer(minLength: 0)
                     Text("Starte Reality in der App.").font(.system(size: 13, weight: .medium)).foregroundStyle(c.ink2)
+                    Text(NebelShared.diag).font(mono(7)).foregroundStyle(c.ink3).lineLimit(4)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
