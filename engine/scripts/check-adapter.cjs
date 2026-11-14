@@ -344,4 +344,27 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   m.basalIQ = false; m.step(); m.step(); m.step(); m.step(); m.step();
   ok("Ausschalten beendet die Pause", !m._susp && m.events.some(x => /läuft wieder/.test(x.name || "")));
 }
+/* Eigene Person, Insulinwirkung fein: kb·s und Dosen /s. Mit passender Therapie
+   bleibt die Kurve exakt gleich, 1 U ohne Essen wirkt staerker oder schwaecher. Die Funktion
+   kommt aus app/template.html, nicht nachgebaut. */
+{
+  const tpl = fs.readFileSync(path.join(root, "app/template.html"), "utf8");
+  const src = tpl.match(/function eigenSubject\(ep\)\{[\s\S]*?\n\}/)[0];
+  const eigenSubject = (0, eval)("(" + src + ")");
+  const idx = 3, base = window.SUBJECTS[idx];
+  const run = (sub, oneUnit) => { const i = window.SUBJECTS.push(sub) - 1, e = new Engine(99, i); e.acts = [];
+    const th = e.therapy, g = [];
+    if (oneUnit) e.injectBolus(1); else { e.logMeal(60, "fast"); e.input[e.input.length-1].fastCarbsG = 60; e.input[e.input.length-1].slowCarbsG = 0; e.injectBolus(60 / th.carbRatioGPerU); }
+    for (let k = 0; k < 6*60; k++){ e.step(); g.push(e.s.G); }
+    window.SUBJECTS.pop(); return g; };
+  const ref = run({ ...base, id:"ref" }), ref1 = run({ ...base, id:"ref1" }, true);
+  for (const s of [0.7, 1.4]){
+    const es = eigenSubject({ base:base.id, id:"Eigen_test", s });
+    const g = run(es), d = Math.max(...g.map((v,k) => Math.abs(v - ref[k])));
+    ok(`Insulinwirkung ×${s}: Mahlzeit mit passendem Bolus gleich`, d < 1e-6, "max " + d.toExponential(1) + " mg/dL");
+    const g1 = run(es, true), drop = ref1[0] - Math.min(...ref1), drop1 = g1[0] - Math.min(...g1);
+    /* Nicht genau s-fach: die Glukose antwortet nichtlinear, nahe am Tief staerker. */
+    ok(`… 1 U ohne Essen wirkt ${s < 1 ? "schwächer" : "stärker"}`, s < 1 ? drop1 < drop - 2 : drop1 > drop + 2, `${drop.toFixed(0)} → ${drop1.toFixed(0)} mg/dL`);
+  }
+}
 function fmtClock(t){ return String(Math.floor(t/60)%24).padStart(2,"0") + ":" + String(t%60).padStart(2,"0"); }

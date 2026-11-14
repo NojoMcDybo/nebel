@@ -75,7 +75,7 @@ small{color:var(--ink3)}
     <ul>
       <li>your progress (<code>nebel.en.state.v1</code>),</li>
       <li>the chosen person (<code>nebel.en.person.v1</code>),</li>
-      <li>your own person, if you create one: name, look and the four rough answers (<code>nebel.eigen.v1</code>, shared with the German version),</li>
+      <li>your own person, if you create one: name, look and the rough answers (<code>nebel.eigen.v1</code>, shared with the German version),</li>
       <li>that you confirmed the notice “Before you start” (<code>nebel.en.hinweis.v1</code>),</li>
       <li>light or dark design, once you switch it (<code>nebel.theme</code>, shared with the German version).</li>
     </ul>
@@ -85,7 +85,7 @@ small{color:var(--ink3)}
     <p>If you write to me, I process your email address, your name if you give it, and the content of your message in order to reply. The legal basis is Art. 6(1)(f) GDPR: the legitimate interest in answering enquiries. The message is stored with my email provider, which processes it technically. I delete it once the matter is settled and no legal retention obligation applies. Please do not send me your own health values: I cannot say anything about your therapy, that is what your diabetes care team is for.</p>
 
     <h3>No health data</h3>
-    <p>Everything in the simulation concerns fictional people. The site does not ask for real glucose, insulin or meal values and has no input field for them. Your own person also only asks roughly, without numbers (“insulin works weakly / medium / strongly”), and then runs on one of the nine fictional bodies.</p>
+    <p>Everything in the simulation concerns fictional people. The site does not ask for real glucose, insulin or meal values and has no input field for them. Your own person also only asks roughly, without numbers (“insulin works weakly / medium / strongly”), and then runs on one of the 20 bodies from the research data set.</p>
 
     <h3>Your rights</h3>
     <p>You have the right of access (Art. 15 GDPR), rectification (Art. 16), erasure (Art. 17) and restriction of processing (Art. 18). You can lodge a complaint with a data protection authority (Art. 77), for example the State Commissioner for Data Protection and Freedom of Information of North Rhine-Westphalia. Unless you write to me, I do not store any data about you; the access data is held by GitHub.</p>
@@ -99,8 +99,8 @@ small{color:var(--ink3)}
     <h3>Program and texts</h3>
     <p>Source code, interface and texts of nebel. are under the <a href="../lizenzen/Apache-2.0.txt">Apache License 2.0</a>. Source code: <a href="https://github.com/NojoMcDybo/nebel">github.com/NojoMcDybo/nebel</a>.</p>
 
-    <h3>The nine bodies</h3>
-    <p>The model parameters of the nine people (<a href="../personen-daten.js">personen-daten.js</a>) come from the 20 virtual patients of the library <a href="https://github.com/illinoistech-itm/py-mgipsim/tree/{{PYMGIPSIM_REF}}">py-mgipsim</a> (Illinois Institute of Technology), version <code>{{PYMGIPSIM_REF_SHORT}}</code>. They are under the <a href="../lizenzen/GPL-3.0.txt">GNU General Public License v3</a> and are passed on here as a separate file under that license. Only the form was changed: nine of the twenty data sets were selected and the required fields were transferred from JSON to JavaScript. The values themselves are unchanged. Where nebel. deviates from them (sensor delay, insulin absorption), this happens only during calculation and is documented in the source code. The names, ages and looks of the people are invented.</p>
+    <h3>The bodies</h3>
+    <p>The model parameters of the people (<a href="../personen-daten.js">personen-daten.js</a>) come from the 20 virtual patients of the library <a href="https://github.com/illinoistech-itm/py-mgipsim/tree/{{PYMGIPSIM_REF}}">py-mgipsim</a> (Illinois Institute of Technology), version <code>{{PYMGIPSIM_REF_SHORT}}</code>. They are under the <a href="../lizenzen/GPL-3.0.txt">GNU General Public License v3</a> and are passed on here as a separate file under that license. Only the form was changed: all twenty data sets were taken over, nine of them with an invented character, and the required fields were transferred from JSON to JavaScript. The values themselves are unchanged. For your own person the insulin effect can be fine-tuned; that happens only during calculation in the browser. Where nebel. deviates from them (sensor delay, insulin absorption), this happens only during calculation and is documented in the source code. The names, ages and looks of the people are invented.</p>
 
     <h3>Model</h3>
     <p>The physiology follows the extended Hovorka model by Rashid et al. (2019), <i>Computers &amp; Chemical Engineering</i>, and Siket, Rashid &amp; Cinar (2025), <i>Journal of Diabetes Science and Technology</i>. The equations were implemented from the publications, not taken from the code of py-mgipsim. Fat, protein and sensor error are own additions, documented with sources in the <a href="https://github.com/NojoMcDybo/nebel/tree/main/docs">project folder docs/</a> (in German).</p>

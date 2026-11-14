@@ -7,7 +7,7 @@
  *
  * 2. dist/site/ — die App, so wie sie veroeffentlicht wird:
  *      index.html          App (Apache 2.0), Engine, Adapter, Personen
- *      personen-daten.js   die neun Parametersaetze, eigene Datei unter GPL-3.0
+ *      personen-daten.js   alle Parametersaetze, eigene Datei unter GPL-3.0
  *      rechtliches.html    Impressum, Datenschutz, Lizenzen
  *      en/index.html       dieselbe App auf Englisch (scripts/i18n-en.mjs)
  *      en/legal.html       englische Fassung von rechtliches.html (app/rechtliches.en.html)
@@ -84,13 +84,12 @@ if (personasSrc) {
   vm.runInContext(engine, ctx);
   vm.runInContext(personasSrc + "\nglobalThis.__PERSONAS = PERSONAS;", ctx);
   const N = ctx.Nebel, profiles = {};
-  for (const p of ctx.__PERSONAS) {
-    const s = subjects.find((x) => x.id === p.id);
-    if (!s) throw new Error(`Person ${p.name}: Subjekt ${p.id} fehlt`);
-    profiles[p.id] = N.responseProfile(N.nebelParameters(s.subject), s.therapy);
-  }
+  for (const p of ctx.__PERSONAS)
+    if (!subjects.some((x) => x.id === p.id)) throw new Error(`Person ${p.name}: Subjekt ${p.id} fehlt`);
+  /* Alle Koerper: die Figuren und die uebrigen, aus denen die eigene Person waehlt. */
+  for (const s of subjects) profiles[s.id] = N.responseProfile(N.nebelParameters(s.subject), s.therapy);
   profilesJs = `window.PROFILES = ${JSON.stringify(profiles)};`;
-  console.log(`${ctx.__PERSONAS.length} Personen, Antwortprofile gerechnet.`);
+  console.log(`${ctx.__PERSONAS.length} Personen, ${subjects.length} Antwortprofile gerechnet.`);
 }
 
 mkdirSync(resolve(root, "dist"), { recursive: true });
@@ -213,19 +212,19 @@ if (existsSync(appTpl)) {
     if (hits.length) console.error(`Hinweis: en: ${hits.length} Zeilen mit deutschem Rest (nur melden, nicht abbrechen)`);
   }
 
-  /* personen-daten.js — nur die neun Koerper der App, eigene Lizenz */
+  /* personen-daten.js — alle Koerper: neun mit Figur, die uebrigen fuer die eigene Person. Eigene Lizenz. */
   const ref = existsSync(resolve(root, "vendor/py-mgipsim/REF"))
     ? readFileSync(resolve(root, "vendor/py-mgipsim/REF"), "utf8").trim() : "unbekannt";
   const vm2 = vm.createContext({});
   vm.runInContext(personasSrc + "\nglobalThis.__IDS = PERSONAS.map(p => p.id);", vm2);
   const ids = vm2.__IDS;
-  const chosen = subjects.filter((s) => ids.includes(s.id));
-  if (chosen.length !== ids.length) { console.error("Nicht jede Person hat einen Parametersatz."); process.exit(1); }
+  const chosen = subjects;
+  if (!ids.every((id) => subjects.some((s) => s.id === id))) { console.error("Nicht jede Person hat einen Parametersatz."); process.exit(1); }
   /* GPL §5a: Datum der tatsaechlichen Aenderung, nicht das Baudatum. Nachziehen, wenn sich
      Auswahl (app/personas.js) oder Zuordnung unten aendert. */
   const DATA_CHANGED = "2026-11-14";
   const dataJs = `/*
- * nebel. — Parametersaetze der neun Koerper
+ * nebel. — Parametersaetze der Koerper
  *
  * Herkunft: py-mgipsim, Illinois Institute of Technology
  *   https://github.com/illinoistech-itm/py-mgipsim  (Stand ${ref})
@@ -237,8 +236,9 @@ if (existsSync(appTpl)) {
  * der Seite; der uebrige Code von nebel. steht unter Apache 2.0.
  * Ohne jede Gewaehrleistung, soweit gesetzlich zulaessig (GPL-3.0 §§ 15-16).
  *
- * Geaendert (${DATA_CHANGED}, nebel.): ${chosen.length} von ${subjects.length} Datensaetzen ausgewaehlt
- * (${ids.join(", ")}), die benoetigten Felder aus JSON in JavaScript
+ * Geaendert (${DATA_CHANGED}, nebel.): alle ${chosen.length} Datensaetze uebernommen; ${ids.length} tragen
+ * eine erfundene Figur (${ids.join(", ")}), die uebrigen dienen der eigenen
+ * Person als moegliche Grundlage. Die benoetigten Felder aus JSON in JavaScript
  * uebertragen. Die Werte selbst sind unveraendert. Zuordnung:
  *   subject  ← model_parameters (kb1 kb2 kb3 EGP0 F01 tmaxI p3 p4 p5 BW HRrest HRmax VG VI VT_HRR)
  *   therapy  ← demographic_info (basal, carb_insulin_ratio, correction_bolus)

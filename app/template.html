@@ -1278,10 +1278,10 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   <h3>Eigene Person</h3>
   <div class="eHead">
     <button class="av" id="eAv" type="button" aria-label="Anderes Aussehen" title="Anderes Aussehen"></button>
-    <input id="eName" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Name" aria-label="Name">
+    <input id="eName" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Name der Person" aria-label="Name der Person">
   </div>
   <div class="field">
-    <label><span>Insulin wirkt bei mir</span></label>
+    <label><span>Insulin wirkt</span></label>
     <div class="seg" id="eQ0"><span class="knob"></span><button data-a="0">schwach</button><button data-a="1">mittel</button><button data-a="2">stark</button></div>
   </div>
   <div class="field">
@@ -1289,15 +1289,23 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     <div class="seg" id="eQ1"><span class="knob"></span><button data-a="0">wenig</button><button data-a="1">mittel</button><button data-a="2">stark</button></div>
   </div>
   <div class="field">
-    <label><span>Sport senkt bei mir</span></label>
+    <label><span>Sport senkt</span></label>
     <div class="seg" id="eQ2"><span class="knob"></span><button data-a="0">kaum</button><button data-a="1">mittel</button><button data-a="2">stark</button></div>
+  </div>
+  <div class="field">
+    <label><span>Harter Sport hebt</span></label>
+    <div class="seg" id="eQ4"><span class="knob"></span><button data-a="0">kaum</button><button data-a="1">mittel</button><button data-a="2">stark</button></div>
   </div>
   <div class="field">
     <label><span>Körperbau</span></label>
     <div class="seg" id="eQ3"><span class="knob"></span><button data-a="0">leicht</button><button data-a="1">mittel</button><button data-a="2">kräftig</button></div>
   </div>
+  <div class="field">
+    <label><span>Insulinwirkung fein</span></label>
+    <div class="seg" id="eF"><span class="knob"></span><button data-a="0" aria-label="viel schwächer">−−</button><button data-a="1" aria-label="schwächer">−</button><button data-a="2" aria-label="wie der Datensatz">=</button><button data-a="3" aria-label="stärker">+</button><button data-a="4" aria-label="viel stärker">++</button></div>
+  </div>
   <p class="split" id="eTxt"></p>
-  <p class="hint">Keine Zahlen: Die Antworten führen zum passendsten der neun Körper aus dem Forschungsdatensatz, mit dessen Körper- und Therapiewerten. Das bildet dich nicht nach und ist kein Bolusrechner. Tipp auf das Gesicht für ein anderes Aussehen. Gespeichert wird nur in diesem Browser.</p>
+  <p class="hint">Keine Zahlen: Die Antworten führen zum passendsten der 20 Körper aus dem Forschungsdatensatz, mit dessen Körper- und Therapiewerten. „Insulinwirkung fein“ lässt jede Einheit stärker oder schwächer wirken; Basalrate, KE-Faktor und Korrekturfaktor ändern sich passend mit. Das bildet niemanden nach und ist kein Bolusrechner. Tipp auf das Gesicht für ein anderes Aussehen. Gespeichert wird nur in diesem Browser.</p>
   <div class="row2">
     <button class="btn soft" data-close>Zurück</button>
     <button class="btn" id="eOK">Übernehmen</button>
@@ -1353,7 +1361,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
 <!-- ══════════ AUSWERTUNG ══════════ -->
 
 
-<!-- Parametersaetze der neun Koerper: eigene Datei, eigene Lizenz (GPL-3.0,
+<!-- Parametersaetze aller Koerper: eigene Datei, eigene Lizenz (GPL-3.0,
      aus py-mgipsim). Der Rest der Seite steht unter Apache 2.0. Siehe
      docs/30_Rechtliche_Einordnung.md, Abschnitt 7. -->
 <script src="personen-daten.js"></script>
@@ -1364,24 +1372,28 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
 /*__PERSONAS__*/
 
 /* ─── Eigene Person ──────────────────────────────────────────────
-   Vier Fragen ohne Zahlen fuehren zum passendsten der neun Koerper. Name und
-   Aussehen waehlt man selbst; Koerper- und Therapiewerte bleiben die des
-   Datensatzes, unveraendert. Keine Werteingabe, kein Nachbilden echter
-   Menschen (docs/30_Rechtliche_Einordnung.md, docs/09_Personen.md).
+   Fuenf Fragen ohne Zahlen fuehren zum passendsten der 20 Koerper. Name und
+   Aussehen waehlt man selbst. Die Feinjustierung skaliert kb1-kb3 mit s und
+   alle Dosen mit 1/s: x1-x3 haengen nur von kb·I ab, die Kurve bei passender
+   Therapie bleibt exakt gleich, nur die Einheiten aendern sich. Keine
+   Werteingabe, kein Nachbilden echter Menschen (docs/30, docs/09).
    Gespeichert nur im Browser: Name, Aussehen, Antworten. */
 const EIGEN_KEY = "nebel.eigen.v1";
-const BODIES = PERSONAS.map(p => p.id);          // die neun, vor dem Anhaengen
+const BODIES = PERSONAS.map(p => p.id);          // die neun Figuren: Vergleichsbalken
+const POOL = window.SUBJECTS.map(s => s.id);      // alle 20: Grundlage der eigenen Person
+const FINE = [0.7, 0.85, 1, 1.2, 1.4];             // Insulinwirkung fein
 const EIGEN_Q = [
   id => window.PROFILES[id].oneUnitDropMgdl,          // Insulin wirkt
   id => window.PROFILES[id].mealPeakMgdl,             // nach dem Essen
   id => window.PROFILES[id].moderateExerciseDropMgdl, // Sport senkt
   id => window.SUBJECTS.find(s => s.id === id).demo.BW,
+  id => window.PROFILES[id].hardExerciseRiseMgdl,     // harter Sport hebt
 ];
-/* Antworten 0/1/2 zielen auf unteres Ende, Mitte, oberes Ende der Spanne der neun. */
+/* Antworten 0/1/2 zielen auf unteres Ende, Mitte, oberes Ende der Spanne der 20. */
 function eigenBase(ans){
-  const rng = EIGEN_Q.map(f => { const v = BODIES.map(f); return [Math.min(...v), Math.max(...v)]; });
-  let best = BODIES[0], bd = Infinity;
-  for (const id of BODIES){
+  const rng = EIGEN_Q.map(f => { const v = POOL.map(f); return [Math.min(...v), Math.max(...v)]; });
+  let best = POOL[0], bd = Infinity;
+  for (const id of POOL){
     const d = EIGEN_Q.reduce((a, f, i) => a + ((f(id) - rng[i][0]) / (rng[i][1] - rng[i][0] || 1) - ans[i] / 2) ** 2, 0);
     if (d < bd){ bd = d; best = id; }
   }
@@ -1395,22 +1407,33 @@ const LOOKS = {
 };
 /* Aus dem Speicher: nur bekannte Werte, der Name ohne Zeichen, die HTML bilden. */
 function cleanEigen(e){
-  if (!e || !Array.isArray(e.ans) || e.ans.length !== 4 || !e.ans.every(a => a === 0 || a === 1 || a === 2)) return null;
+  if (!e || !Array.isArray(e.ans) || e.ans.length < 4 || e.ans.length > 5 || !e.ans.every(a => a === 0 || a === 1 || a === 2)) return null;
   const L = e.look || {}, pick = (k, v) => LOOKS[k].includes(v) ? v : LOOKS[k][0];
-  return { name: String(e.name || "").replace(/[<>&"'`]/g, "").trim().slice(0, 16) || "Ich", ans: e.ans.slice(),
+  const ans = e.ans.length === 4 ? e.ans.concat(1) : e.ans.slice();      // Staende vom 14.11. kannten Frage 5 nicht
+  return { name: String(e.name || "").replace(/[<>&"'`]/g, "").trim().slice(0, 16) || "Eigene", ans,
+    fine: [0,1,2,3,4].includes(e.fine) ? e.fine : 2,
     look: { skin:pick("skin", L.skin), hair:pick("hair", L.hair), style:pick("style", L.style), shirt:pick("shirt", L.shirt),
             glasses:!!L.glasses, beard:!!L.beard } };
 }
 function eigenPersona(e){
-  const base = eigenBase(e.ans), b = PERSONAS.find(p => p.id === base);
-  return { id:"Eigen_" + base, base, name:e.name, age:b.age, line:`selbst zusammengestellt · Körper wie bei ${b.name}`, look:e.look, eigen:true };
+  const base = eigenBase(e.ans), b = PERSONAS.find(p => p.id === base && !p.eigen);
+  const body = b ? `Körper wie bei ${b.name}` : `Körper aus Datensatz ${base.slice(8)} von 20`;
+  const fine = e.fine === 2 ? "" : e.fine < 2 ? " · Insulin wirkt schwächer" : " · Insulin wirkt stärker";
+  return { id:`Eigen_${base}_${e.fine}`, base, s:FINE[e.fine], name:e.name, line:`selbst zusammengestellt · ${body}${fine}`, look:e.look, eigen:true };
+}
+/* Datensatz mit verstellter Insulinwirkung: kb·s, alle Dosen /s (siehe oben). */
+function eigenSubject(ep){
+  const src = window.SUBJECTS.find(x => x.id === ep.base), s = ep.s, sub = src.subject, th = src.therapy;
+  return { ...src, id:ep.id,
+    subject:{ ...sub, kb1:sub.kb1*s, kb2:sub.kb2*s, kb3:sub.kb3*s },
+    therapy:{ ...th, basalRateUPerH:th.basalRateUPerH/s, carbRatioGPerU:th.carbRatioGPerU*s, correctionFactor:th.correctionFactor*s } };
 }
 let EIGEN = null;
 try { EIGEN = cleanEigen(JSON.parse(localStorage.getItem(EIGEN_KEY) || "null")); } catch(e){}
 if (EIGEN){
-  const ep = eigenPersona(EIGEN);
-  window.SUBJECTS.push({ ...window.SUBJECTS.find(s => s.id === ep.base), id: ep.id });
-  window.PROFILES[ep.id] = window.PROFILES[ep.base];
+  const ep = eigenPersona(EIGEN), es = eigenSubject(ep);
+  window.SUBJECTS.push(es);
+  window.PROFILES[ep.id] = ep.s === 1 ? window.PROFILES[ep.base] : N.responseProfile(N.nebelParameters(es.subject), es.therapy);
   PERSONAS.push(ep);
 }
 
@@ -1442,12 +1465,13 @@ const LAG_TXT = (LAG_WORDS[LAG_MIN] ?? LAG_MIN) + " Minuten";
    eine neue Sitzung: anderer Koerper, anderer Verlauf. */
 const PERSON_KEY = "nebel.person.v1";
 function readPerson(){
-  const h = location.hash.match(/person=((?:Eigen_)?Patient_\d+)/);
+  const h = location.hash.match(/person=((?:Eigen_)?Patient_\d+(?:_\d)?)/);
   if (h) return h[1];
   try { const v = localStorage.getItem(PERSON_KEY); if (v) return v; } catch(e){}
   return DEFAULT_PERSONA;
 }
 let personId = readPerson();
+if (/^Eigen_/.test(personId) && EIGEN) personId = PERSONAS.find(p => p.eigen).id;   // aeltere Kennung derselben eigenen Person
 if (!PERSONAS.some(p => p.id === personId)) personId = DEFAULT_PERSONA;
 const PERSON = PERSONAS.find(p => p.id === personId);
 /* Pen (MDI) oder Pumpe. Ein Wechsel beginnt neu: die Vergangenheit passt nicht. */
@@ -1960,11 +1984,11 @@ function showPerson(id, tapped){
     if (on && tapped && !REDUCED) replay(b, "pop");
   });
   $("pcAv").innerHTML = avatarSVG(p, bmiOf(id));
-  $("pcName").textContent = `${p.name}, ${p.age}`;
+  $("pcName").textContent = p.eigen ? p.name : `${p.name}, ${p.age}`;
   $("pcLine").textContent = p.line;
   $("pcEdit").hidden = !p.eigen;
   $("pcNote").textContent = p.eigen
-    ? "Name und Aussehen hast du gewählt, das Alter ist erfunden. Körper- und Therapiewerte stammen aus einem veröffentlichten Forschungsdatensatz."
+    ? "Name und Aussehen hast du gewählt. Körper- und Therapiewerte stammen aus einem veröffentlichten Forschungsdatensatz, die Insulinwirkung lässt sich fein verstellen."
     : "Name, Alter, Alltag und Aussehen sind erfunden. Körper- und Therapiewerte stammen aus einem veröffentlichten Forschungsdatensatz.";
   const vals = [
     [d.height, v => fmtDE(v) + " cm"], [d.BW, v => fmtDE(v) + " kg"],
@@ -2032,17 +2056,19 @@ const rndLook = () => {
 };
 function paintEigen(){
   $("eAv").innerHTML = avatarSVG(cleanEigen({ ...eDraft, name:$("eName").value }), bmiOf(eigenBase(eDraft.ans)));
-  for (let i = 0; i < 4; i++){ pressSeg($("eQ"+i), b => +b.dataset.a === eDraft.ans[i]); moveKnob($("eQ"+i)); }
-  const b = PERSONAS.find(p => p.id === eigenBase(eDraft.ans));
-  $("eTxt").textContent = `Am nächsten liegt der Körper von ${b.name}.`;
+  for (let i = 0; i < 5; i++){ pressSeg($("eQ"+i), b => +b.dataset.a === eDraft.ans[i]); moveKnob($("eQ"+i)); }
+  pressSeg($("eF"), b => +b.dataset.a === eDraft.fine); moveKnob($("eF"));
+  const base = eigenBase(eDraft.ans), b = PERSONAS.find(p => p.id === base && !p.eigen);
+  $("eTxt").textContent = b ? `Am nächsten liegt der Körper von ${b.name}.` : `Am nächsten liegt Datensatz ${base.slice(8)} von 20.`;
 }
 function openEigen(){
-  eDraft = EIGEN ? JSON.parse(JSON.stringify(EIGEN)) : { name:"", ans:[1,1,1,1], look:rndLook() };
+  eDraft = EIGEN ? JSON.parse(JSON.stringify(EIGEN)) : { name:"", ans:[1,1,1,1,1], fine:2, look:rndLook() };
   $("eName").value = EIGEN ? EIGEN.name : "";
   openSheet("sheetEigen");
   requestAnimationFrame(paintEigen);
 }
-for (let i = 0; i < 4; i++) wireSeg($("eQ"+i), b => { eDraft.ans[i] = +b.dataset.a; paintEigen(); });
+for (let i = 0; i < 5; i++) wireSeg($("eQ"+i), b => { eDraft.ans[i] = +b.dataset.a; paintEigen(); });
+wireSeg($("eF"), b => { eDraft.fine = +b.dataset.a; paintEigen(); });
 $("eAv").onclick = () => { eDraft.look = rndLook(); paintEigen(); };
 $("eOK").onclick = () => {
   const e = cleanEigen({ ...eDraft, name:$("eName").value });

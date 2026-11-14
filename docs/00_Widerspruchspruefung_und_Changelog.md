@@ -586,3 +586,10 @@ Anlass: Frage nach dem Modus, der über Nacht die Basalrate senkt. Das ist kein 
 - Gespeichert in `nebel.eigen.v1`, für beide Sprachen gemeinsam. Beim Laden wird geprüft: Antworten nur 0–2, Aussehen nur aus bekannten Werten, aus dem Namen fallen `<>&"'` und Backticks heraus, höchstens 16 Zeichen. Der 26.09. hatte „keine Speicherung“ festgelegt; Begründung der Abweichung in `09_Personen.md`.
 - Vergleichsbalken „Was das ausmacht“: neun Striche, Text „Gleiche Handlung, neun Körper“.
 - Prüfung: check:adapter (neun Personen), Browser: Anlegen, Karte, Neuladen mit Spielstand, englische Fassung, alle neun Körper erreichbar, HTML im Namen entfernt.
+
+## 35. Nachtrag 14.11.2026 — Eigene Person: 20 Körper, fünfte Frage, Insulin fein
+
+- Die eigene Person wählt aus allen 20 Datensätzen (vorher den neun mit Figur); `personen-daten.js` enthält alle 20, die Antwortprofile werden für alle gerechnet. Rechtsseiten und README nachgezogen.
+- Fünfte Frage „Harter Sport hebt“. Alte Stände mit vier Antworten bekommen „mittel“ ergänzt.
+- „Insulinwirkung fein“: kb1–kb3 ×s, Basal /s, KE- und Korrekturfaktor ×s, s ∈ {0,7; 0,85; 1; 1,2; 1,4}. Exakt invariant für die Kurve bei passender Therapie (geprüft gegen die Funktion aus `app/template.html`, 1e-13 mg/dL). Das Profil der Karte wird dafür im Browser neu gerechnet.
+- Neutrale Benennung, kein Alter bei der eigenen Person.

@@ -60,3 +60,12 @@ Umsetzung der Ähnlichkeits-Fragen vom 26.09., auf dem zehnten Platz der Startse
 - **Das Ergebnis bleibt ein veröffentlichter Körper**, mit unveränderten Körper- und Therapiewerten. Die Karte sagt offen „Körper wie bei …“. Name und Aussehen wählt man selbst, das Alter kommt von der Figur dieses Körpers.
 - **Abweichung vom 26.09.:** Damals hieß es „keine Speicherung“. Gespeichert werden jetzt Name, Aussehen und die vier Antworten im Browser (`nebel.eigen.v1`), sonst wäre die Person nach dem Neuladen weg. Die Antworten sind grob und verlassen das Gerät nicht; die Seite „Rechtliches“ nennt den Eintrag. Kein Feld nimmt eine Zahl an.
 - Gegen `30_Rechtliche_Einordnung.md` geprüft: keine Eingabe realer Werte (nur drei Stufen), keine Nachbildung einer Person (Ergebnis ist einer von neun Datensätzen), kein Bolusrechner (das Blatt sagt es ausdrücklich).
+
+### Nachtrag am selben Tag: 20 Körper, fünfte Frage, Insulin fein
+
+- **Grundlage sind alle 20 Datensätze**, nicht nur die neun mit Figur. `personen-daten.js` liefert alle 20 aus, `PROFILES` wird für alle gerechnet. Die Vergleichsbalken bleiben bei den neun Figuren. Ohne Figur heißt es „Körper aus Datensatz N von 20“. Alle 20 sind über die Fragen erreichbar.
+- **Fünfte Frage:** „Harter Sport hebt kaum / mittel / stark“ (Anstieg bei 20 min hartem Sport).
+- **Insulinwirkung fein** in fünf Stufen (×0,7 / 0,85 / 1 / 1,2 / 1,4): kb1–kb3 mal s, Basalrate durch s, KE-Faktor und Korrekturfaktor mal s. Die Zustände x1–x3 hängen nur von kb·I ab, darum bleibt die Kurve mit passender Therapie exakt gleich (check:adapter: Abweichung 1e-13 mg/dL); nur die nötigen Einheiten ändern sich, und 1 U ohne Essen wirkt stärker oder schwächer (nicht genau s-fach, die Glukose antwortet nichtlinear). Das ist die eine bewusste Abweichung von den Datensatzwerten, nur bei der eigenen Person und nur auf Wunsch.
+- **Benennung:** Die Fragen stehen neutral („Insulin wirkt“, nicht „bei mir“), der Name heißt „Name der Person“, ohne Eingabe „Eigene“. Die eigene Person hat kein Alter.
+- Kennung `Eigen_Patient_N_f`; ältere Kennungen derselben eigenen Person werden übernommen, der Spielstand beginnt neu, wenn sich der Körper ändert.
+- Bewusst nicht: Alter und Alltagssatz einstellbar (reine Beschriftung, im Modell ohne Wirkung), weitere Regler mit echter Wirkung (je mehr, desto näher am Nachbilden einer realen Person).
