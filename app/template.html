@@ -718,6 +718,8 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.16)}
 input[type=range]::-moz-range-thumb{width:30px;height:30px;border:0;border-radius:99px;background:var(--ink)}
 .hint{font-size:13px; color:var(--ink2); line-height:1.5; margin:-8px 0 20px}
 .hint.warn{color:var(--high); font-weight:600}
+.pick{width:100%; height:46px; border:0; border-radius:99px; padding:0 18px; background:var(--sink); color:var(--ink);
+  font-family:var(--sans); font-size:13.5px; font-weight:600}
 .row2{display:grid; grid-template-columns:1fr 1.5fr; gap:9px}
 
 /* ─── Auswertung ───────────────────────────────────────────────── */
@@ -1192,6 +1194,22 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   <p class="hint">Die Pumpe schaltet die Basalrate ab, wenn sie für die nächsten 30 Minuten einen Wert unter 80 vorhersagt, und schaltet sie wieder ein, sobald der Wert steigt. Höchstens 2 Stunden am Stück. Mehr Insulin gibt sie nie.</p>
   </div>
   <div class="field">
+    <label><span>Tagesmodus</span></label>
+    <select class="pick" id="dayMode" aria-label="Tagesmodus">
+      <option value="normal">Normaler Tag</option>
+      <option value="schwanger">Schwangerschaft</option>
+      <option value="luteal">Zweite Zyklushälfte</option>
+      <option value="kurznacht">Nach 4 h Schlaf</option>
+      <option value="hitze">Hitzetag</option>
+      <option value="alkohol">Morgen nach Alkohol</option>
+    </select>
+  </div>
+  <div class="field" id="weekWrap" hidden>
+    <label><span>Schwangerschaftswoche</span><b id="weekVal">24</b></label>
+    <input type="range" id="dayWeek" min="6" max="40" step="1" value="24" aria-label="Schwangerschaftswoche">
+  </div>
+  <p class="hint" id="dayHint"></p>
+  <div class="field">
     <label><span>Simulation</span></label>
     <div class="seg tall" id="modeSeg">
       <span class="knob"></span>
@@ -1477,7 +1495,10 @@ const PERSON = PERSONAS.find(p => p.id === personId);
 /* Pen (MDI) oder Pumpe. Ein Wechsel beginnt neu: die Vergangenheit passt nicht. */
 const THERAPY_KEY = "nebel.therapy";
 const PEN = (() => { try { return localStorage.getItem(THERAPY_KEY) === "pen"; } catch(e){ return false; } })();
-const eng = new Engine(undefined, Math.max(0, window.SUBJECTS.findIndex(s => s.id === personId)), PEN);
+/* Tagesmodus: ganztaegiger Zustand mit Quelle (docs/12_Tagesmodi.md). Ein Wechsel beginnt neu. */
+const DAY_KEY = "nebel.daymode";
+const DAY = (() => { try { return JSON.parse(localStorage.getItem(DAY_KEY)) || {}; } catch(e){ return {}; } })();
+const eng = new Engine(undefined, Math.max(0, window.SUBJECTS.findIndex(s => s.id === personId)), PEN, DAY);
 if (PEN){ $("bolusSplitWrap").hidden = true; $("bolusOverWrap").hidden = true; $("iqWrap").hidden = true; }
 /* Basal-IQ: Abschalten bei drohendem Tief. Ein- und Ausschalten aendert nur die Zukunft. */
 const IQ_KEY = "nebel.basaliq";
@@ -1798,7 +1819,34 @@ function syncCfg(){
   pressSeg($("therapySeg"), b => (b.dataset.th === "pen") === PEN);
   pressSeg($("iqSeg"), b => (b.dataset.iq === "an") === eng.basalIQ);
   ["unitSeg","therapySeg","iqSeg","modeSeg","themeSeg","langSeg"].forEach(id => moveKnob($(id)));
+  $("dayMode").value = eng.mode.id; $("dayWeek").value = eng.mode.week || 24; paintDay();
 }
+/* Jeder Modus nennt Quelle und Zahl der Personen; Annahmen stehen als solche da. */
+const DAY_INFO = {
+  normal:    "Ein gewöhnlicher Tag ohne besonderen Zustand.",
+  schwanger: "Früh sinkt der Bedarf, die meisten schweren Unterzucker liegen vor Woche 16. Danach steigt er bis Woche 37. Quellen: García-Patterson 2010, 65 Frauen; Dori-Dayan 2024, 185 Schwangerschaften. Annahme: Höhe der ersten Spitze in Woche 9.",
+  luteal:    "Nach dem Eisprung wirkt Insulin im Mittel 2,6 % schwächer als im Zyklusmittel, bei vielen deutlich mehr oder gar nicht. Quelle: Hossmann 2026, 77 Personen, 380 Zyklen.",
+  kurznacht: "Nach einer Nacht mit 4 h Schlaf nimmt der Körper mit derselben Insulinmenge 21 % weniger Zucker auf; die Leber bleibt gleich. Quelle: Donga 2010, 7 Personen. Annahme: gilt den ganzen Tag.",
+  hitze:     "Bei 35 statt 20 °C kommt gespritztes Insulin 50 bis 60 % schneller ins Blut. Quelle: Koivisto 1981, 6 Personen, Normalinsulin. Annahme: gilt auch für heutige Insuline.",
+  alkohol:   "Am Vorabend Wein, etwa 0,75 g Alkohol je kg. Nach dem Frühstück fällt der Wert tiefer, ab 10 Uhr bei 5 von 6 Personen bis in den Unterzucker. Quelle: Turner 2001, 6 Personen. Annahme: wirkt von 7 bis 13 Uhr; die gemessene Spitze sank stärker als hier.",
+};
+function paintDay(){
+  const id = $("dayMode").value, w = +$("dayWeek").value;
+  $("weekWrap").hidden = id !== "schwanger";
+  $("weekVal").textContent = w;
+  const need = id === "schwanger" ? pregNeed(w) : null;
+  $("dayHint").textContent = (need ? "Insulinbedarf in dieser Woche: ×" + fmtDE(need, 2) + " von vorher. " : "") + DAY_INFO[id];
+}
+function pickDay(){
+  const m = { id: $("dayMode").value, week: +$("dayWeek").value };
+  if (m.id === eng.mode.id && (m.id !== "schwanger" || m.week === eng.mode.week)) return paintDay();
+  if (eng.trace.length > 12 && !confirm("Mit dem neuen Tagesmodus neu beginnen? Der bisherige Verlauf geht verloren.")) return syncCfg();
+  try { localStorage.setItem(DAY_KEY, JSON.stringify(m)); } catch(e){}
+  resetAll();
+}
+$("dayMode").onchange = pickDay;
+$("dayWeek").oninput = paintDay;
+$("dayWeek").onchange = pickDay;
 $("cfg").onclick = () => { if ($("sheetCfg").classList.contains("on")) return closeSheets(); $("cfg").classList.add("on"); openSheet("sheetCfg"); requestAnimationFrame(syncCfg); };
 wireSeg($("unitSeg"), b => {
   MMOL = b.dataset.u === "mmol";

@@ -24,7 +24,7 @@ window.SUBJECTS = fs.readdirSync(dir).filter(f=>f.endsWith(".json"))
       demo:{BW:d.body_weight,HbA1c:d.HbA1c,height:d.height} }; });
 
 const adapter = fs.readFileSync(path.join(root, "app/adapter.js"), "utf8");
-(0, eval)(adapter + "\nglobalThis.__Engine = Engine;");
+(0, eval)(adapter + "\nglobalThis.__Engine = Engine; globalThis.pregNeed = pregNeed;");
 const Engine = globalThis.__Engine;
 
 const ok = (name, cond, info="") => console.log(`${cond ? "  OK  " : "FEHLT "} ${name}${info?"  "+info:""}`);
@@ -367,4 +367,40 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
     ok(`… 1 U ohne Essen wirkt ${s < 1 ? "schwächer" : "stärker"}`, s < 1 ? drop1 < drop - 2 : drop1 > drop + 2, `${drop.toFixed(0)} → ${drop1.toFixed(0)} mg/dL`);
   }
 }
+/* ── Tagesmodi: Richtung je Modus gegenueber einem normalen Tag (docs/12_Tagesmodi.md) ──
+   Gleicher Seed, gleiche Person, gleicher Tag mit drei Mahlzeiten und
+   passenden Boli nach Datensatztherapie; verglichen wird der Mittelwert. */
+{
+  const day = (mode, sub = 3) => { const e = new Engine(31, sub, false, mode); e.acts = []; let sum = 0, n = 0, lo = 999;
+    const meals = { [8*60]: 60, [13*60]: 70, [19*60]: 70 };
+    while (e.s.t < 7*60 + 24*60){ const g = meals[e.s.t];
+      if (g){ e.logMeal(g, "fast"); e.injectBolus(g / e.therapy.carbRatioGPerU, 1, 0); }
+      e.step(); sum += e.s.G; n++; lo = Math.min(lo, e.s.G); }
+    return { mean: sum / n, lo, tir: e.tir(), e }; };
+  const base = day({ id:"normal" }), f = v => v.toFixed(0);
+  const preg = w => day({ id:"schwanger", week:w });
+  const p12 = preg(12), p16 = preg(16), p34 = preg(34), lut = day({ id:"luteal" }),
+        sl = day({ id:"kurznacht" }), heat = day({ id:"hitze" }), alc = day({ id:"alkohol" });
+  ok("Normaler Tag bleibt der alte", new Engine(31, 3).snapshot().mode.id === "normal" && base.e.p.kb2 === new Engine(31, 3).p.kb2);
+  ok("Schwanger Woche 16: tiefer als normal (Bedarf sinkt)", p16.mean < base.mean, `${f(p16.mean)} statt ${f(base.mean)} mg/dL`);
+  ok("… Woche 12 auch, aber weniger als 16", p12.mean < base.mean && p12.mean > p16.mean, `${f(p12.mean)} mg/dL`);
+  ok("… Woche 34: hoeher (Bedarf steigt)", p34.mean > base.mean + 15, `${f(p34.mean)} mg/dL, Bedarf ×${pregNeed(34).toFixed(2)}`);
+  ok("… Bedarfskurve nach den Quellen", Math.abs(pregNeed(16) - 0.7647) < 0.001 && Math.abs(pregNeed(37) - 1.42) < 1e-9 && Math.abs(pregNeed(9) - 1.05) < 1e-9);
+  ok("… Basal so eingestellt, dass der Startwert bleibt", Math.abs(new Engine(1, 3, false, { id:"schwanger", week:34 }).lastSensor - new Engine(1, 3).lastSensor) <= 1
+     && p34.e.therapy.basalRateUPerH > base.e.therapy.basalRateUPerH && p16.e.therapy.basalRateUPerH < base.e.therapy.basalRateUPerH,
+     `Basal ${base.e.therapy.basalRateUPerH.toFixed(2)} → W16 ${p16.e.therapy.basalRateUPerH.toFixed(2)}, W34 ${p34.e.therapy.basalRateUPerH.toFixed(2)} U/h`);
+  ok("… Datensatztherapie bleibt unangetastet", window.SUBJECTS[3].therapy.basalRateUPerH === base.e.therapy.basalRateUPerH);
+  ok("Lutealphase: etwas hoeher", lut.mean > base.mean && lut.mean < base.mean + 15, `${f(lut.mean)} mg/dL`);
+  ok("4 h Schlaf: hoeher", sl.mean > base.mean + 5, `${f(sl.mean)} mg/dL`);
+  ok("Hitzetag: Insulin schneller, Mittel tiefer", heat.mean < base.mean && heat.e.p.tmaxI < base.e.p.tmaxI, `${f(heat.mean)} mg/dL`);
+  ok("Morgen nach Alkohol: tiefer und Unterzucker", alc.mean < base.mean && alc.lo < 63, `Mittel ${f(alc.mean)}, tiefster ${f(alc.lo)} mg/dL`);
+  { const e = new Engine(31, 3, false, { id:"alkohol" }); ok("… nur bis 13 Uhr", e._modeSI(12*60) > 1 && e._modeSI(13*60) === 1 && e._modeSI(8*60 + 1440) === 1); }
+  const s = alc.e.snapshot();
+  ok("Modus im Spielstand", new Engine(1, 3, false, { id:"alkohol" }).canRestore(s) && !new Engine(1, 3).canRestore(s));
+  ok("Woche zaehlt beim Wiederherstellen", !new Engine(1, 3, false, { id:"schwanger", week:20 }).canRestore(p16.e.snapshot()));
+  ok("Unbekannter Modus wird normal", new Engine(1, 3, false, { id:"<x>" }).mode.id === "normal"
+     && new Engine(1, 3, false, { id:"schwanger", week:99 }).mode.week === 40);
+  ok("Modus-Chip", alc.e.states().length >= 0 && new Engine(1, 3, false, { id:"hitze" }).states().some(x => x.txt === "Hitze"));
+}
+
 function fmtClock(t){ return String(Math.floor(t/60)%24).padStart(2,"0") + ":" + String(t%60).padStart(2,"0"); }

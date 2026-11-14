@@ -593,3 +593,10 @@ Anlass: Frage nach dem Modus, der über Nacht die Basalrate senkt. Das ist kein 
 - Fünfte Frage „Harter Sport hebt“. Alte Stände mit vier Antworten bekommen „mittel“ ergänzt.
 - „Insulinwirkung fein“: kb1–kb3 ×s, Basal /s, KE- und Korrekturfaktor ×s, s ∈ {0,7; 0,85; 1; 1,2; 1,4}. Exakt invariant für die Kurve bei passender Therapie (geprüft gegen die Funktion aus `app/template.html`, 1e-13 mg/dL). Das Profil der Karte wird dafür im Browser neu gerechnet.
 - Neutrale Benennung, kein Alter bei der eigenen Person.
+
+## 36. Nachtrag 14.11.2026 — Tagesmodi
+
+- Neu in den Einstellungen: Tagesmodus „Normaler Tag“, „Schwangerschaft“ (Woche 6–40), „Zweite Zyklushälfte“, „Nach 4 h Schlaf“, „Hitzetag“, „Morgen nach Alkohol“. Jeder nennt Quelle und Personenzahl. Ein Wechsel beginnt neu, der Modus steht im Spielstand. Werte, Quellen und Annahmen in `12_Tagesmodi.md`.
+- Widerspruch aufgelöst: Die Literaturwerte direkt als Empfindlichkeit eingesetzt ergeben im Modell absurde Tage (−2,6 % → Mittel +60 mg/dL). Darum wird die Basalrate je Modus so eingestellt, dass der Startwert bleibt; nur KE- und Korrekturfaktor bleiben die alten. Ausnahme Alkohol (ein Morgen, keine Anpassung).
+- Alkohol kalibriert an den Unterzuckern (8 von 9 Figuren unter 3,5 mmol/L, Turner: 5 von 6), nicht an der Spitze; die Abweichung steht im Dokument.
+- Krankheit und Stress bewusst nicht. Die iPhone-App übernimmt die Modi über die bestehenden Patches; `mobile/src/belt-engine.js` reicht Pen und Modus aber noch nicht an den Konstruktor weiter (Sache der App-Sitzung).

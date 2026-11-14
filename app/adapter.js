@@ -98,6 +98,55 @@ const LONG_MIN = 1440, LONG_FIRST = -180;
    die letzten 4 Sensorwerte (Tandem: 3 der letzten 4, gegen Aussetzer). */
 const IQ_PRED = 80, IQ_LOW = 70, IQ_AHEAD = 30, IQ_MAX = 120, IQ_WIN = 150;
 
+/* ── Tagesmodi: ganztaegige Zustaende, nur mit Literatur kalibriert
+   (Werte, Quellen und Annahmen in docs/12_Tagesmodi.md).
+   Die festen Modi aendern beim Start Parameter, damit Lauf, Vorhersage und
+   Rueckblick dieselben Werte rechnen. „Morgen nach Alkohol“ wirkt nur am
+   ersten Vormittag und geht darum ueber die Empfindlichkeit in _u.
+   Ein Modus gilt fuer die ganze Sitzung; ein Wechsel beginnt neu. */
+const DAY_MODES = ["normal", "schwanger", "luteal", "kurznacht", "hitze", "alkohol"];
+/* Schwangerschaft: Insulinbedarf relativ zu vorher, Stuetzstellen [Woche, Bedarf].
+   Garcia-Patterson 2010 (doi:10.1007/s00125-009-1633-z, 65 Frauen): Spitze in
+   Woche 9, Tiefpunkt Woche 16, Spitze Woche 37, dazwischen +4,08 %/Woche.
+   Dori-Dayan 2024 (doi:10.1002/dmrr.3771, 185 Schwangerschaften mit Pumpe):
+   +42,1 % bis zur Geburt -> Woche 37 = 1,42, Woche 16 = 1,42 / (1 + 21 * 4,08 %).
+   NEBEL-ANNAHME: Woche 9 = 1,05 (Hoehe der ersten Spitze nicht berichtet);
+   Bedarf wirkt als Empfindlichkeit 1/Bedarf auf alle drei Insulinpfade. */
+const PREG = [[0, 1], [9, 1.05], [16, 1.42 / (1 + 21 * 0.0408)], [37, 1.42], [42, 1.42]];
+const pregNeed = (w) => {
+  for (let i = 1; i < PREG.length; i++){
+    const [w1, r1] = PREG[i - 1], [w2, r2] = PREG[i];
+    if (w <= w2) return r1 + (r2 - r1) * (w - w1) / (w2 - w1);
+  }
+  return PREG[PREG.length - 1][1];
+};
+/* Lutealphase: Empfindlichkeit -2,6 % gegenueber dem Zyklusmittel (Hossmann 2026,
+   doi:10.2337/dc26-0692, 77 Personen, 380 Zyklen). */
+const LUTEAL_SI = 0.974;
+/* Nacht mit 4 h Schlaf: Glukoseinfusion in der Klemme -21 %, nur periphere
+   Aufnahme, Leber unveraendert (Donga 2010, doi:10.2337/dc09-2317, 7 Personen).
+   Darum nur kb2. NEBEL-ANNAHME: gilt den ganzen Tag (gemessen am Morgen). */
+const SLEEP_KB2 = 0.79;
+/* Hitzetag: bei 35 statt 20 °C 50-60 % schnellere Aufnahme von Normalinsulin
+   (Koivisto 1981, doi:10.1016/0026-0495(81)90122-0, 6 Personen). tmaxI / 1,55.
+   NEBEL-ANNAHME: gilt fuer Analoginsulin und den ganzen Tag. */
+const HEAT_ABS = 1.55;
+/* Morgen nach Alkohol: 0,75 g/kg Wein am Vorabend; nachts kein Unterschied,
+   nach dem Fruehstueck Spitze 8,9 statt 15 mmol/L, ab 10 Uhr bei 5 von 6
+   Unterzuckerung (Turner 2001, doi:10.2337/diacare.24.11.1888, 6 Personen).
+   ALC_SI so kalibriert, dass nach 60 g Fruehstueck mit passendem Bolus um
+   8 Uhr 8 der 9 Figuren unter 3,5 mmol/L fallen (5 von 6 bei Turner).
+   Die Spitze sinkt damit nur um 13 % statt um 41 %: Fuer die volle Senkung
+   braeuchte das Modell x2,15 und alle Figuren fielen bis 18 mg/dL. Die
+   Unterzuckerung ist der klinisch wichtige Befund, darum gilt er.
+   NEBEL-ANNAHME: Wirkung als Empfindlichkeit, nur 7 bis 13 Uhr. */
+const ALC_SI = 1.26, ALC_FROM = 7*60, ALC_TO = 13*60;
+const cleanMode = (m) => {
+  const id = m && DAY_MODES.includes(m.id) ? m.id : "normal";
+  const week = Math.max(6, Math.min(40, Math.round(+(m && m.week) || 24)));
+  return id === "schwanger" ? { id, week } : { id };
+};
+
 /* p: Belastungsmuster [Minuten, Anteil der HF-Reserve], wiederholt bis zum Ende.
    Fehlt es, bleibt die Belastung gleichmaessig bei i. Mit Muster ist i nur
    die gefuehlte Belastung fuer die Anzeige.
@@ -133,7 +182,7 @@ class Engine {
      anderer Sensor. Der Zufall ist zaehlerbasiert — mit festem Seed saehe
      jede Sitzung gleich aus, und Variabilitaet (Lernziel 4) waere
      auswendig lernbar. Gespeicherte Sitzungen bringen ihren Seed mit. */
-  constructor(seed, subjectIndex = 0, pen = false){
+  constructor(seed, subjectIndex = 0, pen = false, mode){
     if (seed === undefined) seed = (typeof crypto !== "undefined" && crypto.getRandomValues)
       ? crypto.getRandomValues(new Uint32Array(1))[0] >>> 1
       : Math.floor(Math.random() * 2147483647);
@@ -141,7 +190,25 @@ class Engine {
     this.subjectId = sub.id;
     /* Quellparameter, danach die eine bewusste Nebel-Kalibrierung. */
     this.p = N.nebelParameters(sub.subject);
+    this.mode = cleanMode(mode);
+    { const sc = (k, f) => { this.p = { ...this.p, [k]: this.p[k] * f }; }, id = this.mode.id;
+      if (id === "schwanger"){ const f = 1 / pregNeed(this.mode.week); sc("kb1", f); sc("kb2", f); sc("kb3", f); }
+      if (id === "luteal"){ sc("kb1", LUTEAL_SI); sc("kb2", LUTEAL_SI); sc("kb3", LUTEAL_SI); }
+      if (id === "kurznacht") sc("kb2", SLEEP_KB2);
+      if (id === "hitze") sc("tmaxI", 1 / HEAT_ABS); }
     this.therapy = sub.therapy;
+    /* Im Modell kippt der Nuechternwert schon bei wenigen Prozent Empfindlichkeit
+       (-2,6 % hebt das Tagesmittel um 60 mg/dL). Darum gilt die Basalrate als
+       eingestellt: so, dass der Nuechternwert der von vorher bleibt (wie titriertes
+       Basal oder AID). KE- und Korrekturfaktor bleiben die alten; der Modus zeigt
+       sich rund ums Essen. NEBEL-ANNAHME, docs/12_Tagesmodi.md. */
+    if (this.mode.id === "schwanger" || this.mode.id === "luteal" || this.mode.id === "kurznacht"){
+      const ig = (p, b) => N.get(N.initialState(p, N.basalRateToMUPerMin(b)), "IG"), b0 = sub.therapy.basalRateUPerH;
+      const goal = ig(N.nebelParameters(sub.subject), b0);
+      let lo = b0 * 0.3, hi = b0 * 3;
+      for (let k = 0; k < 40; k++){ const m = (lo + hi) / 2; if (ig(this.p, m) > goal) lo = m; else hi = m; }
+      this.therapy = { ...sub.therapy, basalRateUPerH: (lo + hi) / 2 };
+    }
     this.seed = seed;
     this.tick = 0;
 
@@ -399,14 +466,15 @@ class Engine {
      die Kurve den alten Tag zeigt — und der Echtzeitmodus rechnet die
      verpasste Zeit von einem falschen Zustand aus nach. */
   snapshot(){
-    return { v:1, subjectId:this.subjectId, seed:this.seed, pen:this.pen,
+    return { v:1, subjectId:this.subjectId, seed:this.seed, pen:this.pen, mode:this.mode,
              z:N.serializeState(this.z), input:this.input,
              reserve:this._reserve, act:this._act, sensorIndex:this._sensorIndex,
              faults:this.sensorFaults, snaps:this._snaps, occ:this._occ };
   }
   canRestore(core){
     return !!core && core.v === 1 && core.subjectId === this.subjectId && Number.isInteger(core.seed)
-      && !!core.pen === this.pen;          // Pumpe und Pen haben verschiedene Vergangenheiten
+      && !!core.pen === this.pen          // Pumpe und Pen haben verschiedene Vergangenheiten
+      && JSON.stringify(cleanMode(core.mode)) === JSON.stringify(this.mode);   // ebenso die Tagesmodi
   }
   restore(core){
     if (!this.canRestore(core)) return false;
@@ -441,6 +509,8 @@ class Engine {
     const a = N.normalAt(this.seed + 501, k), b = N.normalAt(this.seed + 501, k + 1);
     return Math.min(2, Math.max(0.5, Math.exp(SI_SD*(a + (b - a)*sm) - SI_SD*SI_SD/2)));
   }
+  /* Tagesmodus mit Zeitfenster: nur „Morgen nach Alkohol“, nur am ersten Vormittag. */
+  _modeSI(t){ return this.mode.id === "alkohol" && t >= ALC_FROM && t < ALC_TO ? ALC_SI : 1; }
   /* Anteil des Insulins, der ankommt: 0,1 bei geknicktem Katheter. */
   _deliv(t){
     if (!this.variability || this.pen) return 1;       // ein Pen hat keinen Katheter
@@ -448,7 +518,7 @@ class Engine {
     return 1;
   }
   _u(t, ev){
-    const m = N.mealInputsAt(t, 1, ev), dr = this._drift(t);
+    const m = N.mealInputsAt(t, 1, ev), dr = this._drift(t) * this._modeSI(t);
     /* Insulinsensitivitaet: Fett senkt sie, Bewegung hebt sie fuer Stunden.
        siFat bleibt fuer die Zerlegung der Vorhersage getrennt. */
     return {
@@ -706,6 +776,12 @@ class Engine {
   states(){
     const h = (this.s.t/60) % 24, out = [];
     if (this.reality) out.push({ k:"reality", v:1, txt:"Echtzeit", kombi:true });
+    { const m = this.mode.id;
+      if (m === "schwanger") out.push({ k:"tag", v:1, txt:`Woche ${this.mode.week}`, kombi:true });
+      if (m === "luteal") out.push({ k:"tag", v:1, txt:"Zweite Zyklushälfte", kombi:true });
+      if (m === "kurznacht") out.push({ k:"tag", v:1, txt:"4 h geschlafen", kombi:true });
+      if (m === "hitze") out.push({ k:"tag", v:1, txt:"Hitze", kombi:true });
+      if (m === "alkohol" && this.s.t < ALC_TO) out.push({ k:"tag", v:1, txt:"Nach Alkohol", kombi:true }); }
     if (this.s.asleep) out.push({ k:"schlaf2", v:1, txt:"Schlaf" });
     if (h >= 23 || h < 6) out.push({ k:"nacht", v:1, txt:"Nacht" });
     if (!this._act && this.s.Z >= AFTER_SHOW)
