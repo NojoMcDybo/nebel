@@ -185,11 +185,11 @@ public class NebelLivePlugin: CAPPlugin, CAPBridgedPlugin {
             at: Date(timeIntervalSince1970: at),
             points: (call.getArray("points") ?? []).compactMap { ($0 as? NSNumber)?.doubleValue },
             dark: call.getBool("dark") ?? true)
-        // Startbildschirm-Widget: Stand immer ablegen, neu zeichnen nur bei neuem Wert oder
-        // anderem Design, nicht bei jedem Pulswert (iOS teilt die Neuladungen zu).
+        // Startbildschirm-Widget: Stand immer ablegen, neu zeichnen nur bei neuem Wert,
+        // nicht bei jedem Pulswert (iOS teilt die Neuladungen zu).
         let old = NebelActivityAttributes.ContentState.load()
         s.save()
-        if old?.at != s.at || old?.dark != s.dark { WidgetCenter.shared.reloadAllTimelines() }
+        if old?.at != s.at { WidgetCenter.shared.reloadAllTimelines() }
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return call.resolve(["state": "off"]) }
         let content = ActivityContent(state: s, staleDate: s.at.addingTimeInterval(15 * 60))
         Task {

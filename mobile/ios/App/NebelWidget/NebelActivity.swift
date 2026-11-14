@@ -36,8 +36,6 @@ enum NebelShared {
     }()
     static let group = candidates.first { FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: $0) != nil }
     static let defaults = group.flatMap { UserDefaults(suiteName: $0) }
-    // shortcut: Diagnose im leeren Widget, bis die App Group auf dem iPhone sicher laeuft
-    static var diag: String { "\(group ?? "keine App Group") · \(Bundle.main.bundleIdentifier ?? "?") · \(candidates.joined(separator: ", "))" }
 }
 
 @available(iOS 16.1, *)

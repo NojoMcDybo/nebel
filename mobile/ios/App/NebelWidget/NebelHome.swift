@@ -1,16 +1,22 @@
 import SwiftUI
 import WidgetKit
 
-/// Startbildschirm-Widget: letzter Stand aus Reality, abgelegt vom NebelLivePlugin
+/// Startbildschirm-Widgets: letzter Stand aus Reality, abgelegt vom NebelLivePlugin
 /// (NebelShared). Kein eigener Takt: Die App stoesst bei jedem neuen Sensorwert ein
 /// Neuzeichnen an, iOS entscheidet, wann. Deshalb steht das Alter immer dabei.
-struct NebelHome: Widget {
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "NebelHome", provider: HomeProvider()) { HomeView(e: $0) }
-            .configurationDisplayName("nebel.")
-            .description("Letzter simulierter Sensorwert aus Reality.")
-            .supportedFamilies([.systemSmall, .systemMedium])
-    }
+/// Hell und dunkel als eigene Widgets in der Auswahl, fest und ohne Umschalten.
+struct NebelHomeDark: Widget {
+    var body: some WidgetConfiguration { homeConfig(kind: "NebelHomeDark", name: "nebel. dunkel", dark: true) }
+}
+struct NebelHomeLight: Widget {
+    var body: some WidgetConfiguration { homeConfig(kind: "NebelHomeLight", name: "nebel. hell", dark: false) }
+}
+
+private func homeConfig(kind: String, name: String, dark: Bool) -> some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: HomeProvider()) { HomeView(e: $0, c: dark ? .black : .light) }
+        .configurationDisplayName(name)
+        .description("Letzter simulierter Sensorwert aus Reality.")
+        .supportedFamilies([.systemSmall, .systemMedium])
 }
 
 struct HomeEntry: TimelineEntry {
@@ -35,20 +41,21 @@ struct HomeProvider: TimelineProvider {
 struct HomeView: View {
     @Environment(\.widgetFamily) private var family
     let e: HomeEntry
+    let c: Pal
 
     var body: some View {
-        let c = (e.s?.dark ?? true) ? Pal.dark : Pal.light
         Group {
             if let s = e.s {
                 let stale = e.date >= s.at.addingTimeInterval(15 * 60)
-                (family == .systemMedium ? AnyView(medium(s, c)) : AnyView(reading(s, c, header: true)))
-                    .opacity(stale ? 0.5 : 1)
+                Group {
+                    if family == .systemMedium { medium(s) } else { small(s) }
+                }
+                .opacity(stale ? 0.5 : 1)
             } else {
                 VStack(alignment: .leading) {
-                    Text("nebel.").font(.system(size: 15, weight: .heavy)).tracking(-0.5).foregroundStyle(c.ink)
+                    logo
                     Spacer(minLength: 0)
                     Text("Starte Reality in der App.").font(.system(size: 13, weight: .medium)).foregroundStyle(c.ink2)
-                    Text(NebelShared.diag).font(mono(7)).foregroundStyle(c.ink3).lineLimit(4)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
@@ -56,40 +63,59 @@ struct HomeView: View {
         .containerBackground(c.paper, for: .widget)
     }
 
-    private func medium(_ s: NebelActivityAttributes.ContentState, _ c: Pal) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+    private var logo: some View {
+        Text("nebel.").font(.system(size: 15, weight: .heavy)).tracking(-0.5).foregroundStyle(c.ink)
+    }
+
+    private func small(_ s: NebelActivityAttributes.ContentState) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            logo
+            Spacer(minLength: 0)
+            value(s, size: 54)
+            Text(s.unit.uppercased()).font(mono(9)).tracking(1.6).foregroundStyle(c.ink3)
+            age(s)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private func medium(_ s: NebelActivityAttributes.ContentState) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline) {
-                Text("nebel.").font(.system(size: 15, weight: .heavy)).tracking(-0.5).foregroundStyle(c.ink)
+                logo
                 Spacer(minLength: 8)
                 Text("SIMULATION · \(s.name.uppercased())").font(mono(9)).tracking(1.5).foregroundStyle(c.ink3).lineLimit(1)
             }
             HStack(alignment: .center, spacing: 14) {
-                reading(s, c, header: false).fixedSize()
+                VStack(alignment: .leading, spacing: 3) {
+                    value(s, size: 50)
+                    Text(s.unit.uppercased()).font(mono(9)).tracking(1.6).foregroundStyle(c.ink3)
+                    age(s)
+                }
+                .frame(width: 128, alignment: .leading)
                 Graph(g: s.points, c: c)
             }
+            .frame(maxHeight: .infinity)
         }
     }
 
-    /// Wert mit Pfeil, Differenz und Einheit, darunter das Alter des Werts.
-    private func reading(_ s: NebelActivityAttributes.ContentState, _ c: Pal, header: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if header {
-                Text("nebel.").font(.system(size: 15, weight: .heavy)).tracking(-0.5).foregroundStyle(c.ink)
-                Spacer(minLength: 0)
+    /// Wert dicht gesetzt, rechts daneben die Differenz ueber dem Pfeil.
+    private func value(_ s: NebelActivityAttributes.ContentState, size: CGFloat) -> some View {
+        HStack(alignment: .center, spacing: 5) {
+            Text(s.value).font(.system(size: size, weight: .heavy)).tracking(-size * 0.075).monospacedDigit()
+                .minimumScaleFactor(0.6).lineLimit(1)
+                .foregroundStyle(c.tone(s.tone))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(s.delta).font(mono(13)).foregroundStyle(c.ink2).lineLimit(1)
+                Arrow(a: s.arrow).font(.system(size: 18, weight: .semibold)).foregroundStyle(c.tone(s.tone))
             }
-            HStack(alignment: .center, spacing: 4) {
-                Text(s.value).font(.system(size: 44, weight: .bold)).tracking(-2.2).monospacedDigit()
-                    .minimumScaleFactor(0.6).lineLimit(1)
-                Arrow(a: s.arrow).font(.system(size: 18, weight: .semibold))
-            }
-            .foregroundStyle(c.tone(s.tone))
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(s.delta).font(mono(13)).foregroundStyle(c.ink2)
-                Text(s.unit.uppercased()).font(mono(9)).tracking(1.6).foregroundStyle(c.ink3)
-            }
-            (Text("vor ") + Text(timerInterval: s.at...s.at.addingTimeInterval(8 * 3600), countsDown: false, showsHours: false))
-                .font(mono(11)).foregroundStyle(c.ink3).lineLimit(1)
+            .fixedSize()
         }
-        .frame(maxWidth: header ? .infinity : nil, maxHeight: header ? .infinity : nil, alignment: .topLeading)
+    }
+
+    // Feste Breite: Ein Timer-Text nimmt sonst so viel Platz, wie er bekommt.
+    private func age(_ s: NebelActivityAttributes.ContentState) -> some View {
+        (Text("vor ") + Text(timerInterval: s.at...s.at.addingTimeInterval(8 * 3600), countsDown: false, showsHours: false))
+            .font(mono(11)).foregroundStyle(c.ink3).lineLimit(1)
+            .frame(width: 90, alignment: .leading)
     }
 }

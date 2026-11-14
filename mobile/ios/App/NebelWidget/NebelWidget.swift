@@ -7,7 +7,8 @@ import WidgetKit
 struct NebelWidgets: WidgetBundle {
     var body: some Widget {
         NebelLive()
-        NebelHome()
+        NebelHomeDark()
+        NebelHomeLight()
     }
 }
 
@@ -17,6 +18,8 @@ struct Pal {
     let paper, ink, ink2, ink3, low, high: Color
     static let dark = Pal(paper: rgb(14, 18, 19), ink: rgb(233, 239, 239), ink2: rgb(163, 174, 174),
                           ink3: rgb(126, 138, 138), low: rgb(255, 112, 99), high: rgb(232, 180, 74))
+    // Startbildschirm: iOS legt einen hellen Verlauf darueber, deshalb dort fast schwarz.
+    static let black = Pal(paper: rgb(3, 4, 4), ink: dark.ink, ink2: dark.ink2, ink3: dark.ink3, low: dark.low, high: dark.high)
     static let light = Pal(paper: .white,   // hell wie --card der App, nicht --paper
                            ink: rgb(10, 13, 13), ink2: rgb(87, 98, 98),
                            ink3: rgb(95, 106, 106), low: rgb(184, 54, 43), high: rgb(142, 100, 16))
