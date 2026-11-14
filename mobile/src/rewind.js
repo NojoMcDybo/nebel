@@ -11,7 +11,7 @@
 
 /* Eingaben der Oberflaeche an die Engine. Die Engine ruft keine davon selbst auf. */
 const REWIND_INPUTS = ["logMeal", "injectBolus", "setBasal", "startActivity", "cancelPlanned",
-  "sleepAlarm", "beltBpm", "setAsleep"];
+  "sleepAlarm", "beltBpm", "setAsleep", "setOwnRest"];
 
 /* Ganzer Engine-Zustand als JSON. Generisch, damit neue Felder der Website von
    selbst mitkommen. rng haelt nur Funktionen (der Stand ist tick), trace wird

@@ -56,16 +56,18 @@ const beltAvg = new NebelBelt.MinuteAverager();
    dein Puls um den Unterschied der Ruhepulse verschoben (eng.beltToBody). Quelle:
    Apple Health (Mittel der letzten 7 Tage, meist von der Watch), sonst eigene Messung
    aus den Gurtminuten (BeltEngine.restFrom). Nur auf dem Geraet, unter REST_KEY.
-   Gilt ab dem Start der App fest, damit Nachrechnen (rewind.js) dasselbe ergibt;
-   die laufende Messung wirkt erst beim naechsten Oeffnen. */
-const REST_KEY = "nebel.ruhepuls.v1";     // { health: bpm|null, healthDay, mins: [Gurt-Minutenmittel] }
+   Vorrang: eigene Messung per Knopf, dann Health, dann die Gurtminuten (ab 30).
+   setOwnRest schreibt rewind.js mit, ein neuer Wert darf also sofort gelten. */
+const REST_KEY = "nebel.ruhepuls.v1";     // { measured, measuredAt, health: bpm|null, healthDay, mins: [Gurt-Minutenmittel] }
 var rest = (() => { try { return JSON.parse(localStorage.getItem(REST_KEY)) || {}; } catch(e){ return {}; } })();
 rest.mins = Array.isArray(rest.mins) ? rest.mins : [];
-var restNow = null;                       // { bpm, src: "Health" | "gemessen" }
+var restNow = null;                       // { bpm, src: "gemessen" | "Health" | "Gurt" }
 function saveRest(){ try { localStorage.setItem(REST_KEY, JSON.stringify(rest)); } catch(e){} }
 function applyRest(){
-  const m = BeltEngine.restFrom(rest.mins);
-  restNow = rest.health ? { bpm: Math.round(rest.health), src: "Health" } : m != null ? { bpm: m, src: "gemessen" } : null;
+  const m = BeltEngine.restFrom(rest.mins, 30);
+  restNow = rest.measured ? { bpm: rest.measured, src: "gemessen" }
+    : rest.health ? { bpm: Math.round(rest.health), src: "Health" }
+    : m != null ? { bpm: m, src: "Gurt" } : null;
   BeltEngine.ownRest = restNow ? restNow.bpm : null;
   eng.setOwnRest(BeltEngine.ownRest);
 }
@@ -76,14 +78,49 @@ async function restFromHealth(){
     const r = await health.restingHeartRate({ days: 7 });
     rest.health = r.bpm >= 35 && r.bpm <= 110 ? r.bpm : null;
     rest.healthDay = new Date().toDateString(); saveRest();
-    if (rest.health && (!restNow || restNow.src !== "Health")){ applyRest(); lastMoveHTML = ""; paintMove(); }
+    if (rest.health && !rest.measured && (!restNow || restNow.src !== "Health")){ applyRest(); lastMoveHTML = ""; paintMove(); }
   } catch(e){ /* Health nicht erlaubt: eigene Messung */ }
 }
-function onBeltReady(){
-  restFromHealth().then(() => {
-    if (!restNow) toast("move", "Ruhepuls messen: zwei Minuten ruhig sitzen", $("moveCard"));
-  });
+function onBeltReady(){ restFromHealth(); }
+
+/* Ruhepulsmessung per Knopf neben „Pulsgurt verbinden“: zwei Minuten still sitzen, der
+   Gurt liefert jede Sekunde einen Wert. Ergebnis ist das niedrigere der beiden
+   Minutenmittel (die erste Minute ist oft noch unruhig). Gilt sofort. */
+const REST_SECS = 120;
+var restRun = null;                       // { t0, samples: [{ t, bpm }], iv }
+function restBtnPaint(){
+  const b = $("btnRest");
+  if (restRun){
+    const left = Math.max(0, REST_SECS - Math.floor((Date.now() - restRun.t0) / 1000));
+    b.textContent = \`Abbrechen · \${Math.floor(left / 60)}:\${String(left % 60).padStart(2, "0")} · \${beltBpmNow} bpm\`;
+  } else b.textContent = !restNow ? "Ruhepuls messen"          // ohne Gurt steht „Pulsgurt verbinden“ daneben: kurz halten
+    : beltState === "verbunden" ? \`Ruhepuls \${restNow.bpm} · neu messen\` : \`Ruhepuls \${restNow.bpm}\`;
+  b.disabled = !restRun && beltState !== "verbunden";
 }
+function restStop(msg){
+  clearInterval(restRun.iv); restRun = null; restBtnPaint();
+  if (msg) toast("move", msg, $("moveCard"));
+}
+function restTick(){
+  if (!restRun) return;
+  if (beltState !== "verbunden") return restStop("Messung abgebrochen: Gurt getrennt");
+  if (Date.now() - restRun.t0 < REST_SECS * 1000) return restBtnPaint();
+  const t0 = restRun.t0, s = restRun.samples, mean = a => a.reduce((q, x) => q + x.bpm, 0) / a.length;
+  const a = s.filter(x => x.t - t0 < 60000), b = s.filter(x => x.t - t0 >= 60000);
+  if (a.length < 30 || b.length < 30) return restStop("Messung ungültig: zu wenig Werte vom Gurt");
+  const bpm = Math.round(Math.min(mean(a), mean(b)));
+  if (bpm < 35 || bpm > 110) return restStop(\`Messung ungültig: \${bpm} bpm\`);
+  rest.measured = bpm; rest.measuredAt = Date.now(); saveRest(); applyRest();
+  restStop(\`Ruhepuls gemessen: \${bpm} bpm\`);
+  lastMoveHTML = ""; paintMove();
+}
+$("btnRest").onclick = () => {
+  if (restRun) return restStop("Messung abgebrochen");
+  if (beltState !== "verbunden") return toast("move", "Erst den Pulsgurt verbinden", $("moveCard"));
+  restRun = { t0: Date.now(), samples: [], iv: setInterval(restTick, 1000) };
+  toast("move", "Zwei Minuten ruhig sitzen", $("moveCard"));
+  restBtnPaint();
+};
 function catchUp(){
   if (!eng.reality || !anchor) return;
   let n = Math.min(4320, Math.floor(anchor.simT + (Date.now() - anchor.wall)/60000 - eng.s.t));
@@ -91,6 +128,7 @@ function catchUp(){
 }
 function onBeltBpm(bpm){
   beltBpmNow = bpm;
+  if (restRun) restRun.samples.push({ t: Date.now(), bpm });
   liveBpm(bpm);
   if (!eng.reality) return;
   catchUp();                                               // Puls zur richtigen Minute, auch im Hintergrund
@@ -102,7 +140,6 @@ function onBeltBpm(bpm){
     eng.beltBpm(m.bpm);
     rest.mins.push(m.bpm); if (rest.mins.length > 3000) rest.mins.splice(0, rest.mins.length - 3000);
     saveRest();
-    if (!restNow){ applyRest(); if (restNow){ lastMoveHTML = ""; toast("move", \`Ruhepuls gemessen: \${restNow.bpm} bpm\`, $("moveCard")); } }
   }
   if (document.visibilityState === "hidden"){              // einmal pro Minute: Alarme und Stand
     if (eng.s.t - alarmT >= 5) scheduleAlarms();
@@ -259,7 +296,9 @@ export const PATCHES = [
    (m) => m + '\n      <button class="btn line wide" id="btnAlarm" style="display:none">Alarme: an</button>'],
   ['<button class="mvx" id="mvCancel" type="button" hidden>Training absagen</button>',
    (m) => m + '\n      <div class="sub" id="mvSrc" style="margin-top:12px;display:none"></div>' +
-              '\n      <button class="mvx" id="btnBelt" type="button" style="display:none">Pulsgurt verbinden</button>'],
+              '\n      <div style="display:flex;gap:10px;flex-wrap:wrap">' +
+              '<button class="mvx" id="btnBelt" type="button" style="display:none;flex:1 1 0;white-space:nowrap">Pulsgurt verbinden</button>' +
+              '<button class="mvx" id="btnRest" type="button" style="display:none;flex:1 1 0;white-space:nowrap">Ruhepuls messen</button></div>'],
   ["<!-- ══════════ SHEET: REALITY ══════════ -->", (m) => NIGHT_SHEET + m],
   ['<p class="hint">Alles andere läuft weiter: Alltagsbewegung und Sensorfehler. Die planst du ohnehin nicht.</p>',
    (m) => m + '\n  <p class="hint">In der App kommt dazu: Ein Pulsgurt bewegt die Person so, wie du dich bewegst. ' +
@@ -286,12 +325,13 @@ export const PATCHES = [
       $("mvName").textContent = eng.reality ? "Du planst selbst" : "Nichts geplant";`],
   ['$("mvCancel").hidden = a.mode !== "soon";',
    (m) => m + `
-  if (eng.reality) put("mvSrc", belted ? \`Quelle: Pulsgurt · \${beltBpmNow} bpm · \${restNow ? \`Ruhepuls \${restNow.bpm} (\${restNow.src})\` : "Ruhepuls wird gemessen"}\`
+  if (eng.reality) put("mvSrc", belted ? \`Quelle: Pulsgurt · \${beltBpmNow} bpm · \${restNow ? \`Ruhepuls \${restNow.bpm} (\${restNow.src})\` : "Ruhepuls unbekannt"}\`
     : beltState === "suche" ? "Quelle: simuliert · suche Pulsgurt …"
     : beltState === "getrennt" ? "Quelle: simuliert · " + (beltMsg || "Gurt getrennt, verbinde neu …")
     : "Quelle: simuliert" + (beltMsg ? " · " + beltMsg : ""));
   $("mvSrc").style.display = eng.reality ? "" : "none";
-  $("btnBelt").style.display = eng.reality && !belted ? "" : "none";`],
+  $("btnBelt").style.display = eng.reality && !belted ? "" : "none";
+  $("btnRest").style.display = eng.reality ? "" : "none"; restBtnPaint();`],
   ['$("btnMove").onclick = guarded(() => {',
    (m) => m + '\n  if (eng.beltT != null){ toast("move", "Der Gurt misst deine Bewegung", null); return; }'],
 

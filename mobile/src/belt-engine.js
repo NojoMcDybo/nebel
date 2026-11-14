@@ -12,10 +12,10 @@ class BeltEngine extends Engine {
      nicht im Snapshot, deshalb gilt er fuer jede neue Engine und nach restore. */
   static ownRest = null;
 
-  /* Ruhepuls aus eigenen Gurt-Minutenmitteln (ohne Apple Watch): erst ab zwei Minuten
-     Ruhemessung; dann das 5. Perzentil, mit wenigen Werten also der niedrigste. */
-  static restFrom(mins){
-    if (!Array.isArray(mins) || mins.length < 2) return null;
+  /* Ruhepuls aus Gurt-Minutenmitteln: das 5. Perzentil, mit wenigen Werten also der
+     niedrigste. need = Mindestzahl Minuten (die App nimmt 30, ohne eigene Messung). */
+  static restFrom(mins, need = 2){
+    if (!Array.isArray(mins) || mins.length < need) return null;
     const s = [...mins].sort((a, b) => a - b);
     return Math.round(s[Math.floor(0.05 * (s.length - 1))]);
   }

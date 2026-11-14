@@ -70,6 +70,7 @@ describe("BeltEngine", () => {
     expect(BeltEngine.restFrom([72, 66])).toBe(66);
     const many = Array.from({ length: 101 }, (_, i) => 50 + i);   // 50..150
     expect(BeltEngine.restFrom(many)).toBe(55);
+    expect(BeltEngine.restFrom([72, 66], 30)).toBe(null);   // die App wartet ohne eigene Messung auf 30 Minuten
   });
 
   it("verschiebt den Gurtpuls um den eigenen Ruhepuls, auch nach restore und in Kopien", () => {
