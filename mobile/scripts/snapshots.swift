@@ -8,7 +8,7 @@ import WidgetKit
 import ImageIO
 import UniformTypeIdentifiers
 
-#if !canImport(ActivityKit)
+#if !os(iOS)
 protocol ActivityAttributes {}   // ActivityKit gibt es auf dem Mac nicht
 #endif
 

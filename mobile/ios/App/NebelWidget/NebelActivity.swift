@@ -1,4 +1,4 @@
-#if canImport(ActivityKit)
+#if os(iOS)   // ActivityKit laesst sich auf dem Mac importieren, die Typen fehlen aber
 import ActivityKit
 #endif
 import Foundation
