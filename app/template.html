@@ -293,6 +293,60 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .legal a:hover, .legal a:focus-visible{color:var(--ink); text-decoration:underline}
 .gate .legal{margin:18px 0 -4px}
 .gate.hypo .ghd .hv{font-size:28px; font-weight:800; letter-spacing:-.03em; color:var(--low); font-variant-numeric:tabular-nums; white-space:nowrap}
+/* ─── Daily Dose: eine Karte fuer Tag, Verlauf und Teilen ─── */
+.gate .box.ks{max-width:400px; max-height:calc(100dvh - 40px); overflow:auto; padding:20px 18px 18px}
+.kshd{display:flex; flex-direction:column; gap:2px; margin:0 0 8px}
+.kshd h2 b{font-weight:400; white-space:nowrap}
+.gate .kshd h2{margin:0; font-size:18px}
+.kshd h2 span{font-weight:400}
+.ksdate{font-family:var(--mono); font-size:10.5px; color:var(--ink3); letter-spacing:.04em; white-space:nowrap}
+.kschips{display:flex; flex-wrap:wrap; gap:5px; margin:0 0 10px}
+.kschips span{font-family:var(--mono); font-size:10.5px; padding:3px 8px; border-radius:99px; background:var(--sink); color:var(--ink2)}
+.ksbig{display:flex; align-items:baseline; gap:10px; margin:0 0 6px}
+.ksbig b{font-size:34px; font-weight:800; letter-spacing:-.04em; line-height:1; font-variant-numeric:tabular-nums}
+.ksbig span{font-size:15px; font-weight:700; color:var(--ink2)}
+.kschart{display:block; width:100%; height:140px; margin:0 0 4px}
+.ksstripe{display:grid; grid-template-columns:repeat(24,1fr); gap:2px; margin:0 0 10px; padding-right:30px}
+.ksstripe i{height:5px; border-radius:2px; background:var(--ink)}
+.ksstripe i.l{background:var(--low)}
+.ksstripe i.h{background:var(--high)}
+.statlist.ksstat{margin:0 0 10px; box-shadow:none; background:var(--sink)}
+.statlist.ksstat > div{padding:7px 12px; align-items:center}
+.statlist.ksstat > div{gap:6px}
+.statlist.ksstat .k{flex:1; font-size:8.5px; letter-spacing:.04em}   /* bricht nur an Leerzeichen, „MITTELWERT“ passt bei 375 px */
+.statlist.ksstat .v{font-size:14px}
+.ksh{font-family:var(--mono); font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink3); margin:12px 0 6px}
+.kslow{display:flex; gap:16px; align-items:flex-start; margin:0 0 16px}
+.kswd{display:grid; grid-template-rows:repeat(7,11px); gap:2px; margin-right:-12px; font-family:var(--mono); font-size:8.5px; line-height:11px; color:var(--ink3)}
+.kscal{display:grid; grid-auto-flow:column; grid-template-rows:repeat(7,11px); grid-auto-columns:11px; gap:2px; flex:none}
+.kscal i{border-radius:2px; background:var(--sink)}
+.kscal i.on{background:rgba(var(--rgb-ink), calc(.18 + .82 * var(--k)))}
+.kscal i.fut{background:transparent}
+.kscal i.emg{box-shadow:inset 0 0 0 1.5px var(--low)}
+.kscal i.today{outline:1.5px solid var(--ink); outline-offset:1px}
+.ksdist{display:grid; gap:3px; flex:1; min-width:0}
+.ksdist div{display:grid; grid-template-columns:44px 1fr; align-items:center; gap:6px; font-family:var(--mono); font-size:9.5px; color:var(--ink3)}
+.ksdist i{display:block; height:11px; border-radius:3px; background:var(--ink3); opacity:.55; min-width:3px}
+.ksdist .on i{background:var(--ink); opacity:1}
+.ksempty{font-size:13.5px; color:var(--ink2); margin:0 0 12px}
+.ksbar{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-radius:16px; background:var(--sink); margin:0 0 18px}
+.ksbar[hidden]{display:none}
+.ksbar span{font-size:13.5px; font-weight:600}
+.ksbar button{flex:none; height:34px; padding:0 14px; border:0; border-radius:99px; background:var(--ink); color:var(--paper); font:inherit; font-weight:700; font-size:13px}
+.kslinks{display:flex; gap:8px; margin:-8px 0 20px}
+/* Angebot als Mitteilung von oben: annehmen oder wegwischen (hoch oder zur Seite) */
+.ksdrop{position:fixed; left:0; right:0; top:0; z-index:95; display:flex; justify-content:center; pointer-events:none;
+  padding:max(10px, env(safe-area-inset-top)) 12px 0; transform:translateY(-130%); transition:transform .5s var(--spring)}
+.ksdrop[hidden]{display:none}
+.ksdrop.on{transform:none}
+.ksdropin{pointer-events:auto; touch-action:none; width:100%; max-width:420px; background:var(--card); border-radius:20px; box-shadow:var(--shUp);
+  padding:14px 16px 8px; transition:transform .35s var(--spring), opacity .35s var(--spring); cursor:grab}
+.ksdropin h2{font-size:15px; font-weight:800; letter-spacing:-.02em; margin:0 0 4px}
+.ksdropin p{font-size:13px; color:var(--ink2); line-height:1.45; margin:0 0 10px}
+.ksdropbtn{display:flex; gap:8px; justify-content:flex-end}
+.ksdropbtn button{height:36px; padding:0 16px; border:0; border-radius:99px; font:inherit; font-weight:700; font-size:13.5px; background:var(--ink); color:var(--paper)}
+.ksdropbtn button.alt{background:transparent; color:var(--ink); box-shadow:inset 0 0 0 1.5px var(--hair)}
+.ksdropin::after{content:""; display:block; width:36px; height:4px; border-radius:2px; background:var(--hair); margin:8px auto 0}
 .gate.hypo .hnote{font-size:12.5px; color:var(--ink3); margin:14px 0 0}  /* .gate p nahm sonst den Abstand zum Button weg */
 
 /* Personenwahl */
@@ -812,6 +866,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     <div class="hero">
       <h1>nebel.</h1>
     </div>
+    <div class="ksbar" id="ksBar" hidden><span id="ksBarT"></span><button type="button" id="ksBarGo"></button></div>
 
     <div class="eyebrow row"><span>Wer bist du heute?</span><span class="act" id="actTag"></span></div>
     <div class="people" id="people" role="radiogroup" aria-label="Person wählen"></div>
@@ -1210,6 +1265,16 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
   </div>
   <p class="hint" id="dayHint"></p>
   <div class="field">
+    <label><span>Daily Dose of T1D</span></label>
+    <div class="seg tall" id="ksSeg">
+      <span class="knob"></span>
+      <button data-ks="aus" aria-pressed="true">Täglich aus</button>
+      <button data-ks="an" aria-pressed="false">Täglich an</button>
+    </div>
+  </div>
+  <p class="hint">Die tägliche Herausforderung: ein Tag für alle, ein Versuch, bewertet nach der Zeit im Zielbereich.</p>
+  <div class="kslinks"><button class="btn soft" id="ksPlayBtn" type="button">Heute spielen</button><button class="btn soft" id="ksHistBtn" type="button">Verlauf</button></div>
+  <div class="field">
     <label><span>Simulation</span></label>
     <div class="seg tall" id="modeSeg">
       <span class="knob"></span>
@@ -1247,6 +1312,33 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     <p id="hypoS"></p>
     <button type="button" id="hypoOk"><span class="t">15 g Traubenzucker essen</span></button>
     <p class="hnote">Danach heißt es sitzen bleiben. Erst nach 15 Minuten wird nachgemessen.</p>
+  </div>
+</div>
+
+<div class="ksdrop" id="ksAsk" role="dialog" aria-modal="false" aria-labelledby="ksAskT" hidden>
+  <div class="ksdropin">
+    <h2 id="ksAskT">Daily Dose of T1D spielen?</h2>
+    <p>Jeden Tag ein Tag für alle: dieselbe Person, derselbe Zustand, dieselben Überraschungen. Ein Versuch, 24 Stunden, Tempo frei. Danach zeigt eine Karte, wie klar du durch den Nebel gekommen bist.</p>
+    <div class="ksdropbtn"><button type="button" class="alt" id="ksAskNo"><span class="t">Später</span></button><button type="button" id="ksAskYes"><span class="t">Annehmen</span></button></div>
+  </div>
+</div>
+
+<div class="gate" id="ksCard" role="dialog" aria-modal="true" aria-labelledby="ksT" hidden>
+  <div class="box ks">
+    <div class="kshd"><h2 id="ksT">nebel. <b>Daily Dose of T1D</b> <span id="ksNr"></span></h2><span class="ksdate" id="ksDate"></span></div>
+    <div id="ksDay">
+      <div class="kschips" id="ksChips"></div>
+      <div class="ksbig"><b id="ksTir"></b><span id="ksWord"></span></div>
+      <canvas class="kschart" id="ksChart" role="img" aria-label="Sensor und Blut über den Tag"></canvas>
+      <div class="ksstripe" id="ksStripe" aria-hidden="true"></div>
+      <div class="statlist ksstat" id="ksVals"></div>
+    </div>
+    <p class="ksempty" id="ksEmpty" hidden>Noch kein Tag gespielt.</p>
+    <div class="ksh">Verlauf</div>
+    <div class="statlist ksstat" id="ksStats"></div>
+    <div class="kslow"><div class="kswd" aria-hidden="true"><span>Mo</span><span></span><span>Mi</span><span></span><span>Fr</span><span></span><span></span></div><div class="kscal" id="ksCal"></div><div class="ksdist" id="ksDist"></div></div>
+    <button type="button" id="ksShare"><span class="t">Teilen</span></button>
+    <button type="button" class="alt" id="ksClose"><span class="t">Schließen</span></button>
   </div>
 </div>
 
@@ -1397,8 +1489,8 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
    Werteingabe, kein Nachbilden echter Menschen (docs/30, docs/09).
    Gespeichert nur im Browser: Name, Aussehen, Antworten. */
 const EIGEN_KEY = "nebel.eigen.v1";
-const BODIES = PERSONAS.map(p => p.id);          // die neun Figuren: Vergleichsbalken
-const POOL = window.SUBJECTS.map(s => s.id);      // alle 20: Grundlage der eigenen Person
+const BODIES = PERSONAS.map(p => p.id);          // die zehn Figuren: Vergleichsbalken
+const POOL = window.SUBJECTS.filter(s => !s.derived).map(s => s.id);   // die 20 des Datensatzes: Grundlage der eigenen Person
 const FINE = [0.7, 0.85, 1, 1.2, 1.4];             // Insulinwirkung fein
 const EIGEN_Q = [
   id => window.PROFILES[id].oneUnitDropMgdl,          // Insulin wirkt
@@ -1478,12 +1570,84 @@ const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 const LAG_WORDS = {3:"drei",5:"fünf",7:"sieben",10:"zehn",12:"zwölf",15:"fünfzehn",20:"zwanzig"};
 const LAG_MIN = Math.round(P.tau_sens);
 const LAG_TXT = (LAG_WORDS[LAG_MIN] ?? LAG_MIN) + " Minuten";
+/* ─── Daily Dose: die taegliche Herausforderung (docs/13_Daily_Dose.md) ───
+   Alle spielen am selben Datum denselben Tag: Person, Tagesmodus, Pen oder
+   Pumpe und jeder Zufall, der den Ablauf aendert, kommen aus dem Datum.
+   Laeuft neben dem freien Spiel mit eigenem Speicher. */
+/* KS-PURE-BEGIN */
+const KS_FIRST = "2026-11-14", KS_T0 = 7*60;
+const KS_MODES = ["normal", "luteal", "kurznacht", "hitze", "alkohol", "schwanger"];
+const KS_ALL = ["Patient_10", "Patient_4", "Patient_6", "Patient_7", "Patient_8", "Patient_11", "Patient_13", "Patient_15", "Patient_18"];
+const KS_WOMEN = ["Patient_10", "Patient_6", "Patient_7", "Patient_13", "Patient_15"];   // Zyklus und Schwangerschaft nur bei Figuren, die als Frauen beschrieben sind
+const ksHash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; };
+const ksRand = (seed, k) => ksHash(seed + ":" + k) / 4294967296;
+const ksDate = d => new Intl.DateTimeFormat("en-CA", { timeZone:"Europe/Berlin", year:"numeric", month:"2-digit", day:"2-digit" }).format(d);
+const ksShift = (date, n) => new Date(Date.parse(date) + n * 864e5).toISOString().slice(0, 10);
+const ksNr = date => Math.round((Date.parse(date) - Date.parse(KS_FIRST)) / 864e5) + 1;
+function ksDay(date){
+  const nr = ksNr(date), seed = ksHash("klarsicht " + date) >>> 1;   // alter Name bleibt im Seed, damit die Tage gleich bleiben
+  const id = KS_MODES[((nr - 1) % KS_MODES.length + KS_MODES.length) % KS_MODES.length];
+  const pool = id === "luteal" || id === "schwanger" ? KS_WOMEN : KS_ALL;
+  return { date, nr, seed, person: pool[Math.floor(ksRand(seed, "p") * pool.length)],
+           mode: id === "schwanger" ? { id, week: 8 + Math.floor(ksRand(seed, "w") * 31) } : { id },
+           pen: ksRand(seed, "pen") < 0.5 };
+}
+/* Bewertung nach dem internationalen Konsens (Battelino 2019): Ziel 70-180,
+   ueber 70 % im Ziel, unter 4 % unter 70. Notfall: Blut unter 54 fuer 15 min. */
+function ksScore(trace){
+  const day = trace.filter(p => p.t >= KS_T0 && p.t < KS_T0 + 1440), n = day.length || 1, G = day.map(p => p.G);
+  const avg = G.reduce((a, b) => a + b, 0) / n, sd = Math.sqrt(G.reduce((a, g) => a + (g - avg) ** 2, 0) / n);
+  let emergencies = 0, from = null, counted = false;
+  for (const p of day){
+    if (p.G >= 54){ from = null; counted = false; continue; }
+    if (from === null) from = p.t;
+    if (!counted && p.t - from >= 15){ emergencies++; counted = true; }
+  }
+  let stripe = "";
+  for (let h = 0; h < 24; h++){
+    const g = day.filter(p => p.t >= KS_T0 + h*60 && p.t < KS_T0 + (h + 1)*60).map(p => p.G);
+    stripe += !g.length ? "o" : Math.min(...g) < 70 ? "l" : g.reduce((a, b) => a + b, 0) / g.length > 180 ? "h" : "o";
+  }
+  return { tir: Math.round(100 * G.filter(g => g >= 70 && g <= 180).length / n),
+           low: Math.round(1000 * G.filter(g => g < 70).length / n) / 10,
+           avg: Math.round(avg), cv: Math.round(100 * sd / (avg || 1)), emergencies, stripe };
+}
+const ksGrade = r => r.emergencies ? 3 : r.tir >= 70 && r.low < 4 ? 0 : r.tir >= 50 ? 1 : 2;
+const ksBucket = tir => tir < 50 ? 0 : tir < 70 ? 1 : tir < 80 ? 2 : tir < 90 ? 3 : 4;
+function ksStreak(hist, today){
+  const on = new Set(hist.map(h => h.datum));
+  let d = on.has(today) ? today : ksShift(today, -1), n = 0;
+  while (on.has(d)){ n++; d = ksShift(d, -1); }
+  return n;
+}
+function ksLongest(hist){
+  const ds = [...new Set(hist.map(h => h.datum))].sort();
+  let best = 0, run = 0;
+  ds.forEach((d, i) => { run = i && ksShift(ds[i - 1], 1) === d ? run + 1 : 1; best = Math.max(best, run); });
+  return best;
+}
+/* KS-PURE-END */
+const KS_KEY = "nebel.klarsicht", KS_RUN_KEY = "nebel.klarsicht.lauf";
+const KSD = (() => { try { return JSON.parse(localStorage.getItem(KS_KEY)) || {}; } catch(e){ return {}; } })();
+KSD.hist = Array.isArray(KSD.hist) ? KSD.hist : [];
+/* Anker fuer mobile/scripts/app-patches.mjs: die naechste Zeile nicht umformatieren. */
+const ksSave = () => { try { localStorage.setItem(KS_KEY, JSON.stringify(KSD)); } catch(e){} };
+const ksPlayed = date => KSD.hist.some(h => h.datum === date);
+const KS_TODAY = ksDay(ksDate(new Date()));
+/* Ein angefangener Tag darf bis zum Ende des Folgetags fertig gespielt werden. */
+const KS_D = KSD.run && KSD.run.date === ksShift(KS_TODAY.date, -1) && !ksPlayed(KSD.run.date) ? ksDay(KSD.run.date) : KS_TODAY;
+if (KSD.run && (KSD.run.date !== KS_D.date || ksPlayed(KSD.run.date))){
+  KSD.run = null; ksSave(); try { localStorage.removeItem(KS_RUN_KEY); } catch(e){}
+}
+const KS = /daily|klarsicht/.test(location.hash) && KSD.consent === true && !ksPlayed(KS_D.date);
+if (KS && !KSD.run){ KSD.run = { date: KS_D.date, belt: false }; ksSave(); }
+
 /* ─── Person ────────────────────────────────────────────────────
    Gewaehlt auf der Startseite, gemerkt im Browser. Ein Wechsel beginnt
    eine neue Sitzung: anderer Koerper, anderer Verlauf. */
 const PERSON_KEY = "nebel.person.v1";
 function readPerson(){
-  const h = location.hash.match(/person=((?:Eigen_)?Patient_\d+(?:_\d)?)/);
+  const h = location.hash.match(/person=((?:Eigen_)?Patient_\d+(?:_\d|_Tim)?)/);
   if (h) return h[1];
   try { const v = localStorage.getItem(PERSON_KEY); if (v) return v; } catch(e){}
   return DEFAULT_PERSONA;
@@ -1491,14 +1655,15 @@ function readPerson(){
 let personId = readPerson();
 if (/^Eigen_/.test(personId) && EIGEN) personId = PERSONAS.find(p => p.eigen).id;   // aeltere Kennung derselben eigenen Person
 if (!PERSONAS.some(p => p.id === personId)) personId = DEFAULT_PERSONA;
+if (KS) personId = KS_D.person;
 const PERSON = PERSONAS.find(p => p.id === personId);
 /* Pen (MDI) oder Pumpe. Ein Wechsel beginnt neu: die Vergangenheit passt nicht. */
 const THERAPY_KEY = "nebel.therapy";
-const PEN = (() => { try { return localStorage.getItem(THERAPY_KEY) === "pen"; } catch(e){ return false; } })();
+const PEN = KS ? KS_D.pen : (() => { try { return localStorage.getItem(THERAPY_KEY) === "pen"; } catch(e){ return false; } })();
 /* Tagesmodus: ganztaegiger Zustand mit Quelle (docs/12_Tagesmodi.md). Ein Wechsel beginnt neu. */
 const DAY_KEY = "nebel.daymode";
-const DAY = (() => { try { return JSON.parse(localStorage.getItem(DAY_KEY)) || {}; } catch(e){ return {}; } })();
-const eng = new Engine(undefined, Math.max(0, window.SUBJECTS.findIndex(s => s.id === personId)), PEN, DAY);
+const DAY = KS ? KS_D.mode : (() => { try { return JSON.parse(localStorage.getItem(DAY_KEY)) || {}; } catch(e){ return {}; } })();
+const eng = new Engine(KS ? KS_D.seed : undefined, Math.max(0, window.SUBJECTS.findIndex(s => s.id === personId)), PEN, DAY);
 if (PEN){ $("bolusSplitWrap").hidden = true; $("bolusOverWrap").hidden = true; $("iqWrap").hidden = true; }
 /* Basal-IQ: Abschalten bei drohendem Tief. Ein- und Ausschalten aendert nur die Zukunft. */
 const IQ_KEY = "nebel.basaliq";
@@ -1818,7 +1983,8 @@ function syncCfg(){
   pressSeg($("modeSeg"), b => (b.dataset.m === "alltag") === FULLDAY);
   pressSeg($("therapySeg"), b => (b.dataset.th === "pen") === PEN);
   pressSeg($("iqSeg"), b => (b.dataset.iq === "an") === eng.basalIQ);
-  ["unitSeg","therapySeg","iqSeg","modeSeg","themeSeg","langSeg"].forEach(id => moveKnob($(id)));
+  pressSeg($("ksSeg"), b => (b.dataset.ks === "an") === (KSD.consent === true));
+  ["unitSeg","therapySeg","iqSeg","ksSeg","modeSeg","themeSeg","langSeg"].forEach(id => moveKnob($(id)));
   $("dayMode").value = eng.mode.id; $("dayWeek").value = eng.mode.week || 24; paintDay();
 }
 /* Jeder Modus nennt Quelle und Zahl der Personen; Annahmen stehen als solche da. */
@@ -1928,7 +2094,7 @@ $("mealP").addEventListener("input", () => { macroTouched = true; syncMacros(); 
 
 /* ─── Personenwahl ────────────────────────────────────────────────
    Erst die objektiven Merkmale, aufgeklappt die Folgen im Vergleich zu den
-   anderen neun. Die Folgen sind zur Bauzeit mit derselben Engine gerechnet
+   anderen Figuren. Die Folgen sind zur Bauzeit mit derselben Engine gerechnet
    (window.PROFILES, siehe build-viewer.mjs).
 
    Das Geruest wird EINMAL gebaut, danach nur noch befuellt — sonst gibt es
@@ -1942,7 +2108,7 @@ const fmtDE  = (x, n=0) => x.toLocaleString("de-DE", {minimumFractionDigits:n, m
    Schreiben. Ohne Wahl: mmol/L dort, wo es die uebliche Einheit ist. */
 const UNIT_KEY = "nebel.unit", MGDL_MMOL = 18.0182;   // wie engine/src/units.ts
 const MODE_KEY = "nebel.mode";
-let FULLDAY = (() => { try { return localStorage.getItem(MODE_KEY) === "alltag"; } catch(e){ return false; } })();
+let FULLDAY = KS || (() => { try { return localStorage.getItem(MODE_KEY) === "alltag"; } catch(e){ return false; } })();
 eng.variability = FULLDAY;   // Achterbahn: wandernde Insulinempfindlichkeit, Katheterknick
 let MMOL = (() => {
   try { const u = localStorage.getItem(UNIT_KEY); if (u) return u === "mmol"; } catch(e){}
@@ -2015,7 +2181,7 @@ function buildPeople(){
             <div class="cmp"><div class="cl">${m.label}</div><div class="cv" id="pcC${i}"></div>
               <div class="cmpbar">${r.vals.map(v => `<i style="left:${r.pos(v)}"></i>`).join("")}<b id="pcB${i}"></b>
                 <span class="lo">${bgd(r.lo)}</span><span class="hi">${bgd(r.hi)}</span></div></div>`; }).join("")}
-          <p class="cmpfoot">Gleiche Handlung, neun Körper. Die Striche sind alle neun. Gerechnet in der Simulation ab ${bgv(108)} ${UL()}, ohne Sensorfehler — kein Maßstab für echte Menschen.</p>
+          <p class="cmpfoot">Gleiche Handlung, zehn Körper. Die Striche sind alle zehn. Gerechnet in der Simulation ab ${bgv(108)} ${UL()}, ohne Sensorfehler — kein Maßstab für echte Menschen.</p>
         </div></div></div>
       <div class="mark"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1v13M1 7.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
     </div>
@@ -2037,6 +2203,8 @@ function showPerson(id, tapped){
   $("pcEdit").hidden = !p.eigen;
   $("pcNote").textContent = p.eigen
     ? "Name und Aussehen hast du gewählt. Körper- und Therapiewerte stammen aus einem veröffentlichten Forschungsdatensatz, die Insulinwirkung lässt sich fein verstellen."
+    : subjOf(id).derived
+    ? "Größe, Gewicht, Ruhepuls, HbA1c und Therapie stammen aus einem Steckbrief. Der Körper darunter ist aus einem veröffentlichten Forschungsdatensatz abgeleitet und daran angepasst. Alltag und Aussehen sind erfunden."
     : "Name, Alter, Alltag und Aussehen sind erfunden. Körper- und Therapiewerte stammen aus einem veröffentlichten Forschungsdatensatz.";
   const vals = [
     [d.height, v => fmtDE(v) + " cm"], [d.BW, v => fmtDE(v) + " kg"],
@@ -2307,7 +2475,7 @@ function paint(tNow){
   put("behind", uiFade > .4 ? "schwer zu lesen" : ago < 1 ? "letzter Messwert gerade eben" : `letzter Messwert vor ${ago} min`);
 
   // Zustandsanzeigen brauchen keine 60 Bilder pro Sekunde.
-  if ((frame++ & 7) === 0){ paintMove(); paintReserve(); paintChips(); paintCrit(); paintBasal(); checkHypo(); checkRemarks(); checkPlan(); checkInvite(); }
+  if ((frame++ & 7) === 0){ paintMove(); paintReserve(); paintChips(); paintCrit(); paintBasal(); checkHypo(); checkRemarks(); checkPlan(); checkInvite(); checkKs(); }
   viewH = lerp(viewH, rangeH, .12);
   if (prog > 0.02 && prog < LAST){
     /* Nur zeichnen, wenn sich die Kurve um ein Geraetepixel verschoben haette,
@@ -2545,12 +2713,12 @@ const GATE_KEY = "nebel.hinweis.v1";
 (() => {
   let ok = false;
   try { ok = localStorage.getItem(GATE_KEY) === "1"; } catch(e){}
-  if (ok){ requestAnimationFrame(() => greetPage(0)); return; }
+  if (ok){ requestAnimationFrame(() => greetPage(0)); setTimeout(ksAfterGate, 0); return; }
   const gate = $("gate"), pager = $("pager");
   gate.hidden = false; pager.inert = true;
   $("gateOk").onclick = () => {
     try { localStorage.setItem(GATE_KEY, "1"); } catch(e){}
-    const done = () => { gate.hidden = true; gate.classList.remove("out"); pager.inert = false; greetPage(page); };
+    const done = () => { gate.hidden = true; gate.classList.remove("out"); pager.inert = false; greetPage(page); ksAfterGate(); };
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return done();
     $("gateOk").classList.add("ok");                       // Haken zeichnet sich
     setTimeout(() => { gate.classList.add("out"); setTimeout(done, 400); }, 480);
@@ -2739,9 +2907,10 @@ function checkInvite(){
   if (!FULLDAY) return;
   if (day !== invDay){
     invDay = day; invPick = null;
-    if (Math.random() < .6){
-      invPick = INVITES[Math.floor(Math.random() * INVITES.length)];
-      invAt = day*1440 + Math.round((invPick.from + Math.random()*(invPick.to - invPick.from)) * 60);
+    const r = k => KS ? ksRand(KS_D.seed, "inv" + day + "." + k) : Math.random();   // Daily Dose: fuer alle gleich
+    if (r(0) < .6){
+      invPick = INVITES[Math.floor(r(1) * INVITES.length)];
+      invAt = day*1440 + Math.round((invPick.from + r(2)*(invPick.to - invPick.from)) * 60);
     }
   }
   if (!invPick || t < invAt || hypoOn || asleep || eng.s.emg || !$("gate").hidden) return;
@@ -2909,7 +3078,7 @@ $("bolusOK").onclick = () => {
    Zeit. Beim Oeffnen wird die Luecke nachgerechnet, das Ergebnis ist
    identisch zu einem durchgehenden Lauf. Nur ein Alarm im Moment des
    Geschehens ist so nicht moeglich -- dafuer braucht es Push. */
-const SAVE_KEY = "nebel.state.v1";
+const SAVE_KEY = KS ? KS_RUN_KEY : "nebel.state.v1";   // Daily Dose ueberschreibt das freie Spiel nie
 let saveOK = true;
 
 function saveState(){
@@ -2952,6 +3121,7 @@ function restoreState(){
 }
 
 function resetAll(){
+  if (KS) return ksLeave();   // kein Neustart der Daily Dose; ein Wechsel fuehrt ins freie Spiel
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
   location.reload();
 }
@@ -3368,6 +3538,253 @@ $("btnJson").onclick = () => {
 $("btnReset").onclick = () => {
   if (confirm("Alles zurücksetzen und von vorn beginnen?")) resetAll();
 };
+
+/* ─── Daily Dose: eine Karte fuer Tag, Verlauf und Teilen ────── */
+const KS_WORDS = ["klar", "diesig", "neblig", "Nebelbank"];
+const KS_DECIDE = ["meal", "bolus", "long", "basal", "move"];
+let ksOver = false, ksCur = null;
+const ksModeTxt = m => { const o = $("dayMode").querySelector(`option[value="${m.id}"]`);
+  return (o ? o.text : m.id) + (m.week ? " · Woche " + m.week : ""); };
+const ksDateTxt = d => new Date(d + "T12:00:00Z").toLocaleDateString("de-DE", { day:"numeric", month:"long", year:"numeric", timeZone:"UTC" });
+const ksEsc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[c]);
+function ksEnter(){ saveState(); location.hash = "daily"; location.reload(); }
+/* Die Daily Dose verlassen heisst nie neu beginnen: der Lauf bleibt gespeichert. */
+function ksLeave(to){ location.hash = to || "frei"; location.reload(); }
+function checkKs(){
+  if (!KS || ksOver) return;
+  if (eng.beltT != null && !KSD.run.belt){ KSD.run.belt = true; ksSave(); }   // Pulsgurt veraendert den Tag
+  if (eng.s.t < KS_T0 + 1440) return;
+  ksOver = true;
+  const r = ksScore(eng.trace), day = eng.trace.filter(p => p.t >= KS_T0 && p.t < KS_T0 + 1440);
+  /* Entscheidungen: was der Nutzer selbst tut. Geplante Bewegung laeuft von allein; selbst gestartete endet auf „%“. */
+  const decisions = eng.events.filter(e => e.t >= KS_T0 && e.t < KS_T0 + 1440 && (KS_DECIDE.includes(e.kind) && (e.kind !== "move" || / %$/.test(e.name))
+    || e.kind === "state" && e.sev === "ok" && / — /.test(e.name || ""))).length;
+  /* Die Kurve kommt mit in den Verlauf (5-Minuten-Werte, ganze mg/dL), damit auch alte Tage sie zeigen. */
+  const curve = { t: day.map(p => p.t - KS_T0), g: day.map(p => Math.round(p.G)), s: day.map(p => Math.round(p.sensor)) };
+  const entry = { nr: KS_D.nr, datum: KS_D.date, ...r, decisions, mode: KS_D.mode, person: KS_D.person, pen: KS_D.pen, belt: !!KSD.run.belt, curve };
+  KSD.hist.push(entry); KSD.run = null; ksSave();
+  saveOK = false; try { localStorage.removeItem(SAVE_KEY); } catch(e){}
+  if (eng.reality) eng.setReality(false);
+  hypoOn = true; closeSheets();
+  ksShowCard(entry);
+}
+/* Was Karte und Teilbild gemeinsam zeigen. */
+const ksChipsOf = e => { const p = PERSONAS.find(x => x.id === e.person);
+  return [p && p.name, ksModeTxt(e.mode), e.pen ? "Pen" : "Pumpe", e.belt && "mit Gurt"].filter(Boolean); };
+const ksValsOf = e => [["unter " + bgv(70), fmtDE(e.low, 1) + " %"], ["Mittelwert", bgv(e.avg) + " " + UL()], ["CV", e.cv + " %"],
+  ["Entscheidungen", e.decisions], ["Notfälle", e.emergencies], ["Therapie", e.pen ? "Pen" : "Pumpe"]];
+function ksAllOf(){
+  const H = KSD.hist, avg = H.length ? Math.round(H.reduce((a, h) => a + h.tir, 0) / H.length) + " %" : "–";
+  return [["gespielt", H.length], ["Serie", ksStreak(H, KS_TODAY.date)], ["längste Serie", ksLongest(H)], ["Schnitt im Ziel", avg]];
+}
+/* Kalender: zehn Wochen, Spalten sind Wochen (Montag oben). */
+function ksCalOf(mark){
+  const today = KS_TODAY.date, by = new Map(KSD.hist.map(h => [h.datum, h]));
+  const dow = (new Date(today + "T12:00:00Z").getUTCDay() + 6) % 7, start = ksShift(today, -dow - 7*9);
+  return Array.from({ length: 70 }, (_, i) => { const d = ksShift(start, i), h = by.get(d);
+    return { d, h, fut: d > today, mark: d === mark }; });
+}
+function ksDistOf(mark){
+  const cnt = [0, 0, 0, 0, 0]; KSD.hist.forEach(h => cnt[ksBucket(h.tir)]++);
+  const m = KSD.hist.find(h => h.datum === mark);
+  return { cnt, max: Math.max(1, ...cnt), mine: m ? ksBucket(m.tir) : -1 };
+}
+const KS_WD = ["Mo", "", "Mi", "", "Fr", "", ""];
+const KS_BUCKETS = ["< 50", "50–70", "70–80", "80–90", "≥ 90"];
+/* Tageskurve im Stil der Auswertung: Zielband, Grenzen 70 und 180, Blut als Linie, Sensor als Punkte. */
+function ksPlot(x, X0, Y0, W, H, cv, k){
+  const lo = 40, hi = 400, padR = 30*k, padB = 14*k, w = W - padR, h = H - padB, rgb = col("--rgb-ink");
+  const Y = g => Y0 + h - Math.log(Math.max(lo, Math.min(hi, g)) / lo) / Math.log(hi / lo) * h;
+  const X = t => X0 + t / 1440 * w;
+  x.fillStyle = `rgba(${rgb},.06)`; x.fillRect(X0, Y(180), w, Y(70) - Y(180));
+  x.font = `500 ${10*k}px "DM Mono", monospace`; x.textAlign = "left";
+  for (const [g, n, a] of [[70, "--low", .9], [180, "--high", .78]]){
+    x.globalAlpha = a; x.strokeStyle = x.fillStyle = col(n); x.lineWidth = 1.2*k;
+    x.beginPath(); x.moveTo(X0, Y(g)); x.lineTo(X0 + w, Y(g)); x.stroke();
+    x.fillText(bgv(g), X0 + w + 6*k, Y(g) + 3.5*k); x.globalAlpha = 1;
+  }
+  x.fillStyle = col("--ink3"); x.textAlign = "center";
+  for (let hh = 0; hh <= 24; hh += 6) x.fillText(String((7 + hh) % 24).padStart(2, "0") + ":00", Math.min(X0 + w - 14*k, Math.max(X0 + 14*k, X(hh*60))), Y0 + H - 2*k);
+  if (!cv || !cv.g || !cv.g.length) return;
+  const T = i => cv.t ? cv.t[i] : i * 5;
+  x.strokeStyle = col("--low"); x.lineWidth = 2*k; x.lineJoin = "round"; x.beginPath();
+  cv.g.forEach((g, i) => i ? x.lineTo(X(T(i)), Y(g)) : x.moveTo(X(T(i)), Y(g))); x.stroke();
+  const cIn = col("--ink"), cLo = col("--low"), cHi = col("--high");
+  x.globalAlpha = .9;
+  cv.s.forEach((g, i) => { if (!(g > 0)) return; x.fillStyle = g < 70 ? cLo : g > 180 ? cHi : cIn;
+    x.beginPath(); x.arc(X(T(i)), Y(g), 1.7*k, 0, 6.284); x.fill(); });
+  x.globalAlpha = 1;
+}
+function ksDrawChart(e){
+  const cv = $("ksChart"), r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const W = r.width || 340, H = r.height || 140;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  const x = cv.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H);
+  ksPlot(x, 0, 0, W, H, e.curve, 1);
+}
+const ksStat = rows => rows.map(([k, v]) => `<div><span class="k">${k}</span><span class="v">${v}</span></div>`).join("");
+/* Eine Karte: der gespielte Tag (falls es einen gibt) und darunter der Verlauf. */
+function ksShowCard(e){
+  ksCur = e || null;
+  $("ksDay").hidden = !e; $("ksEmpty").hidden = !!e; $("ksShare").hidden = !e; $("ksNr").textContent = e ? "#" + e.nr : "";
+  $("ksDate").textContent = e ? ksDateTxt(e.datum) : "";
+  $("ksClose").firstElementChild.textContent = ksOver ? "Weiter frei spielen" : "Schließen";
+  if (e){
+    $("ksChips").innerHTML = ksChipsOf(e).map(t => `<span>${ksEsc(t)}</span>`).join("");
+    $("ksTir").textContent = e.tir + " %"; $("ksWord").textContent = "im Ziel · " + KS_WORDS[ksGrade(e)];
+    $("ksStripe").innerHTML = [...e.stripe].map(c => `<i class="${c}"></i>`).join("");
+    $("ksVals").innerHTML = ksStat(ksValsOf(e));
+  }
+  $("ksStats").innerHTML = ksStat(ksAllOf());
+  const mark = e ? e.datum : KS_TODAY.date;
+  $("ksCal").innerHTML = ksCalOf(mark).map(c => `<i class="${(c.fut ? "fut" : c.h ? "on" : "") + (c.h && c.h.emergencies ? " emg" : "") + (c.mark ? " today" : "")}"`
+    + (c.h ? ` style="--k:${(c.h.tir / 100).toFixed(2)}" title="${c.d} · ${c.h.tir} %"` : ` title="${c.d}"`) + "></i>").join("");
+  const D = ksDistOf(mark);
+  $("ksDist").innerHTML = KS_BUCKETS.map((b, i) => `<div class="${i === D.mine ? "on" : ""}"><span>${b} %</span><i style="width:${Math.max(2, Math.round(100 * D.cnt[i] / D.max))}%" title="${D.cnt[i]}"></i></div>`).join("");
+  $("ksCard").hidden = false; pager.inert = true;
+  if (e) ksDrawChart(e);
+  (e ? $("ksShare") : $("ksClose")).focus({ preventScroll:true });
+}
+function ksHideCard(){ $("ksCard").hidden = true; pager.inert = false; }
+$("ksClose").onclick = () => ksOver ? ksLeave() : ksHideCard();
+const KS_EMOJI = { o:"🟩", h:"🟨", l:"🟥" };
+function ksText(e){
+  const rows = [0, 8, 16].map(i => [...e.stripe.slice(i, i + 8)].map(c => KS_EMOJI[c]).join("")).join(" / ");
+  return `nebel. Daily Dose of T1D #${e.nr} · ${e.tir} % im Ziel · ${KS_WORDS[ksGrade(e)]}\n${rows}\n${ksModeTxt(e.mode)} · Serie ${ksStreak(KSD.hist, KS_TODAY.date)}`;
+}
+/* Bild fuer das Teilen: dieselbe Karte, dreifach gross auf Canvas gezeichnet. */
+function ksCanvas(e){
+  const k = 3, Wc = 360, pad = 20, iw = Wc - 2*pad;
+  const c = document.createElement("canvas"), x = c.getContext("2d");
+  const C = n => col(n), S = (w, px) => `${w} ${px*k}px "Plus Jakarta Sans", sans-serif`, M = px => `400 ${px*k}px "DM Mono", monospace`;
+  const rows = (a) => Math.ceil(a.length / 2) * 30 + 8;
+  x.font = M(10.5);   // Chips nach Breite auf Zeilen verteilen, lange Namen laufen sonst hinaus
+  const chipL = ksChipsOf(e).reduce((L, p) => { const t = L[L.length - 1] ? L[L.length - 1] + " · " + p : p;
+    if (L.length && x.measureText(t).width > iw*k) L.push(p); else L[Math.max(0, L.length - 1)] = t; return L; }, []);
+  const Hc = pad + 40 + 20 + (chipL.length - 1)*15 + 40 + 146 + 12 + rows(ksValsOf(e)) + 26 + rows(ksAllOf()) + 8 + 7*13 + pad;
+  c.width = Wc * k; c.height = Hc * k;
+  x.fillStyle = C("--card"); x.fillRect(0, 0, c.width, c.height);
+  let y = pad;
+  x.textBaseline = "alphabetic"; x.textAlign = "left";
+  x.fillStyle = C("--ink"); x.font = S(800, 18); x.fillText("nebel.", pad*k, (y + 16)*k);
+  const w0 = x.measureText("nebel. ").width; x.font = S(400, 18); x.fillText(`Daily Dose of T1D #${e.nr}`, pad*k + w0, (y + 16)*k);
+  x.fillStyle = C("--ink3"); x.font = M(10.5); x.fillText(ksDateTxt(e.datum), pad*k, (y + 32)*k);   // eigene Zeile
+  y += 40;
+  x.fillStyle = C("--ink2"); x.font = M(10.5); chipL.forEach((t, i) => x.fillText(t, pad*k, (y + 11 + i*15)*k));
+  y += 20 + (chipL.length - 1)*15;
+  x.fillStyle = C("--ink"); x.font = S(800, 34); x.fillText(e.tir + " %", pad*k, (y + 30)*k);
+  const w1 = x.measureText(e.tir + " % ").width; x.fillStyle = C("--ink2"); x.font = S(700, 15);
+  x.fillText("im Ziel · " + KS_WORDS[ksGrade(e)], pad*k + w1 + 4*k, (y + 30)*k);
+  y += 40;
+  ksPlot(x, pad*k, y*k, iw*k, 140*k, e.curve, k);
+  y += 146;
+  const sw = (iw - 30 - 23*2) / 24;
+  [...e.stripe].forEach((ch, i) => { x.fillStyle = C(ch === "l" ? "--low" : ch === "h" ? "--high" : "--ink");
+    x.fillRect((pad + i*(sw + 2))*k, y*k, sw*k, 5*k); });
+  y += 12;
+  const table = (list) => {
+    x.fillStyle = C("--sink"); x.beginPath(); x.roundRect ? x.roundRect(pad*k, y*k, iw*k, (rows(list) - 8)*k, 14*k) : x.rect(pad*k, y*k, iw*k, (rows(list) - 8)*k); x.fill();
+    list.forEach(([kk, v], i) => { const cx = pad + (i % 2) * iw/2, cy = y + Math.floor(i / 2) * 30;
+      x.fillStyle = C("--ink3"); x.font = M(9.5); x.textAlign = "left"; x.fillText(String(kk).toUpperCase(), (cx + 12)*k, (cy + 19)*k);
+      x.fillStyle = C("--ink"); x.font = S(700, 15); x.textAlign = "right"; x.fillText(String(v), (cx + iw/2 - 12)*k, (cy + 20)*k); });
+    x.textAlign = "left"; y += rows(list);
+  };
+  table(ksValsOf(e));
+  x.fillStyle = C("--ink3"); x.font = M(9.5); x.fillText("VERLAUF", pad*k, (y + 12)*k); y += 18;
+  table(ksAllOf());
+  const rgb = C("--rgb-ink");
+  const cal0 = pad + 18;
+  x.fillStyle = C("--ink3"); x.font = M(8.5); KS_WD.forEach((d, i) => x.fillText(d, pad*k, (y + i*13 + 9)*k));
+  ksCalOf(e.datum).forEach((cc, i) => { const cx = cal0 + Math.floor(i / 7) * 13, cy = y + (i % 7) * 13;
+    if (cc.fut) return;
+    x.fillStyle = cc.h ? `rgba(${rgb},${(.18 + .82 * cc.h.tir / 100).toFixed(2)})` : C("--sink"); x.fillRect(cx*k, cy*k, 11*k, 11*k);
+    if (cc.h && cc.h.emergencies){ x.strokeStyle = C("--low"); x.lineWidth = 1.5*k; x.strokeRect((cx + .75)*k, (cy + .75)*k, 9.5*k, 9.5*k); }
+    if (cc.mark){ x.strokeStyle = C("--ink"); x.lineWidth = 1.5*k; x.strokeRect((cx - 1.5)*k, (cy - 1.5)*k, 14*k, 14*k); } });
+  const D = ksDistOf(e.datum), dx = cal0 + 10*13 + 14, dw = Wc - pad - dx - 50 - 22;   // Platz fuer die Zahl rechts
+  KS_BUCKETS.forEach((b, i) => { const cy = y + i * 14 + 8;
+    x.fillStyle = C("--ink3"); x.font = M(9.5); x.fillText(b + " %", dx*k, (cy + 9)*k);
+    x.globalAlpha = i === D.mine ? 1 : .55; x.fillStyle = C(i === D.mine ? "--ink" : "--ink3");
+    const bw = Math.max(3, dw * D.cnt[i] / D.max); x.fillRect((dx + 50)*k, cy*k, bw*k, 11*k); x.globalAlpha = 1;
+    x.fillStyle = C("--ink3"); x.fillText(String(D.cnt[i]), (dx + 50 + bw + 5)*k, (cy + 9)*k); });
+  return c;
+}
+/* Nur was der Nutzer selbst teilt, verlaesst das Geraet. */
+$("ksShare").onclick = async () => {
+  const e = ksCur; if (!e) return;
+  const txt = ksText(e);
+  try {
+    const blob = await new Promise(res => ksCanvas(e).toBlob(res, "image/png"));
+    const file = blob && new File([blob], `daily-dose-${e.nr}.png`, { type:"image/png" });
+    if (file && navigator.canShare && navigator.canShare({ files:[file] })){ await navigator.share({ files:[file], text:txt }); return; }
+  } catch(err){ if (err && err.name === "AbortError") return; }
+  try { await navigator.clipboard.writeText(txt); toast("basal", "Ergebnis kopiert", null); }
+  catch(err){ toast("basal", "Kopieren ging nicht", null); }
+};
+/* Verlauf = dieselbe Karte, mit dem letzten gespielten Tag oben. */
+function ksOpenHist(){ ksShowCard(KSD.hist[KSD.hist.length - 1] || null); }
+$("ksHistBtn").onclick = () => { closeSheets(); setTimeout(ksOpenHist, 300); };
+$("ksPlayBtn").onclick = () => {
+  if (KS) return closeSheets();
+  if (ksPlayed(KS_D.date)){ closeSheets(); return ksShowCard(KSD.hist.find(h => h.datum === KS_D.date)); }
+  KSD.consent = true; ksSave(); ksEnter();
+};
+wireSeg($("ksSeg"), b => { KSD.consent = b.dataset.ks === "an"; ksSave(); ksPaintBar(); });
+function ksPaintBar(){
+  const bar = $("ksBar"), p = PERSONAS.find(x => x.id === KS_D.person), done = KSD.hist.find(h => h.datum === KS_D.date);
+  $("ksPlayBtn").hidden = KS;
+  bar.hidden = !KS && KSD.consent !== true;
+  if (bar.hidden) return;
+  $("ksBarT").textContent = KS ? `Daily Dose of T1D #${KS_D.nr} läuft · ${p.name}, ${ksModeTxt(KS_D.mode)}`
+    : done ? `Daily Dose of T1D #${KS_D.nr} gespielt · ${done.tir} % · ${KS_WORDS[ksGrade(done)]}`
+    : `Daily Dose of T1D #${KS_D.nr} · heute ${p.name}, ${ksModeTxt(KS_D.mode)}`;
+  $("ksBarGo").textContent = KS ? "Freies Spiel" : done ? "Karte" : "Spielen";
+  $("ksBarGo").onclick = () => KS ? ksLeave() : done ? ksShowCard(done) : ksEnter();
+}
+/* Im Daily-Dose-Lauf fehlt alles, was neu beginnen oder den Tag aendern wuerde. */
+if (KS){
+  document.body.classList.add("ks");
+  ["people", "pcGo", "btnReset"].forEach(id => { $(id).hidden = true; });
+  document.querySelector(".selfhint").hidden = true;
+  ["therapySeg", "dayMode", "modeSeg"].forEach(id => { const f = $(id).closest(".field"); f.hidden = true;
+    if (f.nextElementSibling && f.nextElementSibling.matches("p.hint")) f.nextElementSibling.hidden = true; });
+}
+function ksAfterGate(){
+  ksPaintBar();
+  if (location.hash === "#verlauf") return ksOpenHist();
+  if (/daily|klarsicht/.test(location.hash) && !KS && ksPlayed(KS_D.date)) return ksShowCard(KSD.hist.find(h => h.datum === KS_D.date));
+  if (KSD.consent !== undefined) return;
+  /* Keine Sperre: eine Mitteilung von oben. Annehmen startet den Tag; wegwischen gilt wie „Später“. */
+  const g = $("ksAsk"), card = g.firstElementChild;
+  g.hidden = false; setTimeout(() => g.classList.add("on"), 30);
+  const done = yes => {
+    KSD.consent = yes; ksSave();
+    if (yes) return ksEnter();
+    g.classList.remove("on"); ksPaintBar();
+    setTimeout(() => { g.hidden = true; card.style.transform = card.style.opacity = ""; }, 500);
+  };
+  $("ksAskYes").onclick = () => done(true);
+  $("ksAskNo").onclick = () => done(false);
+  let sw = null;
+  card.addEventListener("pointerdown", e => {
+    if (e.target.closest("button")) return;
+    sw = { x: e.clientX, y: e.clientY }; card.setPointerCapture(e.pointerId); card.style.transition = "none";
+  });
+  card.addEventListener("pointermove", e => {
+    if (!sw) return;
+    const dx = e.clientX - sw.x, dy = Math.min(0, e.clientY - sw.y);
+    card.style.transform = `translate(${dx}px, ${dy}px)`;
+    card.style.opacity = String(1 - Math.min(.7, (Math.abs(dx) - dy) / 300));
+  });
+  const up = e => {
+    if (!sw) return;
+    const dx = e.clientX - sw.x, dy = e.clientY - sw.y; sw = null; card.style.transition = "";
+    if (dy < -40 || Math.abs(dx) > 90){
+      card.style.transform = dy < -40 ? "translateY(-160%)" : `translateX(${dx > 0 ? 130 : -130}%)`; card.style.opacity = "0";
+      done(false);
+    } else { card.style.transform = ""; card.style.opacity = ""; }
+  };
+  card.addEventListener("pointerup", up); card.addEventListener("pointercancel", up);
+}
 
 /* ─── Start ───────────────────────────────────────────────────── */
 const missed = restoreState();

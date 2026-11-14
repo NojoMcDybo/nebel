@@ -84,6 +84,7 @@ if (personasSrc) {
   vm.runInContext(engine, ctx);
   vm.runInContext(personasSrc + "\nglobalThis.__PERSONAS = PERSONAS;", ctx);
   const N = ctx.Nebel, profiles = {};
+  ctx.deriveBodies(subjects, N);   // Tim: Steckbrief auf Patient 9, app/personas.js
   for (const p of ctx.__PERSONAS)
     if (!subjects.some((x) => x.id === p.id)) throw new Error(`Person ${p.name}: Subjekt ${p.id} fehlt`);
   /* Alle Koerper: die Figuren und die uebrigen, aus denen die eigene Person waehlt. */
@@ -212,7 +213,7 @@ if (existsSync(appTpl)) {
     if (hits.length) console.error(`Hinweis: en: ${hits.length} Zeilen mit deutschem Rest (nur melden, nicht abbrechen)`);
   }
 
-  /* personen-daten.js — alle Koerper: neun mit Figur, die uebrigen fuer die eigene Person. Eigene Lizenz. */
+  /* personen-daten.js — alle Koerper: zehn mit Figur, die uebrigen fuer die eigene Person. Eigene Lizenz. */
   const ref = existsSync(resolve(root, "vendor/py-mgipsim/REF"))
     ? readFileSync(resolve(root, "vendor/py-mgipsim/REF"), "utf8").trim() : "unbekannt";
   const vm2 = vm.createContext({});
@@ -236,10 +237,13 @@ if (existsSync(appTpl)) {
  * der Seite; der uebrige Code von nebel. steht unter Apache 2.0.
  * Ohne jede Gewaehrleistung, soweit gesetzlich zulaessig (GPL-3.0 §§ 15-16).
  *
- * Geaendert (${DATA_CHANGED}, nebel.): alle ${chosen.length} Datensaetze uebernommen; ${ids.length} tragen
+ * Geaendert (${DATA_CHANGED}, nebel.): alle ${chosen.filter((s) => !s.derived).length} Datensaetze uebernommen; ${ids.length} tragen
  * eine erfundene Figur (${ids.join(", ")}), die uebrigen dienen der eigenen
  * Person als moegliche Grundlage. Die benoetigten Felder aus JSON in JavaScript
- * uebertragen. Die Werte selbst sind unveraendert. Zuordnung:
+ * uebertragen. Diese Werte selbst sind unveraendert. Zusaetzlich angehaengt und
+ * mit "derived" markiert: ${chosen.filter((s) => s.derived).map((s) => s.id + " (aus " + s.derived + ")").join(", ") || "keine"},
+ * aus dem Datensatz abgeleitet und veraendert (Gewicht, Ruhepuls, Therapie,
+ * Insulinwirkung; Rechenweg in app/personas.js, deriveBodies). Zuordnung:
  *   subject  ← model_parameters (kb1 kb2 kb3 EGP0 F01 tmaxI p3 p4 p5 BW HRrest HRmax VG VI VT_HRR)
  *   therapy  ← demographic_info (basal, carb_insulin_ratio, correction_bolus)
  *   demo     ← demographic_info (body_weight, HbA1c, height)

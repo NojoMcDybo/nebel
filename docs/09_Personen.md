@@ -69,3 +69,16 @@ Umsetzung der Ähnlichkeits-Fragen vom 26.09., auf dem zehnten Platz der Startse
 - **Benennung:** Die Fragen stehen neutral („Insulin wirkt“, nicht „bei mir“), der Name heißt „Name der Person“, ohne Eingabe „Eigene“. Die eigene Person hat kein Alter.
 - Kennung `Eigen_Patient_N_f`; ältere Kennungen derselben eigenen Person werden übernommen, der Spielstand beginnt neu, wenn sich der Körper ändert.
 - Bewusst nicht: Alter und Alltagssatz einstellbar (reine Beschriftung, im Modell ohne Wirkung), weitere Regler mit echter Wirkung (je mehr, desto näher am Nachbilden einer realen Person).
+
+### Nachtrag am selben Tag: Tim
+
+- **Tim, 21, „studiert Sport“ (zuerst „macht ein duales Studium“), auf Patient 9.** Nojo wünschte eine Figur nach einem Steckbrief: 190 cm, 88 kg, Ruhepuls 50, HbA1c 6,1 %, Basal 1 U/h, KE-Faktor 12 g/U, Korrektur 55 mg/dL/U, Pumpe.
+- **Kein Körper im Datensatz passt dazu.** Die Größen reichen bis 180 cm, der Ruhepuls fängt bei 54 an. Nach allen sieben Merkmalen (standardisiert) liegt Patient 14 am nächsten, der schon als „Finn“ wegen zu großer Nähe zu Mira entfallen war; der Abstand ist aber bei allen groß (über 5 Standardabweichungen).
+- **Gewählt ist Patient 9:** Seine Therapie liegt am nächsten (Basal 0,98 U/h, Korrektur 55,7 mg/dL/U, KE 16 statt 12 g/U), und die Therapie bestimmt die Kurve stärker als Größe und Gewicht.
+- **In der App stehen nur die Datensatzwerte** (168 cm, 66 kg, Ruhepuls 66, HbA1c 6,3 %), nicht der Steckbrief. Name, Alter, Alltag und Aussehen sind wie bei allen Figuren erfunden. Der Maximalpuls von Patient 9 (191) spräche nach 220 minus Alter eher für 29 Jahre; 21 liegt innerhalb der üblichen Streuung.
+- **Nicht in der Daily Dose.** Deren feste Personenliste bleibt bei neun, sonst bekämen schon vergebene Tage nachträglich eine andere Person.
+
+### Nachtrag am selben Tag: Tims Steckbrief übernommen
+
+- Ersetzt „In der App stehen nur die Datensatzwerte“ oben. Tim läuft auf einem eigenen, aus Patient 9 abgeleiteten Körper mit allen Steckbriefwerten: 190 cm, 88 kg, Ruhepuls 50, HbA1c 6,1 %, Basal 1,0 U/h, KE 12 g/U, Korrektur 55 mg/dL/U. Maximalpuls bleibt 191 aus dem Datensatz.
+- Rechenweg und Folgen (Insulinwirkung ×1,30, KE 12 knapp) in `00_Widerspruchspruefung_und_Changelog.md`, Nachtrag 40.

@@ -168,9 +168,25 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   const src = fs.readFileSync(path.join(root, "app/personas.js"), "utf8");
   (0, eval)(src + "\nglobalThis.__PERSONAS = PERSONAS; globalThis.__avatar = avatarSVG; globalThis.__DEF = DEFAULT_PERSONA;");
   const P = globalThis.__PERSONAS;
-  ok("Neun Personen (dazu die eigene)", P.length === 9, P.map(p => p.name).join(", "));
+  deriveBodies(window.SUBJECTS, window.Nebel);
+  const tim = window.SUBJECTS.find(s => s.id === "Patient_9_Tim"), p9 = window.SUBJECTS.find(s => s.id === "Patient_9");
+  ok("Tim: Steckbrief unveraendert", tim && tim.subject.BW === 88 && tim.subject.HRrest === 50 && tim.demo.height === 190 && tim.demo.HbA1c === 6.1
+     && tim.therapy.basalRateUPerH === 1 && tim.therapy.carbRatioGPerU === 12 && tim.therapy.correctionFactor === 55);
+  ok("… Volumen je kg wie im Datensatz", Math.abs(tim.subject.VG / 88 - p9.subject.VG / p9.subject.BW) < 1e-12 && Math.abs(tim.subject.VI / 88 - 0.12) < 1e-9);
+  ok("… Patient 9 selbst bleibt unveraendert", p9.subject.BW < 70 && p9.therapy.carbRatioGPerU === 16 && !p9.derived);
+  ok("… ein zweiter Aufruf haengt nichts doppelt an", deriveBodies(window.SUBJECTS, window.Nebel).filter(s => s.id === "Patient_9_Tim").length === 1);
+  {
+    const ti = window.SUBJECTS.indexOf(tim), sit = rest => { const e = new Engine(7, ti); e.acts = []; e.setOwnRest(rest); const g0 = e.s.G;
+      e._setHeartRate([{ t:e.s.t, bpm:e.beltToBody(66) }]); for (let i = 0; i < 240; i++) e.step(); return g0 - e.s.G; };
+    const raw = sit(null), own = sit(66);
+    ok("Gurt: roher Puls 66 senkt bei Tim im Sitzen", raw > 3, `${raw.toFixed(1)} mg/dL in 4 h`);
+    ok("… mit eigenem Ruhepuls 66 ist Sitzen wieder Ruhe", Math.abs(own) < 1, `${own.toFixed(2)} mg/dL in 4 h`);
+    const e = new Engine(7, ti); e.setOwnRest(66);
+    ok("… Verschiebung: 150 wird 134, Unsinn wird verworfen", e.beltToBody(150) === 134 && (e.setOwnRest(5), e.beltToBody(150) === 150) && (e.setOwnRest(NaN), e.ownRest === null));
+  }
+  ok("Zehn Personen (dazu die eigene)", P.length === 10, P.map(p => p.name).join(", "));
   ok("… jede auf einem vorhandenen Subjekt", P.every(p => window.SUBJECTS.some(s => s.id === p.id)));
-  ok("… keine doppelt", new Set(P.map(p => p.id)).size === 9 && new Set(P.map(p => p.name)).size === 9);
+  ok("… keine doppelt", new Set(P.map(p => p.id)).size === P.length && new Set(P.map(p => p.name)).size === P.length);
   ok("Standardperson ist dabei", P.some(p => p.id === globalThis.__DEF), globalThis.__DEF);
   const svgs = P.map(p => globalThis.__avatar(p, 24));
   ok("Avatare vollstaendig gezeichnet", svgs.every(s => s.startsWith("<svg") && !/undefined|NaN/.test(s)));
@@ -401,6 +417,41 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   ok("Unbekannter Modus wird normal", new Engine(1, 3, false, { id:"<x>" }).mode.id === "normal"
      && new Engine(1, 3, false, { id:"schwanger", week:99 }).mode.week === 40);
   ok("Modus-Chip", alc.e.states().length >= 0 && new Engine(1, 3, false, { id:"hitze" }).states().some(x => x.txt === "Hitze"));
+}
+
+/* ── Daily Dose: Tagesauswahl, Bewertung, Serie (reiner Teil aus app/template.html) ── */
+{
+  const tpl = fs.readFileSync(path.join(root, "app/template.html"), "utf8");
+  const src = tpl.slice(tpl.indexOf("/* KS-PURE-BEGIN */"), tpl.indexOf("/* KS-PURE-END */"));
+  const K = (0, eval)("(() => {" + src + "; return { KS_T0, KS_ALL, KS_WOMEN, ksDay, ksScore, ksGrade, ksBucket, ksStreak, ksLongest, ksShift, ksDate, ksRand }; })()");
+  const a = K.ksDay("2026-11-20"), b = K.ksDay("2026-11-20");
+  ok("Daily Dose: gleiches Datum, gleicher Tag", JSON.stringify(a) === JSON.stringify(b) && K.ksDay("2026-11-14").nr === 1 && a.nr === 7);
+  const days = Array.from({ length: 60 }, (_, i) => K.ksDay(K.ksShift("2026-11-14", i)));
+  ok("… Modus rotiert, Woche 8 bis 38", days.slice(0, 6).map(d => d.mode.id).join() === "normal,luteal,kurznacht,hitze,alkohol,schwanger"
+     && days.filter(d => d.mode.week).every(d => d.mode.week >= 8 && d.mode.week <= 38));
+  ok("… Zyklus und Schwangerschaft nur bei Frauenfiguren", days.filter(d => /luteal|schwanger/.test(d.mode.id)).every(d => K.KS_WOMEN.includes(d.person)));
+  ok("… Personen, Pen und Pumpe streuen", new Set(days.map(d => d.person)).size >= 7 && days.some(d => d.pen) && days.some(d => !d.pen));
+  ok("… alle Personen gibt es", days.every(d => window.SUBJECTS.some(s => s.id === d.person)));
+  ok("… Datum in Berlin", K.ksDate(new Date("2026-11-14T23:30:00Z")) === "2026-11-15" && K.ksDate(new Date("2026-07-01T21:59:00Z")) === "2026-07-01");
+  const tr = g => Array.from({ length: 288 }, (_, i) => ({ t: K.KS_T0 + i*5, G: typeof g === "function" ? g(i) : g }));
+  const clear = K.ksScore(tr(120));
+  ok("Bewertung: ganzer Tag im Ziel = klar", clear.tir === 100 && clear.low === 0 && K.ksGrade(clear) === 0 && clear.stripe === "o".repeat(24));
+  const dip = K.ksScore(tr(i => i >= 24 && i < 28 ? 50 : 120));   // 09:00-09:15 unter 54
+  ok("… 15 min unter 54 = Notfall, Nebelbank", dip.emergencies === 1 && K.ksGrade(dip) === 3 && dip.stripe[2] === "l", dip.stripe);
+  const short = K.ksScore(tr(i => i >= 24 && i < 27 ? 50 : 120));
+  ok("… 10 min unter 54 noch kein Notfall", short.emergencies === 0);
+  const hazy = K.ksScore(tr(i => i < 170 ? 150 : 220));
+  ok("… 59 % im Ziel = diesig", hazy.tir === 59 && K.ksGrade(hazy) === 1 && hazy.stripe.endsWith("h"));
+  ok("… unter 50 % = neblig", K.ksGrade(K.ksScore(tr(250))) === 2);
+  const lowish = K.ksScore(tr(i => i % 20 === 0 ? 65 : 120));   // 5 % unter 70
+  ok("… 95 % im Ziel, aber 5 % unter 70 = nicht klar", lowish.tir === 95 && K.ksGrade(lowish) === 1);
+  ok("… Verteilung", [10, 50, 69, 70, 85, 90, 100].map(K.ksBucket).join("") === "0112344");
+  const H = ["2026-11-10", "2026-11-11", "2026-11-12", "2026-11-14", "2026-11-15"].map(d => ({ datum: d }));
+  ok("Serie und laengste Serie", K.ksStreak(H, "2026-11-15") === 2 && K.ksStreak(H, "2026-11-16") === 2 && K.ksStreak(H, "2026-11-17") === 0 && K.ksLongest(H) === 3);
+  const d = K.ksDay("2026-11-19"), e = new Engine(d.seed, window.SUBJECTS.findIndex(s => s.id === d.person), d.pen, d.mode);
+  e.variability = true; while (e.s.t < K.KS_T0 + 1440) e.step();
+  const r = K.ksScore(e.trace);
+  ok("… ein ganzer Tag laesst sich bewerten", r.stripe.length === 24 && r.tir >= 0 && r.tir <= 100 && r.avg > 40, `ohne Eingriff: ${r.tir} % im Ziel, Notfaelle ${r.emergencies}`);
 }
 
 function fmtClock(t){ return String(Math.floor(t/60)%24).padStart(2,"0") + ":" + String(t%60).padStart(2,"0"); }

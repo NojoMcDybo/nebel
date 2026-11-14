@@ -600,3 +600,34 @@ Anlass: Frage nach dem Modus, der über Nacht die Basalrate senkt. Das ist kein 
 - Widerspruch aufgelöst: Die Literaturwerte direkt als Empfindlichkeit eingesetzt ergeben im Modell absurde Tage (−2,6 % → Mittel +60 mg/dL). Darum wird die Basalrate je Modus so eingestellt, dass der Startwert bleibt; nur KE- und Korrekturfaktor bleiben die alten. Ausnahme Alkohol (ein Morgen, keine Anpassung).
 - Alkohol kalibriert an den Unterzuckern (8 von 9 Figuren unter 3,5 mmol/L, Turner: 5 von 6), nicht an der Spitze; die Abweichung steht im Dokument.
 - Krankheit und Stress bewusst nicht. Die iPhone-App übernimmt die Modi über die bestehenden Patches; `mobile/src/belt-engine.js` reicht Pen und Modus aber noch nicht an den Konstruktor weiter (Sache der App-Sitzung).
+
+## 37. Nachtrag 14.11.2026 — Daily Dose of T1D (zuerst „Klarsicht“)
+
+- Neu: tägliche Herausforderung, zuerst „Klarsicht“, noch am selben Tag auf Nojos Wunsch umbenannt in „Daily Dose of T1D“ (Regeln, Bewertung und Oberfläche in `13_Daily_Dose.md`). Speichereinträge, Seed-Text und der Sprung `#klarsicht` behalten den alten Namen, damit nichts verloren geht.
+- Ergebnis und Verlauf auf einer Karte statt Karte plus Verlaufsblatt, kleiner gesetzt. Neu darauf die Tageskurve im Stil der Auswertung, dafür speichert jeder Eintrag die 5-Minuten-Werte; die Werte stehen als Statistikliste. Das Teilbild zeigt dieselbe Karte.
+- Widerspruch zur bisherigen Regel „ein Wechsel beginnt neu“: Im Klarsicht-Lauf führt ein Wechsel stattdessen ins freie Spiel, weil ein Neustart den einen Versuch aushebeln würde. `resetAll` verzweigt dafür.
+- Bewertung nach Konsens (Battelino 2019), Notfall = 15 min unter 54 mg/dL. Gezählt wird das Blut, nicht der Sensor.
+- Datenschutzseite (DE/EN): Klarsicht-Einträge im lokalen Speicher und das Teilen nur durch den Nutzer ergänzt. Die alte Angabe „bis zu vier Einträge“ war schon vorher zu knapp und heißt jetzt „einige Einträge, darunter“.
+
+## 38. Nachtrag 14.11.2026 — Tim als zehnte Figur
+
+- Tim, 21, auf Patient 9 (Begründung in `09_Personen.md`). Zahl der Figuren von neun auf zehn: Personenliste, Vergleichstext („zehn Körper“), README, Rechtsseiten und Prüfung nachgezogen.
+- Widerspruch geprüft: Die Figuren sollen keinen realen Menschen nachbilden. Tim zeigt darum nur Datensatzwerte, die deutlich vom Steckbrief abweichen; Name und Alter stammen aus dem Wunsch.
+- Die Daily Dose bleibt bei neun Personen, damit vergebene Tage gleich bleiben.
+
+## 39. Nachtrag 14.11.2026 — Gurtpuls mit eigenem Ruhepuls
+
+- Problem: Der Gurtpuls ging roh ins Modell. Die Belastung rechnet das Modell aus der Herzfrequenzreserve der Figur, (Puls − Ruhepuls) / (Max − Ruhepuls). Wer selbst 65 hat und eine Figur mit 50 spielt, lag schon im Sitzen in leichter Bewegung (HRR 0,1; etwa −5 mg/dL in 4 h). Ohne Gurt betrifft das nichts: geplante Bewegung setzt den Puls als Anteil der Reserve.
+- Entscheidung (Nojo): Ein eigener Ruhepuls darf aus Apple Health (`restingHeartRate`) kommen oder aus einer kurzen Ruhemessung am Gurt geschätzt werden. Er bleibt auf dem Gerät und dient nur der Verschiebung `Puls − eigener Ruhepuls + Ruhepuls der Figur` (`setOwnRest`, `beltToBody` in `app/adapter.js`).
+- Widerspruch geprüft gegen „keine echten Gesundheitswerte eingeben“: Der Gurt liefert schon heute echten Puls. Der Ruhepuls ist dieselbe Art Wert, berührt weder Zucker noch Insulin noch Therapie und ergibt keine Dosis. Die Regel zielt auf Therapiewerte; sie bleibt dafür unverändert.
+- Bewusst nicht: die Spanne zum Maximalpuls umrechnen (bräuchte Alter oder gemessenen Maximalpuls).
+- Health-Abfrage und Ruhemessung baut die App-Sitzung in `mobile/`.
+
+## 40. Nachtrag 14.11.2026 — Tim mit Steckbriefwerten
+
+- Ersetzt den Satz aus Nachtrag 38, Tim zeige nur Datensatzwerte. Auf Nojos Wunsch gelten alle Steckbriefwerte so, wie sie sind.
+- Eigener Körper `Patient_9_Tim`, abgeleitet aus Patient 9 (`deriveBodies` in `app/personas.js`). Patient 9 selbst bleibt unverändert und steht der eigenen Person weiter zur Wahl; der abgeleitete Körper nicht.
+- Gewicht 88 kg: VG und VI wie im Datensatz je kg (0,16 und 0,12 L/kg), EGP0 und p3–p5 im selben Verhältnis. Nur VG und VI zu skalieren ergab nüchtern 73, alles zu skalieren ohne Anpassung 226: Ein schwererer Körper braucht im Modell mehr Insulin als Basal 1,0.
+- Darum kb1–kb3 gemeinsam ×1,30, sodass Basal 1,0 den Nüchternwert von Patient 9 (108) hält. Folge: Tim wirkt pro Einheit wie ein empfindlicherer Körper; 1 U senkt im Modell um etwa 25 mg/dL (wie bei Patient 9, nicht 55: der Korrekturfaktor des Datensatzes passt auch dort nicht zum Modell).
+- KE 12 ist für diesen Körper knapp: 60 g mit 5 U enden nach 5 h um 68 mg/dL (Patient 9 mit KE 16: 99). Bewusst so gelassen, weil die Werte unverändert bleiben sollten.
+- Widerspruch geprüft gegen „Figuren bilden keinen realen Menschen nach“: Der Steckbrief stammt von Nojo; ob er zu einer echten Person gehört, ist nicht festgehalten. Name und Alter kamen schon mit dem Wunsch. Die Personenkarte sagt für Tim jetzt, dass die Werte aus einem Steckbrief stammen und der Körper abgeleitet ist. `personen-daten.js` vermerkt den abgeleiteten Datensatz als Änderung (GPL-3.0 §5a).

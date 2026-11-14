@@ -383,6 +383,16 @@ class Engine {
      sehen, als live gerechnet wurde. Darum: den Wert der letzten gerechneten
      Minute als Anker festhalten, alles Spaetere verwerfen, dann neu setzen.
      Der Anker liegt auf der alten Strecke, die Vergangenheit bleibt bitgleich. */
+  /* Gurtpuls auf diesen Koerper umrechnen. Ohne eigenen Ruhepuls liest die Figur
+     den Gurt roh: wer selbst 65 hat, laege bei Tim (50) schon im Sitzen in leichter
+     Bewegung. Mit eigenem Ruhepuls (Apple Health oder Ruhemessung, nur auf dem
+     Geraet) wird verschoben: Puls - eigener Ruhepuls + Ruhepuls der Figur. Die
+     Spanne zum Maximalpuls bleibt die der Figur; dafuer braeuchte es Alter oder
+     Maximalpuls. shortcut: nur Verschiebung, Spanne erst bei Bedarf.
+     NEBEL-ANNAHME, docs/00 Nachtrag 39. */
+  setOwnRest(bpm){ this.ownRest = Number.isFinite(bpm) && bpm >= 35 && bpm <= 110 ? bpm : null; }
+  beltToBody(bpm){ return this.ownRest == null ? bpm : Math.max(30, bpm - this.ownRest + this.p.HRrest); }
+
   _setHeartRate(points){
     const anchorT = this.s.t - 1;
     const keep = N.heartRateAt(anchorT, this.input, this.p.HRrest);

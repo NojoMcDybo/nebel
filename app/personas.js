@@ -1,11 +1,11 @@
 /* ══════════════════════════════════════════════════════════════════
-   PERSONEN — neun erfundene Figuren auf neun veroeffentlichten Koerpern,
+   PERSONEN — zehn erfundene Figuren auf zehn veroeffentlichten Koerpern,
    dazu eine eigene Person aus Fragen ohne Zahlen (app/template.html,
-   „Eigene Person“), die auf einem dieser neun Koerper laeuft.
+   „Eigene Person“), die auf einem der 20 Koerper laeuft.
 
    Echt (aus dem Datensatz, zur Laufzeit aus window.SUBJECTS gelesen):
    Groesse, Gewicht, Ruhepuls, Basalrate, KE-Faktor, Korrekturfaktor, HbA1c
-   und alle Modellparameter.
+   und alle Modellparameter. Ausnahme: Tim (DERIVED unten).
 
    Erfunden (hier, und in der App als erfunden gekennzeichnet):
    Vorname, Alter, der Satz zum Alltag und das Aussehen. Das Alter ist grob
@@ -43,8 +43,46 @@ const PERSONAS = [
     look:{ skin:"#D8A785", hair:"#3A2417", style:"curlylong", shirt:"#A36A4F" } },
   { id:"Patient_18", name:"David",  age:20, line:"studiert BWL",
     look:{ skin:"#A56D48", hair:"#1B1411", style:"short",     shirt:"#556B55", glasses:true } },
+  /* Seit 14.11.2026: Tim, auf Nojos Wunsch mit seinem Steckbrief. Koerper siehe DERIVED. */
+  { id:"Patient_9_Tim", name:"Tim",    age:21, line:"studiert Sport",
+    look:{ skin:"#EAC4A6", hair:"#7A5232", style:"side",      shirt:"#3F5F7A" } },
 ];
 const DEFAULT_PERSONA = "Patient_10";
+
+/* ── Abgeleitete Koerper ────────────────────────────────────────────
+   Tim (14.11.2026, Nojos Wunsch): Steckbriefwerte so, wie sie sind, auf dem
+   Koerper von Patient 9 (naechste Therapie im Datensatz). Damit der Koerper
+   zu 88 kg und Basal 1,0 passt:
+   - Groessen, die im Datensatz mit dem Gewicht gehen, mal 88/66,5: VG und VI
+     (dort exakt 0,16 und 0,12 L/kg), EGP0 und die Bewegungsfluesse p3-p5
+     (absolute mmol/min bzw. mmol). F01 ist schon je kg.
+   - Ruhepuls 50. Maximalpuls bleibt der des Datensatzes (191).
+   - kb1-kb3 gemeinsam so skaliert, dass Basal 1,0 U/h den Nuechternwert von
+     Patient 9 haelt (wie beim Titrieren in den Tagesmodi, hier an der
+     Empfindlichkeit statt an der Rate, weil die Rate vorgegeben ist).
+   KE 12 und Korrektur 55 bleiben, auch wo sie fuer diesen Koerper knapp sind.
+   NEBEL-ANNAHME, docs/09_Personen.md. Wird beim Bauen (build-viewer.mjs) und
+   in der Pruefung (check-adapter.cjs) an SUBJECTS angehaengt. */
+const DERIVED = [
+  { id:"Patient_9_Tim", base:"Patient_9", BW:88, HRrest:50, height:190, HbA1c:6.1,
+    therapy:{ basalRateUPerH:1, carbRatioGPerU:12, correctionFactor:55 } },
+];
+function deriveBodies(subjects, N){
+  const ig = (sub, rate) => N.get(N.initialState(N.nebelParameters(sub), N.basalRateToMUPerMin(rate)), "IG");
+  for (const d of DERIVED){
+    if (subjects.some(s => s.id === d.id)) continue;
+    const src = subjects.find(s => s.id === d.base), f = d.BW / src.subject.BW;
+    const sub = { ...src.subject, BW:d.BW, HRrest:d.HRrest };
+    for (const k of ["VG", "VI", "EGP0", "p3", "p4", "p5"]) sub[k] *= f;
+    const kb = sc => ({ ...sub, kb1:sub.kb1*sc, kb2:sub.kb2*sc, kb3:sub.kb3*sc });
+    const goal = ig(src.subject, src.therapy.basalRateUPerH);
+    let lo = 0.3, hi = 3;
+    for (let i = 0; i < 50; i++){ const m = (lo + hi) / 2; if (ig(kb(m), d.therapy.basalRateUPerH) > goal) lo = m; else hi = m; }
+    subjects.push({ id:d.id, derived:d.base, subject:kb((lo + hi) / 2), therapy:{ ...d.therapy },
+      demo:{ BW:d.BW, HbA1c:d.HbA1c, height:d.height } });
+  }
+  return subjects;
+}
 
 /* ── Avatar ─────────────────────────────────────────────────────────
    Flaches Portrait als Inline-SVG. Eigene Zeichnung, keine Vorlage.
