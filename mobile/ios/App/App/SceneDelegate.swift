@@ -164,7 +164,7 @@ public class NebelHealthPlugin: CAPPlugin, CAPBridgedPlugin {
 /// update startet sie, wenn keine laeuft; starten darf iOS nur die geoeffnete App,
 /// aktualisieren auch die gesperrte. Nach 8 h beendet iOS sie, beim naechsten
 /// Oeffnen startet eine neue. JS: NebelLive.update({ value, unit, arrow, tone, name,
-/// delta, bpm, at: ms, points: [mg/dL] }) -> { state }, NebelLive.end()
+/// delta, bpm, hard, at: ms, points: [mg/dL], dark }) -> { state }, NebelLive.end()
 @objc(NebelLivePlugin)
 public class NebelLivePlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "NebelLivePlugin"
@@ -181,9 +181,10 @@ public class NebelLivePlugin: CAPPlugin, CAPBridgedPlugin {
         let s = NebelActivityAttributes.ContentState(
             value: call.getString("value") ?? "", unit: call.getString("unit") ?? "",
             arrow: call.getString("arrow") ?? "", delta: call.getString("delta") ?? "", tone: call.getString("tone") ?? "ok",
-            name: call.getString("name") ?? "", bpm: call.getInt("bpm") ?? 0,
+            name: call.getString("name") ?? "", bpm: call.getInt("bpm") ?? 0, hard: call.getBool("hard") ?? false,
             at: Date(timeIntervalSince1970: at),
-            points: (call.getArray("points") ?? []).compactMap { ($0 as? NSNumber)?.doubleValue })
+            points: (call.getArray("points") ?? []).compactMap { ($0 as? NSNumber)?.doubleValue },
+            dark: call.getBool("dark") ?? true)
         let content = ActivityContent(state: s, staleDate: s.at.addingTimeInterval(15 * 60))
         Task {
             let all = Activity<NebelActivityAttributes>.activities

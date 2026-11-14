@@ -112,7 +112,7 @@ export const health = registerPlugin<{
 export const live = registerPlugin<{
   update(o: {
     value: string; unit: string; arrow: string; delta: string; tone: string; name: string;
-    bpm: number; at: number; points: number[];
+    bpm: number; hard: boolean; at: number; points: number[]; dark: boolean;
   }): Promise<{ state: string; error?: string }>;
   end(): Promise<void>;
 }>("NebelLive");

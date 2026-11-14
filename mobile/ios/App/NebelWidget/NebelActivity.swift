@@ -15,7 +15,9 @@ struct NebelActivityAttributes: ActivityAttributes {
         var tone: String       // "low" | "high" | "ok"
         var name: String       // simulierte Person
         var bpm: Int           // Puls jetzt: Gurt, sonst simuliert
+        var hard: Bool         // Puls ueber der ventilatorischen Schwelle (anaerob)
         var at: Date           // Zeit des Sensorwerts
         var points: [Double]   // letzte Stunde in mg/dL, alle 5 min
+        var dark: Bool         // Farbschema der App
     }
 }

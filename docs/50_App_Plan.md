@@ -154,7 +154,7 @@ Live-Aktivität auf dem Sperrbildschirm und App-Icon gebaut (13.11.2026), auf de
 - Starten darf iOS sie nur aus der geöffneten App; nach 8 h beendet iOS sie, beim nächsten Öffnen startet eine neue. Kein Push, kein Server.
 - Technik: Widget-Erweiterung `ios/App/NebelWidget` (SwiftUI), `NebelLivePlugin` in `SceneDelegate.swift`. Ohne Mac trägt `scripts/add-widget.rb` (Gem xcodeproj) die Erweiterung im CI ins Projekt ein; die Projektdatei im Repo bleibt unverändert. SideStore braucht dafür eine zweite App-ID.
 - App-Icon: das „n.“ des Favicons in 1024 px, statt des Capacitor-Icons.
-- Nachgezogen: Live-Aktivität im dunklen Schema der App. Wert mit Differenz zum vorigen und Zeit seit dem Wert; der Graph zeigt die Sensorwerte als Punkte wie der Verlauf der App, ohne eigene Karte, rechts die Nebelzone. Startbildschirm schwarz mit „n.“. Test auf dem iPhone offen.
+- Nachgezogen: Live-Aktivität im dunklen Schema der App. Wert mit Differenz zum vorigen und Zeit seit dem Wert; der Graph zeigt die Sensorwerte als Punkte wie der Verlauf der App, ohne eigene Karte, rechts die Nebelzone. Puls live mit jedem Gurtwert; Herz mit Blitz in Bernstein über der ventilatorischen Schwelle (anaerob, wie `heartRateReserve` der Engine). Hell oder dunkel nach der Einstellung der App. Startbildschirm schwarz mit „n.“. Test auf dem iPhone offen.
 - Datenschutztext der App (Pulsdaten), bevor die App an andere geht.
 - Entscheidung Developer Program und TestFlight.
 

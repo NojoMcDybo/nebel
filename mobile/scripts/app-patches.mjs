@@ -58,6 +58,7 @@ function catchUp(){
 }
 function onBeltBpm(bpm){
   beltBpmNow = bpm;
+  liveBpm(bpm);
   if (!eng.reality) return;
   catchUp();                                               // Puls zur richtigen Minute, auch im Hintergrund
   const now = Date.now();
@@ -115,24 +116,33 @@ setInterval(tryFillGap, 120000);          // Zepp schreibt das Training oft erst
 /* Live-Aktivitaet auf dem Sperrbildschirm: in Reality mit jedem neuen Sensorwert
    (alle 5 min), auch bei gesperrtem iPhone ueber die Gurtwerte. Starten kann sie
    nur die geoeffnete App; beim Oeffnen wird deshalb neu angestossen (liveN = -1).
-   liveN 0 beim Start: ein Rest aus einer frueheren Reality-Sitzung wird beendet. */
-var liveN = 0, liveAct = NebelBelt.live;
+   liveN 0 beim Start: ein Rest aus einer frueheren Reality-Sitzung wird beendet.
+   Der Puls laeuft live mit: jeder neue Gurtwert (1 pro Sekunde) aendert nur bpm. */
+var liveN = 0, liveAct = NebelBelt.live, liveLast = null;
+function liveBpm(bpm){
+  if (!liveAct || !liveLast || liveN === null || bpm === liveLast.bpm) return;
+  liveLast.bpm = bpm; liveLast.hard = liveHard(bpm);
+  liveAct.update(liveLast).catch(() => {});
+}
+/* Zone wie in der Engine (heartRateReserve): ueber der ventilatorischen Schwelle = anaerob. */
+const liveHard = bpm => (bpm - eng.p.HRrest) / (eng.p.HRmax - eng.p.HRrest) > eng.p.VT_HRR;
 const LIVE_ARROW = { 3:"⇈", 2:"↑", 1:"↗", 0:"→", [-1]:"↘", [-2]:"↓", [-3]:"⇊" };
 function paintLive(){
   if (!liveAct) return;                   // paintApp kann vor dieser Stelle laufen
   if (!eng.reality || !anchor){
-    if (liveN !== null){ liveN = null; liveAct.end().catch(() => {}); }
+    if (liveN !== null){ liveN = null; liveLast = null; liveAct.end().catch(() => {}); }
     return;
   }
   const trc = eng.trace, last = trc[trc.length - 1];
   if (!last || trc.length === liveN) return;
   liveN = trc.length;
   const v = eng.lastSensor, dlt = trc.length >= 2 ? v - trc[trc.length - 2].sensor : 0;
-  liveAct.update({
+  const bpm = eng.beltT != null ? beltBpmNow : Math.round(N.heartRateAt(last.t, eng.input, eng.p.HRrest));
+  liveAct.update(liveLast = {
     value: bgv(v), unit: UL(), arrow: LIVE_ARROW[trendClass(eng.trend())],
     tone: v < 70 ? "low" : v > 180 ? "high" : "ok", name: PERSON.name,
     delta: dlt === 0 ? "0" : (dlt > 0 ? "+" : "−") + bgd(Math.abs(dlt)),   // wie bgDelta in der App
-    bpm: eng.beltT != null ? beltBpmNow : Math.round(N.heartRateAt(last.t, eng.input, eng.p.HRrest)),
+    bpm, hard: liveHard(bpm), dark: document.documentElement.dataset.theme === "dark",
     at: anchor.wall + (last.t - anchor.simT)*60000,
     points: trc.slice(-13).map(p => p.sensor),
   }).catch(() => {});
@@ -173,6 +183,9 @@ function scheduleAlarms(){
 
 /** [Anker, Ersatz, Anzahl (Standard 1)] */
 export const PATCHES = [
+  // Design umgeschaltet: Live-Aktivitaet gleich mitziehen
+  ['try { localStorage.setItem("nebel.theme", root.dataset.theme); } catch (e) {}', (m) => m + " liveN = -1; paintLive();"],
+
   // Abstaende: Seiteninhalt unter der Statusleiste, Website-Teile ohne Ziel in der App ausblenden
   [".page > .inner{width:100%; max-width:460px; padding:0 20px 1px; align-self:flex-start; min-height:100%}",
    (m) => m + CSS],
