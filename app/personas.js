@@ -1,5 +1,7 @@
 /* ══════════════════════════════════════════════════════════════════
-   PERSONEN — zehn erfundene Figuren auf zehn veroeffentlichten Koerpern.
+   PERSONEN — neun erfundene Figuren auf neun veroeffentlichten Koerpern,
+   dazu eine eigene Person aus Fragen ohne Zahlen (app/template.html,
+   „Eigene Person“), die auf einem dieser neun Koerper laeuft.
 
    Echt (aus dem Datensatz, zur Laufzeit aus window.SUBJECTS gelesen):
    Groesse, Gewicht, Ruhepuls, Basalrate, KE-Faktor, Korrekturfaktor, HbA1c
@@ -15,7 +17,9 @@
 
    Auswahl: die zehn Subjekte, die sich bei Insulin, Mahlzeit, moderatem und
    hartem Sport und Koerpergewicht am staerksten unterscheiden (Maximin-Auswahl,
-   Start bei Patient 10 als typischster Person). Siehe docs/09_Personen.md.
+   Start bei Patient 10 als typischster Person). Seit 14.11.2026 ohne Finn
+   (Patient 14): er lag am naechsten an Mira, sein Platz gehoert der eigenen
+   Person. Siehe docs/09_Personen.md.
 
    Keine dieser Figuren bildet einen realen Menschen nach.
    ══════════════════════════════════════════════════════════════════ */
@@ -35,8 +39,6 @@ const PERSONAS = [
     look:{ skin:"#EEC6AC", hair:"#9C4E27", style:"side",      shirt:"#2F4A5C", beard:true } },
   { id:"Patient_13", name:"Jana",   age:34, line:"arbeitet als Erzieherin",
     look:{ skin:"#F3D5C2", hair:"#6E3520", style:"bob",       shirt:"#7A5A7A" } },
-  { id:"Patient_14", name:"Finn",   age:19, line:"hat gerade Abitur gemacht",
-    look:{ skin:"#EFCDB3", hair:"#C9A05A", style:"curly",     shirt:"#9A7B3E" } },
   { id:"Patient_15", name:"Sofia",  age:24, line:"arbeitet im Buchhandel",
     look:{ skin:"#D8A785", hair:"#3A2417", style:"curlylong", shirt:"#A36A4F" } },
   { id:"Patient_18", name:"David",  age:20, line:"studiert BWL",

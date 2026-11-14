@@ -578,3 +578,11 @@ Anlass: Frage nach dem Modus, der über Nacht die Basalrate senkt. Das ist kein 
 ## 33. Nachtrag 14.11.2026 — Alter des Messwerts statt Körper-Verzögerung
 
 - Unter dem Sensorwert steht „letzter Messwert vor X min“ (1–4 min, „gerade eben“ direkt nach der Messung), englisch „last reading X min ago“. Bisher: „dein Körper vor etwa …“. Bei sehr tiefen Werten bleibt „schwer zu lesen“. Die Sensorverzögerung erklären weiter die Texte mit `.lagTxt`.
+
+## 34. Nachtrag 14.11.2026 — Eigene Person, Finn fällt weg
+
+- Neun feste Personen statt zehn: Finn (Patient 14) entfällt, `personen-daten.js` enthält neun Datensätze (GPL-Änderungsdatum 2026-11-14). Mira und Finn waren das ähnlichste Paar.
+- Zehnter Platz: „Eigene“. Vier Fragen mit drei Stufen, keine Zahlen, führen zum nächstliegenden der neun Körper (Abstand über die Spannen von Wirkung 1 U, Mahlzeitenspitze mit Bolus, moderatem Sport, Gewicht). Die Person läuft als Kopie dieses Datensatzes mit der Kennung `Eigen_Patient_N`; ändert sich der Körper, passt ein gespeicherter Stand nicht mehr und es beginnt neu.
+- Gespeichert in `nebel.eigen.v1`, für beide Sprachen gemeinsam. Beim Laden wird geprüft: Antworten nur 0–2, Aussehen nur aus bekannten Werten, aus dem Namen fallen `<>&"'` und Backticks heraus, höchstens 16 Zeichen. Der 26.09. hatte „keine Speicherung“ festgelegt; Begründung der Abweichung in `09_Personen.md`.
+- Vergleichsbalken „Was das ausmacht“: neun Striche, Text „Gleiche Handlung, neun Körper“.
+- Prüfung: check:adapter (neun Personen), Browser: Anlegen, Karte, Neuladen mit Spielstand, englische Fassung, alle neun Körper erreichbar, HTML im Namen entfernt.

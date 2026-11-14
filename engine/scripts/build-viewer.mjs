@@ -7,7 +7,7 @@
  *
  * 2. dist/site/ — die App, so wie sie veroeffentlicht wird:
  *      index.html          App (Apache 2.0), Engine, Adapter, Personen
- *      personen-daten.js   die zehn Parametersaetze, eigene Datei unter GPL-3.0
+ *      personen-daten.js   die neun Parametersaetze, eigene Datei unter GPL-3.0
  *      rechtliches.html    Impressum, Datenschutz, Lizenzen
  *      en/index.html       dieselbe App auf Englisch (scripts/i18n-en.mjs)
  *      en/legal.html       englische Fassung von rechtliches.html (app/rechtliches.en.html)
@@ -213,7 +213,7 @@ if (existsSync(appTpl)) {
     if (hits.length) console.error(`Hinweis: en: ${hits.length} Zeilen mit deutschem Rest (nur melden, nicht abbrechen)`);
   }
 
-  /* personen-daten.js — nur die zehn Personen der App, eigene Lizenz */
+  /* personen-daten.js — nur die neun Koerper der App, eigene Lizenz */
   const ref = existsSync(resolve(root, "vendor/py-mgipsim/REF"))
     ? readFileSync(resolve(root, "vendor/py-mgipsim/REF"), "utf8").trim() : "unbekannt";
   const vm2 = vm.createContext({});
@@ -223,9 +223,9 @@ if (existsSync(appTpl)) {
   if (chosen.length !== ids.length) { console.error("Nicht jede Person hat einen Parametersatz."); process.exit(1); }
   /* GPL §5a: Datum der tatsaechlichen Aenderung, nicht das Baudatum. Nachziehen, wenn sich
      Auswahl (app/personas.js) oder Zuordnung unten aendert. */
-  const DATA_CHANGED = "2026-10-12";
+  const DATA_CHANGED = "2026-11-14";
   const dataJs = `/*
- * nebel. — Parametersaetze der zehn Personen
+ * nebel. — Parametersaetze der neun Koerper
  *
  * Herkunft: py-mgipsim, Illinois Institute of Technology
  *   https://github.com/illinoistech-itm/py-mgipsim  (Stand ${ref})

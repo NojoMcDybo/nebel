@@ -168,9 +168,9 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   const src = fs.readFileSync(path.join(root, "app/personas.js"), "utf8");
   (0, eval)(src + "\nglobalThis.__PERSONAS = PERSONAS; globalThis.__avatar = avatarSVG; globalThis.__DEF = DEFAULT_PERSONA;");
   const P = globalThis.__PERSONAS;
-  ok("Zehn Personen", P.length === 10, P.map(p => p.name).join(", "));
+  ok("Neun Personen (dazu die eigene)", P.length === 9, P.map(p => p.name).join(", "));
   ok("… jede auf einem vorhandenen Subjekt", P.every(p => window.SUBJECTS.some(s => s.id === p.id)));
-  ok("… keine doppelt", new Set(P.map(p => p.id)).size === 10 && new Set(P.map(p => p.name)).size === 10);
+  ok("… keine doppelt", new Set(P.map(p => p.id)).size === 9 && new Set(P.map(p => p.name)).size === 9);
   ok("Standardperson ist dabei", P.some(p => p.id === globalThis.__DEF), globalThis.__DEF);
   const svgs = P.map(p => globalThis.__avatar(p, 24));
   ok("Avatare vollstaendig gezeichnet", svgs.every(s => s.startsWith("<svg") && !/undefined|NaN/.test(s)));

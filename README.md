@@ -12,14 +12,14 @@ nebel. is explicitly **not** intended for the diagnosis, prevention, monitoring,
 
 - No dosing recommendations and no individual advice. There is no bolus calculator.
 - No real health data. There is no way to enter your own glucose, insulin or meal values.
-- The simulation covers **ten fictional adults**. Children, adolescents and poorly controlled diabetes are not covered.
+- The simulation covers **nine fictional adults**, plus your own person built from four rough questions. Children, adolescents and poorly controlled diabetes are not covered.
 - No number from nebel. may ever inform a real therapy decision. That is the job of your diabetes care team.
 
 Legal assessment and the conditions for publishing (in German): `docs/30_Rechtliche_Einordnung.md`.
 
 ## What you can do
 
-- **Pick a person.** Ten invented people (name, age, everyday life, look), each running on one of the published virtual-patient parameter sets. Fold out a card to see how their body differs from the others.
+- **Pick a person.** Nine invented people (name, age, everyday life, look), each running on one of the published virtual-patient parameter sets. Fold out a card to see how their body differs from the others. Or build your own: four questions without numbers lead to the closest of the nine bodies, and you pick the name and look.
 - **Live their day.** Eat, bolus, change the basal rate, exercise. A day plan with everyday movement and training runs alongside.
 - **Watch the sensor.** A CGM reading every five minutes with realistic error and lag, Dexcom-style trend arrows, the difference to the previous reading, and alarms at night.
 - **Real-time mode.** The simulation follows the real clock, so it can run alongside your own day.
@@ -74,7 +74,7 @@ Open `engine/dist/site/index.html` in a browser. The viewer is a developer tool 
 - **py-mgipsim:** The reference implementation [py-mgipsim](https://github.com/illinoistech-itm/py-mgipsim) (GPL-3.0) serves as a numerical oracle in the test suite.
   - No code was copied from it.
   - Neither the library nor its parameter sets are part of this repository.
-- **The published app** ships ten of the twenty py-mgipsim parameter sets.
+- **The published app** ships nine of the twenty py-mgipsim parameter sets.
   - They come as a separate file, `personen-daten.js`, **under GPL-3.0**, with source, license text and a modification notice.
   - The rest of the app is Apache 2.0.
   - Reasoning: `docs/30_Rechtliche_Einordnung.md`, section 7.

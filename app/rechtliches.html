@@ -75,6 +75,7 @@ small{color:var(--ink3)}
     <ul>
       <li>den Spielstand (<code>nebel.state.v1</code>),</li>
       <li>die gewählte Person (<code>nebel.person.v1</code>),</li>
+      <li>deine eigene Person, falls du eine anlegst: Name, Aussehen und die vier groben Antworten (<code>nebel.eigen.v1</code>, für beide Sprachen gemeinsam),</li>
       <li>dass du den Hinweis „Bevor es losgeht“ bestätigt hast (<code>nebel.hinweis.v1</code>),</li>
       <li>helles oder dunkles Design, sobald du es umstellst (<code>nebel.theme</code>).</li>
     </ul>
@@ -84,7 +85,7 @@ small{color:var(--ink3)}
     <p>Wenn du mir schreibst, verarbeite ich deine E-Mail-Adresse, deinen Namen, falls du ihn nennst, und den Inhalt der Nachricht, um dir zu antworten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO: das berechtigte Interesse, Anfragen zu beantworten. Die Nachricht liegt bei meinem E-Mail-Anbieter, der sie technisch verarbeitet. Ich lösche sie, wenn die Sache erledigt ist und keine gesetzliche Aufbewahrungspflicht besteht. Bitte schick mir keine eigenen Gesundheitswerte: Zu deiner Therapie kann ich nichts sagen, dafür ist dein Diabetesteam da.</p>
 
     <h3>Keine Gesundheitsdaten</h3>
-    <p>Alles in der Simulation betrifft erfundene Personen. Die Seite fragt keine echten Blutzucker-, Insulin- oder Mahlzeitenwerte ab und hat dafür kein Eingabefeld.</p>
+    <p>Alles in der Simulation betrifft erfundene Personen. Die Seite fragt keine echten Blutzucker-, Insulin- oder Mahlzeitenwerte ab und hat dafür kein Eingabefeld. Auch die eigene Person fragt nur grob ohne Zahlen („Insulin wirkt schwach / mittel / stark“) und läuft dann auf einem der neun erfundenen Körper.</p>
 
     <h3>Deine Rechte</h3>
     <p>Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17) und Einschränkung der Verarbeitung (Art. 18). Du kannst dich bei einer Datenschutz-Aufsichtsbehörde beschweren (Art. 77), zum Beispiel bei der Landesbeauftragten für Datenschutz und Informationsfreiheit Nordrhein-Westfalen. Außer wenn du mir schreibst, speichere ich keine Daten über dich; die Zugriffsdaten liegen bei GitHub.</p>
@@ -98,8 +99,8 @@ small{color:var(--ink3)}
     <h3>Programm und Texte</h3>
     <p>Quellcode, Oberfläche und Texte von nebel. stehen unter der <a href="lizenzen/Apache-2.0.txt">Apache License 2.0</a>. Quellcode: <a href="https://github.com/NojoMcDybo/nebel">github.com/NojoMcDybo/nebel</a>.</p>
 
-    <h3>Die zehn Körper</h3>
-    <p>Die Modellparameter der zehn Personen (<a href="personen-daten.js">personen-daten.js</a>) stammen aus den 20 virtuellen Personen der Bibliothek <a href="https://github.com/illinoistech-itm/py-mgipsim/tree/{{PYMGIPSIM_REF}}">py-mgipsim</a> (Illinois Institute of Technology), Stand <code>{{PYMGIPSIM_REF_SHORT}}</code>. Sie stehen unter der <a href="lizenzen/GPL-3.0.txt">GNU General Public License v3</a> und werden hier als eigene Datei unter dieser Lizenz weitergegeben. Geändert wurde nur die Form: zehn der zwanzig Datensätze ausgewählt, die benötigten Felder aus JSON in JavaScript übertragen. Die Werte selbst sind unverändert. Wo nebel. von ihnen abweicht (Sensorverzögerung, Insulinaufnahme), passiert das erst beim Rechnen und ist im Quellcode dokumentiert. Namen, Alter und Aussehen der Personen sind erfunden.</p>
+    <h3>Die neun Körper</h3>
+    <p>Die Modellparameter der neun Personen (<a href="personen-daten.js">personen-daten.js</a>) stammen aus den 20 virtuellen Personen der Bibliothek <a href="https://github.com/illinoistech-itm/py-mgipsim/tree/{{PYMGIPSIM_REF}}">py-mgipsim</a> (Illinois Institute of Technology), Stand <code>{{PYMGIPSIM_REF_SHORT}}</code>. Sie stehen unter der <a href="lizenzen/GPL-3.0.txt">GNU General Public License v3</a> und werden hier als eigene Datei unter dieser Lizenz weitergegeben. Geändert wurde nur die Form: neun der zwanzig Datensätze ausgewählt, die benötigten Felder aus JSON in JavaScript übertragen. Die Werte selbst sind unverändert. Wo nebel. von ihnen abweicht (Sensorverzögerung, Insulinaufnahme), passiert das erst beim Rechnen und ist im Quellcode dokumentiert. Namen, Alter und Aussehen der Personen sind erfunden.</p>
 
     <h3>Modell</h3>
     <p>Die Physiologie folgt dem erweiterten Hovorka-Modell nach Rashid et al. (2019), <i>Computers &amp; Chemical Engineering</i>, und Siket, Rashid &amp; Cinar (2025), <i>Journal of Diabetes Science and Technology</i>. Die Gleichungen sind aus den Veröffentlichungen umgesetzt, nicht aus dem Code von py-mgipsim übernommen. Fett, Eiweiß und Sensorfehler sind eigene Ergänzungen, mit Quellen dokumentiert im <a href="https://github.com/NojoMcDybo/nebel/tree/main/docs">Projektordner docs/</a>.</p>
@@ -109,7 +110,7 @@ small{color:var(--ink3)}
   </section>
 
   <!-- Datum der letzten inhaltlichen Aenderung, bei jeder Textaenderung von Hand nachziehen (auch in rechtliches.en.html). -->
-  <p><small>Stand dieser Seite: 12.11.2026</small></p>
+  <p><small>Stand dieser Seite: 14.11.2026</small></p>
   <a class="back" href="./">← zur Simulation</a>
 </main>
 </body>

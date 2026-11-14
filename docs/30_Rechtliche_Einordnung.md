@@ -111,7 +111,7 @@ Sobald eine öffentlich erreichbare Website existiert, greift außerdem die Impr
 | Herkunft und Verhältnis zu py-mgipsim dokumentiert | erledigt |
 | Keine Parameterdatensätze im Repository | erledigt |
 | Keine Dosierungsfunktion in der Oberfläche | **erfüllt** (12.10.2026): kein Bolusrechner, die Dosis wählt die Nutzerin selbst |
-| Keine Eingabe realer Gesundheitsdaten | **erfüllt** (12.10.2026): zehn feste, erfundene Personen, kein Eingabefeld für eigene Werte |
+| Keine Eingabe realer Gesundheitsdaten | **erfüllt** (12.10.2026): zehn feste, erfundene Personen, kein Eingabefeld für eigene Werte. Seit 14.11.2026 neun feste plus eine eigene Person aus vier Fragen mit je drei Stufen, ohne Zahlen; sie läuft auf einem der neun Datensätze (`09_Personen.md`) |
 | Disclaimer auch **in** der Anwendung, nicht nur im README | **erfüllt**: „Lernwerkzeug, kein Medizinprodukt“ auf der Startseite, dazu die Seite „Rechtliches“ |
 | Keine Monetarisierung | Entscheidung, laufend einzuhalten |
 
