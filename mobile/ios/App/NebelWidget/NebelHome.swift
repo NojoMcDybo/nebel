@@ -39,9 +39,11 @@ struct HomeProvider: TimelineProvider {
 }
 
 struct HomeView: View {
-    @Environment(\.widgetFamily) private var family
+    @Environment(\.widgetFamily) private var envFamily
     let e: HomeEntry
     let c: Pal
+    var size: WidgetFamily? = nil   // fuer scripts/snapshots.swift, sonst von iOS
+    private var family: WidgetFamily { size ?? envFamily }
 
     var body: some View {
         Group {
@@ -71,9 +73,8 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 3) {
             logo
             Spacer(minLength: 0)
-            value(s, size: 54)
-            Text(s.unit.uppercased()).font(mono(9)).tracking(1.6).foregroundStyle(c.ink3)
-            age(s)
+            value(s)
+            footer(s)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
@@ -87,35 +88,40 @@ struct HomeView: View {
             }
             HStack(alignment: .center, spacing: 14) {
                 VStack(alignment: .leading, spacing: 3) {
-                    value(s, size: 50)
-                    Text(s.unit.uppercased()).font(mono(9)).tracking(1.6).foregroundStyle(c.ink3)
-                    age(s)
+                    value(s)
+                    footer(s)
                 }
-                .frame(width: 128, alignment: .leading)
+                .frame(width: 150, alignment: .leading)
                 Graph(g: s.points, c: c)
             }
             .frame(maxHeight: .infinity)
         }
     }
 
-    /// Wert dicht gesetzt, rechts daneben die Differenz ueber dem Pfeil.
-    private func value(_ s: NebelActivityAttributes.ContentState, size: CGFloat) -> some View {
+    /// Wert so gross wie die Breite erlaubt (dreistellig schrumpft er), rechts daneben
+    /// die Differenz ueber dem Pfeil.
+    private func value(_ s: NebelActivityAttributes.ContentState) -> some View {
         HStack(alignment: .center, spacing: 5) {
-            Text(s.value).font(.system(size: size, weight: .heavy)).tracking(-size * 0.075).monospacedDigit()
-                .minimumScaleFactor(0.6).lineLimit(1)
+            Text(s.value).font(.system(size: 80, weight: .heavy)).tracking(-6).monospacedDigit()
+                .minimumScaleFactor(0.5).lineLimit(1).layoutPriority(1)
                 .foregroundStyle(c.tone(s.tone))
             VStack(alignment: .leading, spacing: 1) {
-                Text(s.delta).font(mono(13)).foregroundStyle(c.ink2).lineLimit(1)
-                Arrow(a: s.arrow).font(.system(size: 18, weight: .semibold)).foregroundStyle(c.tone(s.tone))
+                Text(s.delta).font(mono(15)).foregroundStyle(c.ink2).lineLimit(1)
+                Arrow(a: s.arrow).font(.system(size: 24, weight: .semibold)).foregroundStyle(c.tone(s.tone))
             }
             .fixedSize()
         }
     }
 
-    // Feste Breite: Ein Timer-Text nimmt sonst so viel Platz, wie er bekommt.
-    private func age(_ s: NebelActivityAttributes.ContentState) -> some View {
-        (Text("vor ") + Text(timerInterval: s.at...s.at.addingTimeInterval(8 * 3600), countsDown: false, showsHours: false))
-            .font(mono(11)).foregroundStyle(c.ink3).lineLimit(1)
-            .frame(width: 90, alignment: .leading)
+    /// Einheit und Alter in einer Zeile. Feste Breite fuer den Timer-Text: Er nimmt sonst
+    /// so viel Platz, wie er bekommt.
+    private func footer(_ s: NebelActivityAttributes.ContentState) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(s.unit.uppercased()).font(mono(9)).tracking(1.4).fixedSize()
+            (Text("vor ") + Text(timerInterval: s.at...s.at.addingTimeInterval(8 * 3600), countsDown: false, showsHours: false))
+                .font(mono(11)).lineLimit(1)
+                .frame(width: 66, alignment: .leading)
+        }
+        .foregroundStyle(c.ink3)
     }
 }

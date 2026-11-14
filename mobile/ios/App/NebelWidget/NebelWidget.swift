@@ -1,8 +1,11 @@
+#if os(iOS)
 import ActivityKit
+#endif
 import SwiftUI
 import WidgetKit
 
 /// Widget-Erweiterung von nebel.: Live-Aktivitaet und Startbildschirm-Widget (NebelHome.swift).
+#if os(iOS)   // ohne iOS nur die Ansichten, fuer scripts/snapshots.swift
 @main
 struct NebelWidgets: WidgetBundle {
     var body: some Widget {
@@ -11,6 +14,7 @@ struct NebelWidgets: WidgetBundle {
         NebelHomeLight()
     }
 }
+#endif
 
 // Farben der App (app/template.html, :root und html[data-theme="dark"]), nach ihrer Einstellung.
 private func rgb(_ r: Double, _ g: Double, _ b: Double) -> Color { Color(red: r / 255, green: g / 255, blue: b / 255) }
@@ -29,6 +33,7 @@ struct Pal {
 // Schriften der App: Plus Jakarta Sans -> SF, DM Mono -> SF Mono.
 func mono(_ size: CGFloat, _ w: Font.Weight = .medium) -> Font { .system(size: size, weight: w, design: .monospaced) }
 
+#if os(iOS)
 struct NebelLive: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: NebelActivityAttributes.self) { ctx in
@@ -62,6 +67,7 @@ struct NebelLive: Widget {
         }
     }
 }
+#endif
 
 struct LockView: View {
     let s: NebelActivityAttributes.ContentState

@@ -101,3 +101,15 @@ jobs:
           name: nebel-ipa
           path: nebel.ipa
           if-no-files-found: error
+      - name: Ansichtsbilder rendern (Live-Aktivitaet und Widgets)
+        continue-on-error: true   # Bilder sind nur zum Ansehen, die ipa haengt nicht daran
+        run: |
+          W=ios/App/NebelWidget
+          xcrun swiftc -parse-as-library -target arm64-apple-macos14.0 -o "$RUNNER_TEMP/snap" \
+            $W/NebelActivity.swift $W/NebelWidget.swift $W/NebelHome.swift scripts/snapshots.swift
+          "$RUNNER_TEMP/snap" "$GITHUB_WORKSPACE/shots"
+      - uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: nebel-ansicht
+          path: shots/*.png

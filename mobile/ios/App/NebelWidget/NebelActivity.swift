@@ -1,4 +1,6 @@
+#if canImport(ActivityKit)
 import ActivityKit
+#endif
 import Foundation
 
 /// Live-Aktivitaet auf dem Sperrbildschirm. Gehoert zu beiden Programmteilen:
