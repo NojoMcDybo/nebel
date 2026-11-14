@@ -90,7 +90,8 @@ jobs:
           # SideStore liest sie dort aus und signiert neu.
           APP="$RUNNER_TEMP/ipa/Payload/App.app"
           for f in "$APP"/Frameworks/*.framework; do codesign --force --sign - "$f"; done
-          for x in "$APP"/PlugIns/*.appex; do codesign --force --sign - "$x"; done
+          codesign --force --sign - --entitlements ios/App/NebelWidget/NebelWidget.entitlements "$APP/PlugIns/NebelWidget.appex"
+          codesign -d --entitlements - "$APP/PlugIns/NebelWidget.appex"
           ls "$APP"/PlugIns
           codesign --force --sign - --entitlements ios/App/App/App.entitlements "$APP"
           codesign -d --entitlements - "$APP"

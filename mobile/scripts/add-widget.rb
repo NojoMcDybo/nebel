@@ -11,7 +11,7 @@ app = proj.targets.find { |t| t.name == "App" } or abort "Ziel App fehlt"
 ext = proj.new_target(:app_extension, "NebelWidget", :ios, "17.0", nil, :swift)
 group = proj.main_group.new_group("NebelWidget", "NebelWidget")
 shared = group.new_file("NebelActivity.swift")
-ext.add_file_references([group.new_file("NebelWidget.swift"), shared])
+ext.add_file_references([group.new_file("NebelWidget.swift"), group.new_file("NebelHome.swift"), shared])
 app.add_file_references([shared])     # Die App startet die Aktivitaet mit demselben Typ
 group.new_file("Info.plist")
 

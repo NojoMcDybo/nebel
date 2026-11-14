@@ -2,10 +2,13 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
-/// Widget-Erweiterung von nebel.: nur die Live-Aktivitaet, keine Home-Widgets.
+/// Widget-Erweiterung von nebel.: Live-Aktivitaet und Startbildschirm-Widget (NebelHome.swift).
 @main
 struct NebelWidgets: WidgetBundle {
-    var body: some Widget { NebelLive() }
+    var body: some Widget {
+        NebelLive()
+        NebelHome()
+    }
 }
 
 // Farben der App (app/template.html, :root und html[data-theme="dark"]), nach ihrer Einstellung.
@@ -14,13 +17,14 @@ struct Pal {
     let paper, ink, ink2, ink3, low, high: Color
     static let dark = Pal(paper: rgb(14, 18, 19), ink: rgb(233, 239, 239), ink2: rgb(163, 174, 174),
                           ink3: rgb(126, 138, 138), low: rgb(255, 112, 99), high: rgb(232, 180, 74))
-    static let light = Pal(paper: rgb(237, 241, 241), ink: rgb(10, 13, 13), ink2: rgb(87, 98, 98),
+    static let light = Pal(paper: .white,   // hell wie --card der App, nicht --paper
+                           ink: rgb(10, 13, 13), ink2: rgb(87, 98, 98),
                            ink3: rgb(95, 106, 106), low: rgb(184, 54, 43), high: rgb(142, 100, 16))
     func tone(_ t: String) -> Color { t == "low" ? low : t == "high" ? high : ink }
     func tone(mg v: Double) -> Color { v < 70 ? low : v > 180 ? high : ink }
 }
 // Schriften der App: Plus Jakarta Sans -> SF, DM Mono -> SF Mono.
-private func mono(_ size: CGFloat, _ w: Font.Weight = .medium) -> Font { .system(size: size, weight: w, design: .monospaced) }
+func mono(_ size: CGFloat, _ w: Font.Weight = .medium) -> Font { .system(size: size, weight: w, design: .monospaced) }
 
 struct NebelLive: Widget {
     var body: some WidgetConfiguration {

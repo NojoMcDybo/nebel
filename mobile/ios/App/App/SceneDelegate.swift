@@ -3,6 +3,7 @@ import Capacitor
 import SwiftUI
 import HealthKit
 import ActivityKit
+import WidgetKit
 #if canImport(AlarmKit)
 import AlarmKit
 #endif
@@ -176,7 +177,6 @@ public class NebelLivePlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func update(_ call: CAPPluginCall) {
         guard #available(iOS 16.2, *) else { return call.resolve(["state": "unsupported"]) }
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return call.resolve(["state": "off"]) }
         let at = (call.getDouble("at") ?? Date().timeIntervalSince1970 * 1000) / 1000
         let s = NebelActivityAttributes.ContentState(
             value: call.getString("value") ?? "", unit: call.getString("unit") ?? "",
@@ -185,6 +185,12 @@ public class NebelLivePlugin: CAPPlugin, CAPBridgedPlugin {
             at: Date(timeIntervalSince1970: at),
             points: (call.getArray("points") ?? []).compactMap { ($0 as? NSNumber)?.doubleValue },
             dark: call.getBool("dark") ?? true)
+        // Startbildschirm-Widget: Stand immer ablegen, neu zeichnen nur bei neuem Wert oder
+        // anderem Design, nicht bei jedem Pulswert (iOS teilt die Neuladungen zu).
+        let old = NebelActivityAttributes.ContentState.load()
+        s.save()
+        if old?.at != s.at || old?.dark != s.dark { WidgetCenter.shared.reloadAllTimelines() }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return call.resolve(["state": "off"]) }
         let content = ActivityContent(state: s, staleDate: s.at.addingTimeInterval(15 * 60))
         Task {
             let all = Activity<NebelActivityAttributes>.activities
@@ -201,6 +207,8 @@ public class NebelLivePlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     @objc func end(_ call: CAPPluginCall) {
+        NebelShared.defaults?.removeObject(forKey: "last")   // Reality vorbei: Widget zeigt den Hinweis
+        WidgetCenter.shared.reloadAllTimelines()
         guard #available(iOS 16.2, *) else { return call.resolve() }
         Task {
             for a in Activity<NebelActivityAttributes>.activities { await a.end(nil, dismissalPolicy: .immediate) }
