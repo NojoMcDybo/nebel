@@ -37,6 +37,31 @@ class NebelBridgeViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(NebelAlarmPlugin())
         bridge?.registerPluginInstance(NebelHealthPlugin())
         bridge?.registerPluginInstance(NebelLivePlugin())
+        bridge?.registerPluginInstance(NebelSharePlugin())
+    }
+}
+
+/// Teilen-Blatt von iOS fuer die Klarsicht-Karte: Bild und Text. Die WebView kann
+/// navigator.share mit Dateien nicht verlaesslich. JS: NebelShare.share({ text, png: base64 })
+/// -> { done }. Nur was der Nutzer selbst teilt, verlaesst das Geraet.
+@objc(NebelSharePlugin)
+public class NebelSharePlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "NebelSharePlugin"
+    public let jsName = "NebelShare"
+    public let pluginMethods: [CAPPluginMethod] = [CAPPluginMethod(name: "share", returnType: CAPPluginReturnPromise)]
+
+    @objc func share(_ call: CAPPluginCall) {
+        var items: [Any] = []
+        if let b = call.getString("png"), let d = Data(base64Encoded: b), let img = UIImage(data: d) { items.append(img) }
+        if let t = call.getString("text"), !t.isEmpty { items.append(t) }
+        DispatchQueue.main.async {
+            guard let vc = self.bridge?.viewController, !items.isEmpty else { return call.resolve(["done": false]) }
+            let a = UIActivityViewController(activityItems: items, applicationActivities: nil)
+            a.popoverPresentationController?.sourceView = vc.view   // iPad: sonst Absturz
+            a.popoverPresentationController?.sourceRect = CGRect(x: vc.view.bounds.midX, y: vc.view.bounds.maxY - 80, width: 1, height: 1)
+            a.completionWithItemsHandler = { _, done, _, _ in call.resolve(["done": done]) }
+            vc.present(a, animated: true)
+        }
     }
 }
 

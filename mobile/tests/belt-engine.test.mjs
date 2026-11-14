@@ -63,4 +63,11 @@ describe("BeltEngine", () => {
     for (let i = 0; i < 1440; i++) { e.beltBpm(65); e.step(); }
     expect(e.events.some((x) => x.kind === "move")).toBe(false);
   });
+
+  it("reicht Pen und Tagesmodus an den Adapter durch", () => {
+    const e = new BeltEngine(7, 0, true, { id: "schwanger", week: 34 });
+    expect(e.pen).toBe(true);
+    expect(e.mode).toEqual(new Engine(7, 0, true, { id: "schwanger", week: 34 }).mode);
+    expect(e.mode.id).toBe("schwanger");
+  });
 });

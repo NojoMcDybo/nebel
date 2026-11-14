@@ -179,6 +179,29 @@ function scheduleAlarms(){
   })));
 }
 
+/* Daily Dose (intern ks*, frueher Klarsicht) in der App: Teilen ueber das iOS-Blatt (Bild
+   und Text) und eine Mitteilung um 8 Uhr fuer jeden noch nicht gespielten Tag der naechsten
+   Woche. Ein Tipp darauf oeffnet den Tag (#daily). */
+if (window.Capacitor && Capacitor.isNativePlatform()) $("ksShare").onclick = async () => {
+  const e = ksCur; if (!e) return;
+  try { await NebelBelt.share.share({ text: ksText(e), png: ksCanvas(e).toDataURL("image/png").split(",")[1] }); }
+  catch(err){ toast("basal", "Teilen ging nicht", null); }
+};
+var ksMornKey = null;
+function ksMorning(){
+  const out = [];
+  if (KSD.consent === true) for (let i = 0; i < 8; i++){
+    const at = new Date(); at.setDate(at.getDate() + i); at.setHours(8, 0, 0, 0);
+    const d = ksDay(ksDate(at)), p = PERSONAS.find(x => x.id === d.person);
+    if (at.getTime() > Date.now() && !ksPlayed(d.date))
+      out.push({ at: at.getTime(), title: \`Daily Dose of T1D #\${d.nr} ist da\`, body: \`Heute: \${p ? p.name : "neue Person"}, \${ksModeTxt(d.mode)}. Ein Tag, ein Versuch.\` });
+  }
+  const key = JSON.stringify(out);
+  if (key === ksMornKey) return;
+  ksMornKey = key; NebelAlarms.morning(out);
+}
+NebelAlarms.onOpen(h => { if (!location.hash.includes(h)){ saveState(); location.hash = h; location.reload(); } });
+
 `;
 
 /** [Anker, Ersatz, Anzahl (Standard 1)] */
@@ -268,6 +291,10 @@ export const PATCHES = [
 });
 $("nightOK").onclick = () => { closeSheets(); goSleep(); };`],
 
+  // Klarsicht: jede Aenderung (Zustimmung, gespielter Tag) plant die Morgen-Mitteilungen neu
+  ["const ksSave = () => { try { localStorage.setItem(KS_KEY, JSON.stringify(KSD)); } catch(e){} };",
+   "const ksSave = () => { try { localStorage.setItem(KS_KEY, JSON.stringify(KSD)); } catch(e){} setTimeout(ksMorning, 0); };"],
+
   // Start
   ["/* ─── Start ───", (m) => APP_JS + m],
   ["if (eng.reality) setAnchor();",
@@ -280,6 +307,7 @@ if (eng.reality){ speed = 1; [...$("speed").children].forEach(x => x.setAttribut
   ["requestAnimationFrame(loop);\n</script>",
    `requestAnimationFrame(loop);
 paintAlarmBtn();
+ksMorning();
 tryFillGap();
 paintLive();
 if (eng.reality && belt.remembered()) belt.connect(false);   // gemerkter Gurt: still verbinden, nie die Auswahl oeffnen

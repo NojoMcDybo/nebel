@@ -8,7 +8,7 @@
 const BELT_GRACE = 2;
 
 class BeltEngine extends Engine {
-  constructor(seed, subjectIndex){ super(seed, subjectIndex); this.beltT = null; }
+  constructor(...a){ super(...a); this.beltT = null; }   // pen und Tagesmodus durchreichen
 
   /* Mittel der letzten Minute [bpm]. */
   beltBpm(bpm){

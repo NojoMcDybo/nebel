@@ -40,13 +40,14 @@ export async function ask(): Promise<boolean> {
   return (await weckerState("ask")) === "authorized" || note;
 }
 
-// iOS hält höchstens 64 geplante Mitteilungen pro App.
-const MAX = 60;
+// iOS hält höchstens 64 geplante Mitteilungen pro App: 56 Alarme plus 7 Klarsicht-Morgen.
+const MAX = 56;
+const MORNING_ID = 1000; // Klarsicht-Morgen: 1001–1007, Alarme: 1–56
 
-async function clearNotes() {
+async function clearNotes(morning = false) {
   const pending = await LocalNotifications.getPending();
-  if (pending.notifications.length)
-    await LocalNotifications.cancel({ notifications: pending.notifications.map((n) => ({ id: n.id })) });
+  const ids = pending.notifications.filter((n) => (n.id > MORNING_ID) === morning).map((n) => ({ id: n.id }));
+  if (ids.length) await LocalNotifications.cancel({ notifications: ids });
 }
 
 async function doReplace(alarms: Alarm[]) {
@@ -75,4 +76,36 @@ let chain: Promise<void> = Promise.resolve();
 export function replace(alarms: Alarm[]): Promise<void> {
   chain = chain.then(() => doReplace(alarms)).catch(() => {});
   return chain;
+}
+
+export interface Morning {
+  at: number; // ms seit Epoche
+  title: string;
+  body: string;
+}
+
+/** Klarsicht: eine Mitteilung pro Morgen für die nächsten Tage. Leere Liste löscht sie.
+ *  Fragt nach Mitteilungen, wenn noch nie gefragt wurde (nur nach Zustimmung zu Klarsicht). */
+export function morning(list: Morning[]): Promise<void> {
+  chain = chain.then(async () => {
+    await clearNotes(true);
+    const next = list.filter((m) => m.at > Date.now()).slice(0, 7);
+    if (!next.length) return;
+    if ((await LocalNotifications.requestPermissions()).display !== "granted") return;
+    await LocalNotifications.schedule({
+      notifications: next.map((m, i) => ({
+        id: MORNING_ID + 1 + i, title: m.title, body: m.body, schedule: { at: new Date(m.at) },
+        extra: { hash: "daily" },
+      })),
+    });
+  }).catch(() => {});
+  return chain;
+}
+
+/** Tipp auf eine Mitteilung mit Sprungziel (extra.hash). iOS hebt das Ereignis bis hierher auf. */
+export function onOpen(fn: (hash: string) => void): void {
+  LocalNotifications.addListener("localNotificationActionPerformed", (a) => {
+    const h = a.notification.extra?.hash;
+    if (typeof h === "string") fn(h);
+  }).catch(() => {});
 }

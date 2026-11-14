@@ -116,3 +116,8 @@ export const live = registerPlugin<{
   }): Promise<{ state: string; error?: string }>;
   end(): Promise<void>;
 }>("NebelLive");
+
+/** Teilen-Blatt von iOS (NebelSharePlugin): Klarsicht-Karte als Bild plus Text. png ohne data:-Praefix. */
+export const share = registerPlugin<{
+  share(o: { text: string; png?: string }): Promise<{ done: boolean }>;
+}>("NebelShare");

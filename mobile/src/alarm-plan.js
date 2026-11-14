@@ -13,7 +13,7 @@ const alarmSide = v => v < TRAIN_LOW ? "low" : v > TRAIN_HIGH ? "high" : null;
 /* Kopie des Laufs: dieselben Teile, die app.html speichert und laedt. */
 function cloneRun(eng){
   const idx = Math.max(0, window.SUBJECTS.findIndex(s => s.id === eng.subjectId));
-  const c = new BeltEngine(eng.seed, idx);
+  const c = new BeltEngine(eng.seed, idx, eng.pen, eng.mode);   // sonst schlaegt restore fehl (Pen/Modus)
   const d = JSON.parse(JSON.stringify({ s:eng.s, rng:eng.rng.state(), core:eng.snapshot(),
     acts:eng.acts, reality:eng.reality, lastSensor:eng.lastSensor }));
   Object.assign(c.s, d.s); c.rng.setState(d.rng); c.restore(d.core);
