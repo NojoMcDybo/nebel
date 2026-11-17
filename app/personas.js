@@ -66,7 +66,8 @@ const DERIVED = [
     therapy:{ basalRateUPerH:1, carbRatioGPerU:12, correctionFactor:55 } },
 ];
 function deriveBodies(subjects, N){
-  const ig = (sub, rate) => N.get(N.initialState(N.nebelParameters(sub), N.basalRateToMUPerMin(rate)), "IG");
+  // Ruhezustand haengt nicht an p3/p4: ohne die Bewegungskalibrierung, die 50 Zwischenkoerper waeren sonst Sekunden
+  const ig = (sub, rate) => N.get(N.initialState(N.applyNebelCalibration(N.withPopulationConstants(sub)), N.basalRateToMUPerMin(rate)), "IG");
   for (const d of DERIVED){
     if (subjects.some(s => s.id === d.id)) continue;
     const src = subjects.find(s => s.id === d.base), f = d.BW / src.subject.BW;

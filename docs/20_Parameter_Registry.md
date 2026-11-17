@@ -104,37 +104,37 @@ Nicht im Datensatz: Alter und Geschlecht. Alle 20 halten mit ihrer Basalrate exa
 
 Datensatzfehler: Das Feld `total_daily_basal` passt nicht zu `basal` × 24 (Verhältnis 1,02 bis 2,44, bei Patient 1 16,9 gegen 27,3 U). Bedeutung unklar; Nebel nutzt das Feld nicht.
 
-### Verhalten im Nebel-Parametersatz (26.09.2026, Bewegung neu am 09.11.2026)
+### Verhalten im Nebel-Parametersatz (26.09.2026, Bewegung neu am 09.11. und 17.11.2026)
 
-Gerechnet aus dem Gleichgewicht bei 108 mg/dL, ohne Sensorfehler. Die Bewegungsspalten enthalten seit 09.11.2026 die lange Nachwirkung (Abschnitt 9). „60 g" = 24 g schnell + 36 g langsam, Bolus nach KE-Faktor 10 min vorher. „Sport" = 45 min bei 55 % der Herzfrequenzreserve, nüchtern. „Hart" = 20 min bei 90 %.
+Gerechnet aus dem Gleichgewicht bei 108 mg/dL, ohne Sensorfehler. Die Bewegungsspalten enthalten seit 09.11.2026 die lange Nachwirkung (Abschnitt 9), seit 17.11.2026 die Bewegungskalibrierung (Abschnitt 7). „60 g" = 24 g schnell + 36 g langsam, Bolus nach KE-Faktor 10 min vorher. „Sport" = 45 min bei 55 % der Herzfrequenzreserve, nüchtern. „Hart" = 20 min bei 90 %.
 
 | P | kg | HbA1c | Basal U/h | 1 U senkt | 60 g + Bolus: Spitze / Tief | 60 g ohne Bolus | Sport moderat | Hart |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 79 | 6,5 | 1,14 | 23 | 131 / 98 | 191 | −12 | +16 |
-| 2 | 74 | 7,6 | 1,45 | 18 | 134 / 105 | 186 | −4 | +34 |
-| 3 | 70 | 6,2 | 1,25 | 31 | 138 / 101 | 201 | −78 | +19 |
-| 4 | 73 | 6,4 | 0,93 | 38 | 159 / 108 | 255 | −84 | +79 |
-| 5 | 64 | 6,9 | 0,77 | 36 | 164 / 108 | 274 | −89 | 0 |
-| 6 | 65 | 6,5 | 0,59 | 37 | 152 / 105 | 271 | −89 | 0 |
-| 7 | 62 | 7,0 | 2,00 | 16 | 142 / 108 | 186 | −25 | +56 |
-| 8 | 68 | 6,9 | 0,73 | 24 | 129 / 92 | 209 | −42 | +23 |
-| 9 | 66 | 6,3 | 0,98 | 25 | 138 / 99 | 216 | −9 | +42 |
-| 10 | 71 | 6,3 | 0,46 | 33 | 163 / 108 | 299 | −32 | +40 |
-| 11 | 84 | 6,2 | 1,77 | 20 | 127 / 99 | 171 | −2 | +36 |
-| 12 | 83 | 5,7 | 1,09 | 23 | 128 / 95 | 186 | −17 | +16 |
-| 13 | 70 | 7,1 | 1,26 | 28 | 186 / 108 | 278 | −89 | +41 |
-| 14 | 77 | 5,8 | 0,51 | 35 | 136 / 90 | 236 | −64 | +6 |
-| 15 | 85 | 5,9 | 1,19 | 21 | 137 / 107 | 194 | −54 | +51 |
-| 16 | 66 | 6,1 | 0,39 | 38 | 145 / 86 | 290 | −38 | +16 |
-| 17 | 81 | 7,2 | 1,50 | 33 | 144 / 105 | 216 | −17 | +19 |
-| 18 | 88 | 6,9 | 1,56 | 31 | 134 / 103 | 190 | −23 | +11 |
-| 19 | 73 | 6,4 | 1,15 | 32 | 168 / 108 | 260 | −27 | +89 |
-| 20 | 75 | 6,7 | 1,00 | 36 | 160 / 108 | 261 | −35 | +76 |
-| **Median** | | | | **31** | **142** | **216** | **−33** | **+29** |
+| 1 | 79 | 6,5 | 1,14 | 23 | 131 / 98 | 191 | −24 | +6 |
+| 2 | 74 | 7,6 | 1,45 | 18 | 134 / 105 | 186 | −18 | +18 |
+| 3 | 70 | 6,2 | 1,25 | 31 | 138 / 101 | 201 | −53 | +40 |
+| 4 | 73 | 6,4 | 0,93 | 38 | 159 / 108 | 255 | −53 | +89 |
+| 5 | 64 | 6,9 | 0,77 | 36 | 164 / 108 | 274 | −54 | +12 |
+| 6 | 65 | 6,5 | 0,59 | 37 | 152 / 105 | 271 | −53 | +4 |
+| 7 | 62 | 7,0 | 2,00 | 16 | 142 / 108 | 186 | −38 | +51 |
+| 8 | 68 | 6,9 | 0,73 | 24 | 129 / 92 | 209 | −45 | +22 |
+| 9 | 66 | 6,3 | 0,98 | 25 | 138 / 99 | 216 | −24 | +33 |
+| 10 | 71 | 6,3 | 0,46 | 33 | 163 / 108 | 299 | −37 | +35 |
+| 11 | 84 | 6,2 | 1,77 | 20 | 127 / 99 | 171 | −20 | +25 |
+| 12 | 83 | 5,7 | 1,09 | 23 | 128 / 95 | 186 | −32 | +11 |
+| 13 | 70 | 7,1 | 1,26 | 28 | 186 / 108 | 278 | −56 | +77 |
+| 14 | 77 | 5,8 | 0,51 | 35 | 136 / 90 | 236 | −47 | +12 |
+| 15 | 85 | 5,9 | 1,19 | 21 | 137 / 107 | 194 | −51 | +52 |
+| 16 | 66 | 6,1 | 0,39 | 38 | 145 / 86 | 290 | −40 | +15 |
+| 17 | 81 | 7,2 | 1,50 | 33 | 144 / 105 | 216 | −29 | +10 |
+| 18 | 88 | 6,9 | 1,56 | 31 | 134 / 103 | 190 | −34 | +2 |
+| 19 | 73 | 6,4 | 1,15 | 32 | 168 / 108 | 260 | −33 | +80 |
+| 20 | 75 | 6,7 | 1,00 | 36 | 160 / 108 | 261 | −42 | +72 |
+| **Median** | | | | **31** | **142** | **216** | **−39** | **+23** |
 
 Die App bietet zehn davon als Personen an (4, 6, 7, 8, 10, 11, 13, 14, 15, 18), siehe `09_Personen.md`.
 
-Lesart: Die größte Streuung liegt in der Bewegungsantwort (−2 bis −89 mg/dL bei derselben moderaten Einheit), getragen von `p3`. Patient 1, das bisherige Standardsubjekt, ist bei Insulin und moderater Bewegung am schwachen Rand.
+Lesart: Die größte Streuung lag in der Bewegungsantwort (Quelle: −2 bis −89 mg/dL bei derselben moderaten Einheit), getragen von `p3`. Seit der Bewegungskalibrierung (Abschnitt 7) sind es −18 bis −56. Patient 1, das bisherige Standardsubjekt, ist bei Insulin und moderater Bewegung am schwachen Rand.
 
 Einschränkung: Alle 20 Subjekte sind Erwachsene mit HbA1c zwischen 5.7 und 7.6 %. Kinder, Jugendliche und schlecht eingestellte Verläufe sind **nicht** abgedeckt. Das gehört in den Model Validity Envelope und in die Kommunikation gegenüber Nutzern.
 
@@ -268,8 +268,9 @@ Wo ein Quellwert nachweislich nicht zur Wirklichkeit passt, wird er an genau ein
 |---|---|---|---|---|
 | `tsub` | 15 min | **5 min** | N, an Q kalibriert | ISPAD 5–10 min; Vettoretti 2019 τ = 3,8 min. Nur Beobachtungsschicht (W9) |
 | `tmaxI` | 58–131 min | **50 min** für alle | N, an Q kalibriert | Fachinformation Insulin aspart: Maximum 1–3 h, Wirkdauer 3–5 h. Changelog Nachtrag 9 |
+| `p3`, `p4` | je Subjekt | **× k je Körper** | N, an Q kalibriert (seit 17.11.2026) | Ziel: im Gleichgewicht bei 108 mg/dL fällt der Wert in 60 min bei 55 % HRR um 18 % + 36 % · (1 − e^(−eigen/0,35)), also 18–54 %, Median 40 %. DirecNet 2005 (Tsalikian et al., [PMC2258153](https://pmc.ncbi.nlm.nih.gov/articles/PMC2258153)): 75 min, 82 % fallen um ≥ 25 %, 22 % auf ≤ 60 mg/dL; der Median 40 % ist Nebel-Annahme. Gegenprobe T1DEXI 2023: aerob −18 ± 39 mg/dL in ~30 min (Nebel 30 min: Median −33 aus 108, nüchtern und ohne Anpassung). Reihenfolge der Körper bleibt; `p5`, `p2` und die Schwelle bleiben Quelle. Changelog Nachtrag 43 |
 
-Abgesichert durch `tests/calibration.test.ts`: Die Kalibrierung verändert das Basalgleichgewicht nicht, legt die Wirkung von 1 U in die Grenzen der Fachinformation, und die Gegenprobe mit Quellwerten liegt außerhalb.
+Abgesichert durch `tests/calibration.test.ts`: Die Kalibrierung verändert das Basalgleichgewicht nicht, legt die Wirkung von 1 U in die Grenzen der Fachinformation, und die Gegenprobe mit Quellwerten liegt außerhalb. Für die Bewegung: alle 20 in 18–54 %, Median 35–45 %, Reihenfolge erhalten, unterhalb der Schwelle mehr Intensität = mehr Abfall, nur `p3`/`p4` geändert.
 
 
 ## 8. Fett und Eiweiß (`engine/src/nutrition.ts`, seit 26.09.2026)
@@ -328,25 +329,25 @@ Die Quelle führt die Nachwirkung über `EElong` mit `p7 = 0,1/min`, also 10 min
 | Parameter | Wert | Einheit | Status | Beleg |
 |---|---|---|---|---|
 | `tauMin` | 600 | min | N, aus Q übernommen | Dalla Man, Breton, Cobelli 2009, Tabelle 1: `T_ex` = 600 min; Breton 2008: Unterschied nach 20 h signifikant, nach 24 h fraglich |
-| `gainPerLoadMin` | 0,0045 | 1/min | N, an Q kalibriert | DirecNet 2005: Nachtmittel 22–6 Uhr nach Nachmittagstraining −23 mg/dL; Nebel −22. Gegenprobe Taplin 2010 |
+| `gainPerLoadMin` | 0,005 | 1/min | N, an Q kalibriert | DirecNet 2005: Nachtmittel 22–6 Uhr nach Nachmittagstraining −23 mg/dL; Nebel −22,5. Gegenprobe Taplin 2010. Bis 17.11.2026 0,0045 (vor der Bewegungskalibrierung) |
 
 ### 9.2 Gleichungen
 
 ```
 L(t)      = ∫ HRR(s) · e^(−(t−s)/600) ds       HRR aus der Herzfrequenzspur, stückweise linear, exakt integriert
-siFactor  = siFactor_Fett · (1 + 0,0045 · L)    wirkt auf kb1, kb2, kb3; ausgewertet am Anfang des Rechenschritts
+siFactor  = siFactor_Fett · (1 + 0,005 · L)      wirkt auf kb1, kb2, kb3; ausgewertet am Anfang des Rechenschritts
 ```
 
-60 min bei 55 % der Herzfrequenzreserve ergeben `L ≈ 31` und 14 % mehr Insulinwirkung. Nach 10 h ist davon gut ein Drittel übrig, nach 24 h knapp ein Zehntel.
+60 min bei 55 % der Herzfrequenzreserve ergeben `L ≈ 31` und 16 % mehr Insulinwirkung. Nach 10 h ist davon gut ein Drittel übrig, nach 24 h knapp ein Zehntel.
 
 ### 9.3 Nachrechnung
 
-Szenario: Gleichgewicht, 60 min bei 55 % um 16 Uhr, 60 g mit Bolus um 19 Uhr, Nachtmittel 22–6 Uhr. Gezählt werden die 10 Subjekte, die am Nachmittag nicht unter 70 mg/dL fallen.
+Szenario: Gleichgewicht, 60 min bei 55 % um 16 Uhr, 60 g mit Bolus um 19 Uhr, Nachtmittel 22–6 Uhr. Seit 17.11.2026 alle 20 Subjekte; ein Tief zwischen 16 und 22 Uhr wird wie in DirecNet behandelt (unter 70 mg/dL 15 g schnelle KH, höchstens alle 15 min; 15 von 20 brauchen das). Vorher zählten nur die 10, die nicht unter 70 fielen; nach der Bewegungskalibrierung wären das 4.
 
 | Größe (Median) | Studie | Quelle allein | Nebel | Rolle |
 |---|---|---|---|---|
-| Nacht nach Training gegen ohne | −23 (DirecNet 2005) | −1 | −22 | Kalibrierung |
-| 20 % weniger Basal 21–3 Uhr hebt die Nacht | gleicht aus (Taplin 2010) | +29 | +20 (Verhältnis 1,19) | Gegenprobe |
+| Nacht nach Training gegen ohne | −23 (DirecNet 2005) | −1 (Stand 09.11., 10 Subjekte) | −22,5 | Kalibrierung |
+| 20 % weniger Basal 21–3 Uhr hebt die Nacht | gleicht aus (Taplin 2010) | +29 (Stand 09.11.) | +21 (Verhältnis 1,15) | Gegenprobe |
 
 Einschränkungen: Beide Studien messen Kinder und Jugendliche, die 20 Subjekte sind Erwachsene. Linear in Dauer × Intensität, keine Sättigung. Abgesichert durch `tests/afterEffect.test.ts` und `scripts/check-adapter.cjs`.
 

@@ -19,7 +19,8 @@ const relError = (a: number, b: number): number =>
   Math.abs(a - b) / Math.max(1, Math.abs(b));
 
 describe("Orakelabgleich", () => {
-  it("Referenzwerte sind vorhanden", () => {
+  // Im CI Pflicht (pages.yml rechnet sie vorher), lokal ohne numpy uebersprungen.
+  it.runIf(available || !!process.env.CI)("Referenzwerte sind vorhanden", () => {
     expect(available, REFERENCE_HINT).toBe(true);
   });
 

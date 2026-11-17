@@ -23,7 +23,7 @@
  *
  * dist/ ist gitignored: Die Ausgaben enthalten Parametersaetze aus vendor/.
  */
-import { build } from "esbuild";
+import { build, transformSync } from "esbuild";
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, copyFileSync } from "node:fs";
 import { resolve, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -31,6 +31,7 @@ import vm from "node:vm";
 import { createHash } from "node:crypto";
 import { PAIRS } from "./i18n-en.mjs";
 import { markdown } from "./md.mjs";
+import { minifyInline } from "./minify-inline.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const oracle = resolve(root, "vendor/py-mgipsim/pymgipsim/VirtualPatient/Models/T1DM/ExtHovorka/Patients");
@@ -132,6 +133,8 @@ const checkNoExternal = (html, name) => {
 /* Fuer Suchmaschinen: jede Seite nennt ihre eigene Adresse, alle landen in sitemap.xml. */
 const SITE_URL = "https://nojomcdybo.github.io/nebel/", SITE_DIR = resolve(root, "dist/site"), sitemap = [];
 const writePage = (path, html) => {
+  html = minifyInline(html, transformSync);   // gut ein Viertel kleiner, auch gepackt
+  checkScripts(html, relative(SITE_DIR, path));
   const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
     .map((m) => `'sha256-${createHash("sha256").update(m[1].replace(/\r\n?/g, "\n"), "utf8").digest("base64")}'`);
   const csp = `default-src 'none'; script-src 'self' ${hashes.join(" ")}; style-src 'unsafe-inline'; font-src 'self'; ` +
@@ -203,10 +206,10 @@ if (existsSync(appTpl)) {
   writePage(resolve(site, "en/index.html"), htmlEn);
   /* Deutsche Reste im Sichtbaren (ohne Kommentare, Stile, Bezeichner) melden. */
   {
-    const visible = htmlEn
+    const visible = PAIRS.reduce((x, [, en]) => x.split(en).join(""), htmlEn   // Uebersetztes ist kein Rest ("would you die?")
       .replace(/<style[\s\S]*?<\/style>/g, "").replace(/<!--[\s\S]*?-->/g, "")
       .replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "").replace(/\s\/\/ .*$/gm, "")
-      .replace(/<svg[\s\S]*?<\/svg>/g, "");
+      .replace(/<svg[\s\S]*?<\/svg>/g, ""));
     const de = /\b(und|der|die|das|ist|nicht|ein|eine|einen|wird|mit|für|auf|sich|dein|deine|deinen|du|Sie|zu|von|wenn|nur|noch|aber|oder|Tag|Stunden|Minuten|Wert|keine|kein)\b|[äöüß]/;
     const hits = visible.split("\n").filter((l) => de.test(l) && /["'`>]/.test(l) && !/\bthrow\b|Error\(|^\s*`/.test(l));
     for (const l of hits.slice(0, 40)) console.error("en: deutscher Rest? " + l.trim().slice(0, 140));
@@ -315,7 +318,7 @@ window.SUBJECTS = ${JSON.stringify(chosen, null, 1)};
     `<!DOCTYPE html><meta charset="utf-8"><title>nebel.</title>` +
     `<meta http-equiv="refresh" content="0; url=site/index.html">` +
     `<p>Die App liegt jetzt in <a href="site/index.html">site/index.html</a>.</p>\n`, "utf8");
-  console.log(`geschrieben: dist/site/  (index.html ${(html.length / 1024).toFixed(0)} KB, personen-daten.js ${chosen.length} Personen, Stand py-mgipsim ${ref.slice(0, 7)})`);
+  console.log(`geschrieben: dist/site/  (index.html ${(htmlDe.length / 1024).toFixed(0)} KB vor dem Verkleinern, personen-daten.js ${chosen.length} Personen, Stand py-mgipsim ${ref.slice(0, 7)})`);
 }
 
 if (release && problems.length) {

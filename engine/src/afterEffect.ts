@@ -45,10 +45,34 @@ export const AFTER_EFFECT = {
    * 2010: 20 % weniger Basal ueber 6 h gleicht das zu gut 80 % aus.
    * Nachrechnung in tests/afterEffect.test.ts.
    */
-  gainPerLoadMin: 0.0045,
+  gainPerLoadMin: 0.005,
 } as const;
 
 export type AfterEffectConstants = { readonly [K in keyof typeof AFTER_EFFECT]: number };
+
+/* Stuetzstellen der Herzfrequenz, zeitlich sortiert (stabil), als Anteil der Reserve.
+   Die Vorhersage und jeder Rechenschritt fragen dieselbe Eingabeliste viele Male mit
+   wachsendem t ab; sortiert wird nur, wenn sich die Liste geaendert hat. Erkannt an
+   Laenge und letztem Eintrag: der Adapter haengt nur an oder schneidet aus und haengt
+   dann an, Pulseintraege aendert er nie an Ort und Stelle. */
+const tracks = new WeakMap<readonly SimEvent[], { len: number; last: SimEvent | undefined; p: Parameters; ts: number[]; hs: number[] }>();
+const hrTrack = (events: readonly SimEvent[], p: Parameters) => {
+  const c = tracks.get(events), last = events[events.length - 1];
+  if (c && c.len === events.length && c.last === last && c.p === p) return c;
+  let ts: number[] = [], hs: number[] = [], sorted = true;
+  for (const e of events)
+    if (e.kind === "heartRate") {
+      if (ts.length && e.t < ts[ts.length - 1]!) sorted = false;
+      ts.push(e.t); hs.push(heartRateReserve(e.bpm, p).hrr);
+    }
+  if (!sorted) {
+    const idx = ts.map((_, k) => k).sort((a, b) => ts[a]! - ts[b]!);
+    ts = idx.map((k) => ts[k]!); hs = idx.map((k) => hs[k]!);
+  }
+  const fresh = { len: events.length, last, p, ts, hs };
+  tracks.set(events, fresh);
+  return fresh;
+};
 
 /**
  * Abklingende Belastungssumme bis t [min]. Die Herzfrequenz folgt heartRateAt:
@@ -59,23 +83,34 @@ export const afterEffectLoad = (
   t: number, events: readonly SimEvent[], p: Parameters, tau: number = AFTER_EFFECT.tauMin,
 ): number => {
   // shortcut: Stuetzstellen aelter als 12 tau (5 Tage) wiegen weniger als e^-12 und fallen weg.
-  const pts: { t: number; h: number }[] = [];
-  for (const e of events)
-    if (e.kind === "heartRate" && e.t > t - 12 * tau) pts.push({ t: e.t, h: heartRateReserve(e.bpm, p).hrr });
-  pts.sort((a, b) => a.t - b.t);
+  const lo = t - 12 * tau;
+  const { ts, hs } = hrTrack(events, p);
+  let i = 0;
+  for (let hi = ts.length; i < hi;) { const m = (i + hi) >> 1; if (ts[m]! > lo) hi = m; else i = m + 1; }   // erste nach lo
 
-  const w = (s: number) => Math.exp((s - t) / tau);
-  let L = 0;
-  for (let i = 0; i < pts.length && pts[i]!.t < t; i++) {
-    const a = pts[i]!, b = pts[i + 1];
-    const end = b ? Math.min(b.t, t) : t;
-    if (end <= a.t) continue;
-    const slope = b && b.t > a.t ? (b.h - a.h) / (b.t - a.t) : 0;
-    const wa = w(a.t), we = w(end), span = end - a.t;
-    // ∫ (h_a + slope·(s − a)) · w(s) ds von a bis end, mit ∫ w = tau · w
-    L += a.h * tau * (we - wa) + slope * (tau * span * we - tau * tau * (we - wa));
+  /* Jedes Stueck a..end traegt we · K bei, we = e^((end − t)/tau), K haengt nur am Stueck.
+     Horner ueber die Stueckenden: acc · e^(−Abstand/tau) + K. So braucht es exp nur, wenn
+     sich Abstand oder Stuecklaenge aendern; mit dem Gurt (eine Stuetzstelle je Minute)
+     fast nie. Vorher zwei exp je Stuetzstelle, zweimal je Rechenschritt. */
+  let qArg = NaN, qVal = 0, dArg = NaN, dVal = 0, acc = 0, lastEnd = NaN;
+  const n = ts.length;
+  for (; i < n && ts[i]! < t; i++) {
+    const aT = ts[i]!, aH = hs[i]!, more = i + 1 < n;
+    const end = more ? Math.min(ts[i + 1]!, t) : t;
+    if (end <= aT) continue;
+    const slope = more && ts[i + 1]! > aT ? (hs[i + 1]! - aH) / (ts[i + 1]! - aT) : 0;
+    const span = end - aT;
+    if (span !== qArg) { qArg = span; qVal = Math.exp(-span / tau); }
+    // ∫ (h_a + slope·(s − a)) · e^((s − end)/tau) ds von a bis end
+    const K = aH * tau * (1 - qVal) + slope * (tau * span - tau * tau * (1 - qVal));
+    if (lastEnd === lastEnd) {
+      const gap = end - lastEnd;
+      if (gap !== dArg) { dArg = gap; dVal = Math.exp(-gap / tau); }
+      acc *= dVal;
+    }
+    acc += K; lastEnd = end;
   }
-  return L;
+  return lastEnd === lastEnd ? acc * Math.exp((lastEnd - t) / tau) : 0;
 };
 
 /**

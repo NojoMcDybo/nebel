@@ -197,7 +197,7 @@ Numerische Schutzgrenzen ohne physiologische Bedeutung: Glukose zwischen 1 und 3
 
 35 Parameter, davon 16 je Person verschieden und 19 für alle gleich. Die Spannweiten im Register sind die beobachteten Werte über die 20 Datensätze, keine Populationsverteilungen. Zwei Parameter (`beta`, `a`) sind Reste eines älteren Bewegungsmodells, werden in keiner Gleichung verwendet und sind nicht übernommen.
 
-Auffällig: Die Bewegungsantwort unterscheidet sich zwischen den Personen fast ausschließlich über `p3`, `p4`, `p5`, Ruhe- und Maximalpuls und die ventilatorische Schwelle. `p3` allein spannt einen Faktor 13. Dieselbe moderate Einheit senkt den Wert je nach Person um 2 bis 89 mg/dL.
+Auffällig: Die Bewegungsantwort unterscheidet sich zwischen den Personen fast ausschließlich über `p3`, `p4`, `p5`, Ruhe- und Maximalpuls und die ventilatorische Schwelle. `p3` allein spannt einen Faktor 13. Dieselbe moderate Einheit senkte den Wert je nach Person um 2 bis 89 mg/dL, bei einem Körper stieg er in einer Stunde sogar leicht. Studien messen anderes: In DirecNet fiel der Wert in 75 Minuten bei 82 % der Teilnehmenden um mindestens ein Viertel, 22 % kamen auf 60 mg/dL oder tiefer. Darum skaliert nebel. `p3` und `p4` je Körper so, dass eine Stunde bei 55 % der Herzfrequenzreserve den Wert um 18 bis 54 % senkt, im Median um 40 %. Wer in der Quelle stärker reagiert, reagiert auch hier stärker; nur die Extreme sind gestaucht. Seitdem sind es 18 bis 56 mg/dL.
 
 Alle 20 Datensätze sind Erwachsene mit HbA1c zwischen 5,7 und 7,6 %. Alter und Geschlecht stehen nicht darin. Jede Basalrate hält ohne Essen exakt 108 mg/dL, weil sie darauf gefittet ist.
 
@@ -269,15 +269,15 @@ Mit einem Parameter lassen sich Plasmaspitze und Wirkmaximum nicht gleichzeitig 
 
 ```
 L(t)     = ∫ HRR(s) · e^(−(t−s)/600) ds      abklingende Belastungsminuten
-siFactor = siFactor_Fett · (1 + 0,0045 · L)
+siFactor = siFactor_Fett · (1 + 0,005 · L)
 ```
 
 - **Abklingzeit 600 min** aus dem Bewegungsmodell von Dalla Man, Breton & Cobelli (2009), das die Insulinwirkung „schnell an, langsam ab“ beschreibt. Breton (2008) legte seine Werte so, dass der Unterschied nach 20 Stunden noch messbar ist.
-- **Stärke 0,0045 je Belastungsminute**, kalibriert an DirecNet: nebel. −22 mg/dL im Median.
-- **Gegenprobe Taplin et al. (2010):** 20 % weniger Basal über sechs Stunden hob den nächtlichen Tiefstwert nach Training deutlich an. In nebel. hebt dieselbe Maßnahme die Nacht um 20 mg/dL und gleicht die Nachwirkung damit fast aus (Quelle allein: +29 gegen −1).
-- Gerechnet mit den zehn Personen, die nachmittags nicht unter 70 mg/dL fallen. Die anderen hätten im echten Leben gegessen.
+- **Stärke 0,005 je Belastungsminute**, kalibriert an DirecNet: nebel. −22,5 mg/dL im Median.
+- **Gegenprobe Taplin et al. (2010):** 20 % weniger Basal über sechs Stunden hob den nächtlichen Tiefstwert nach Training deutlich an. In nebel. hebt dieselbe Maßnahme die Nacht um 21 mg/dL und gleicht die Nachwirkung damit fast aus (Quelle allein: +29 gegen −1).
+- Gerechnet mit allen 20 Personen. Wer nachmittags unter 70 mg/dL fällt, bekommt wie in DirecNet 15 g schnelle Kohlenhydrate.
 
-**Folgen.** 60 min bei 55 % der Herzfrequenzreserve machen Insulin um 14 % wirksamer. Nach 10 Stunden ist gut ein Drittel davon übrig, nach 24 Stunden knapp ein Zehntel. Die App zeigt „Nachwirkung +X %“ und, solange die Reserven unter 62 % liegen, „Reserven · nachtanken“. Nächte nach dem Training fallen jetzt öfter tief, wie in den Studien.
+**Folgen.** 60 min bei 55 % der Herzfrequenzreserve machen Insulin um 16 % wirksamer. Nach 10 Stunden ist gut ein Drittel davon übrig, nach 24 Stunden knapp ein Zehntel. Die App zeigt „Nachwirkung +X %“ und, solange die Reserven unter 62 % liegen, „Reserven · nachtanken“. Nächte nach dem Training fallen jetzt öfter tief, wie in den Studien.
 
 **Grenzen.** Beide Studien untersuchten Kinder und Jugendliche, die Modellpersonen sind Erwachsene. Die Nachwirkung wächst linear mit Dauer mal Intensität, ohne Sättigung. Sie ist eine Größenordnung, keine Dosis.
 

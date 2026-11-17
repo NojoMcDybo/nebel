@@ -1,7 +1,8 @@
 // Baut www/: die Simulation (index.html) und den Pulsgurt-Test (puls.html).
 //
 // Die Oberflaeche ist app/template.html der Website, beim Bauen gepatcht (app-patches.mjs).
-import { build } from "esbuild";
+import { build, transformSync } from "esbuild";
+import { minifyInline } from "../../engine/scripts/minify-inline.mjs";
 import { applyPatches } from "./app-patches.mjs";
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -31,8 +32,9 @@ const html = patched
   .replace("/*__ADAPTER__*/", () => adapter + "\n" + beltEngine)
   .replace("/*__PERSONAS__*/", () => personas + "\n" + profilesJs);
 if (/\/\*__[A-Z]+__\*\//.test(html)) throw new Error("index.html: Platzhalter nicht ersetzt");
-for (const m of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) new vm.Script(m[1], { filename: "index.html" });
-writeFileSync("www/index.html", html);
+const small = minifyInline(html, transformSync);   // wie die Website, nach der Platzhalterpruefung (Kommentare fallen weg)
+for (const m of small.matchAll(/<script>([\s\S]*?)<\/script>/g)) new vm.Script(m[1], { filename: "index.html" });
+writeFileSync("www/index.html", small);
 
 writeFileSync("www/personen-daten.js", data);
 cpSync(resolve(site, "fonts"), "www/fonts", { recursive: true });
@@ -71,4 +73,4 @@ cpSync("src/puls.html", "www/puls.html");
   }
   writeFileSync("www/alarm.wav", buf);
 }
-console.log(`www/ gebaut: index.html ${(html.length / 1024).toFixed(0)} KB, ${core.PERSONAS.length} Personen`);
+console.log(`www/ gebaut: index.html ${(small.length / 1024).toFixed(0)} KB, ${core.PERSONAS.length} Personen`);

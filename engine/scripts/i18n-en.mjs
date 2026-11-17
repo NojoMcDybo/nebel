@@ -170,7 +170,7 @@ export const PAIRS = [
   ['aria-pressed="true">Moderat<', 'aria-pressed="true">Moderate<'],
   ['aria-pressed="false">Fordernd<', 'aria-pressed="false">Demanding<'],
   ['aria-pressed="false">Hart<', 'aria-pressed="false">Hard<'],
-  ['<label><span>Dauer</span>', '<label><span>Duration</span>'],
+  ['<span>Dauer</span><b><span id="mvDurTxt">', '<span>Duration</span><b><span id="mvDurTxt">'],
   ["Keine Vorwarnung, kein Countdown. Was du vorbereiten wolltest, musst du vorher getan haben.",
    "No warning, no countdown. Whatever you wanted to prepare, you had to do beforehand."],
   ['id="moveOK">Los<', 'id="moveOK">Go<'],
@@ -187,7 +187,7 @@ export const PAIRS = [
 
   // ── Blatt: Basal ──
   ['<h3>Basalrate</h3>', '<h3>Basal rate</h3>'],
-  ['<label><span>Eingestellt</span>', '<label><span>Set to</span>'],
+  ['<span>Eingestellt</span>', '<span>Set to</span>'],
   ["Basal deckt den Grundbedarf zwischen den Mahlzeiten. Zu wenig, und der Wert steigt langsam und dauerhaft. Zu viel, und er sinkt — auch nachts, wenn du schläfst.",
    "Basal covers the baseline need between meals. Too little, and the value rises slowly and steadily. Too much, and it falls — at night too, while you sleep."],
   ["Die Umstellung braucht Stunden und lässt sich nicht zurückholen. Das ist keine Einstellung, die man zwischendurch dreht.",
@@ -196,7 +196,7 @@ export const PAIRS = [
 
   // ── Blatt: Insulin ──
   ['<h3>Insulin spritzen</h3>', '<h3>Inject insulin</h3>'],
-  ['<label><span>Einheiten</span>', '<label><span>Units</span>'],
+  ['<span>Einheiten</span><b>', '<span>Units</span><b>'],
   ['<label><span>Aufteilung</span></label>', '<label><span>Split</span></label>'],
   ['aria-pressed="true">Sofort<', 'aria-pressed="true">Now<'],
   ['<span>Rest verteilt über</span>', '<span>Rest spread over</span>'],
@@ -263,7 +263,7 @@ export const PAIRS = [
   ['+ " Minuten"', '+ " minutes"'],
   ['"Tag " + day + " · " + PERSON.name', '"Day " + day + " · " + PERSON.name'],
   ['"Tag " + (Math.floor(eng.s.t/1440)+1)', '"Day " + (Math.floor(eng.s.t/1440)+1)'],
-  ["`läuft seit ${eng.trace.length*5} Minuten · ${hhmm}`", "`running for ${eng.trace.length*5} minutes · ${hhmm}`"],
+  ["`läuft seit ${Math.floor(tNow) - 7*60} Minuten · ${hhmm}`", "`running for ${Math.floor(tNow) - 7*60} minutes · ${hhmm}`"],
   ['"schwer zu lesen" : ago < 1 ? "letzter Messwert gerade eben" : `letzter Messwert vor ${ago} min`', '"hard to read" : ago < 1 ? "last reading just now" : `last reading ${ago} min ago`'],
   ['"Bewusstlos"', '"Unconscious"'],
   ['"Notaufnahme"', '"Emergency room"'],

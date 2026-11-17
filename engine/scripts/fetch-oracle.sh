@@ -19,7 +19,8 @@ PATIENTS="vendor/py-mgipsim/pymgipsim/VirtualPatient/Models/T1DM/ExtHovorka/Pati
 
 check_patients() {
   local got
-  got="$(cd "$PATIENTS" && sha256sum Patient_*.json | sort -k2 | sha256sum | cut -d' ' -f1)"
+  # Git Bash unter Windows markiert Dateien mit " *" (Binaermodus); Linux nicht. Gleich machen.
+  got="$(cd "$PATIENTS" && sha256sum Patient_*.json | sed 's/ [*]/  /' | sort -k2 | sha256sum | cut -d' ' -f1)"
   if [ "$got" != "$PATIENTS_SHA256" ]; then
     echo "Parametersaetze weichen vom festgehaltenen Stand ab ($got)." >&2
     exit 1

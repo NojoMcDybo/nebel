@@ -59,7 +59,46 @@ describe("Nachwirkung: Spur", () => {
     const at = (share: number, dur: number) => afterEffectFactor(60 + dur, exerciseBlock(60, dur, bpm(share), p.HRrest), p);
     expect(at(0.55, 60)).toBeGreaterThan(at(0.55, 30));
     expect(at(0.8, 30)).toBeGreaterThan(at(0.55, 30));
-    expect(at(0.55, 60)).toBeCloseTo(1.14, 2);   // 60 min moderat: Insulin wirkt 14 % staerker
+    expect(at(0.55, 60)).toBeCloseTo(1.16, 2);   // 60 min moderat: Insulin wirkt 16 % staerker
+  });
+
+  /* Die Horner-Form (ein Durchlauf) gegen die direkte Summe, wie sie bis 17.11.2026 rechnete. */
+  it("rechnet wie die direkte Summe, auf zufaelligen Spuren", () => {
+    const direct = (t: number, ev: SimEvent[], tau = AFTER_EFFECT.tauMin) => {
+      const pts = ev.filter((e) => e.kind === "heartRate" && e.t > t - 12 * tau)
+        .map((e) => ({ t: e.t, h: heartRateReserve((e as { bpm: number }).bpm, p).hrr })).sort((a, b) => a.t - b.t);
+      const w = (s: number) => Math.exp((s - t) / tau);
+      let L = 0;
+      for (let i = 0; i < pts.length && pts[i]!.t < t; i++) {
+        const a = pts[i]!, b = pts[i + 1], end = b ? Math.min(b.t, t) : t;
+        if (end <= a.t) continue;
+        const slope = b && b.t > a.t ? (b.h - a.h) / (b.t - a.t) : 0, wa = w(a.t), we = w(end), span = end - a.t;
+        L += a.h * tau * (we - wa) + slope * (tau * span * we - tau * tau * (we - wa));
+      }
+      return L;
+    };
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
+    for (let run = 0; run < 300; run++) {
+      const ev: SimEvent[] = [];
+      let s = Math.floor(rnd() * 200);
+      const n = 1 + Math.floor(rnd() * 120), dense = rnd() < 0.5;   // dicht wie der Gurt oder lose Bloecke
+      for (let k = 0; k < n; k++) {
+        ev.push({ kind: "heartRate", t: s, bpm: 40 + rnd() * 160 });
+        s += dense ? 1 : rnd() < 0.2 ? 0 : 1 + Math.floor(rnd() * 400);   // auch gleiche Zeitpunkte
+      }
+      if (rnd() < 0.3) ev.reverse();
+      for (const t of [s * rnd(), s, s + rnd() * 9000, s + 12 * AFTER_EFFECT.tauMin - 1]) {
+        const want = direct(t, ev);
+        expect(Math.abs(afterEffectLoad(t, ev, p) - want), `Lauf ${run}, t=${t}`).toBeLessThanOrEqual(1e-9 * Math.max(1, want));
+      }
+      /* Dieselbe Liste an Ort und Stelle aendern wie der Adapter: anhaengen, ausschneiden und anhaengen. */
+      ev.push({ kind: "heartRate", t: s + 3, bpm: 150 });
+      expect(afterEffectLoad(s + 60, ev, p)).toBeCloseTo(direct(s + 60, ev), 9);
+      const cut = ev.findIndex((e) => e.kind === "heartRate" && e.t >= s / 2);
+      ev.splice(cut, 1); ev.push({ kind: "meal", t: s, fastCarbsG: 10, slowCarbsG: 0 });
+      expect(afterEffectLoad(s + 60, ev, p)).toBeCloseTo(direct(s + 60, ev), 9);
+    }
   });
 });
 
@@ -68,6 +107,8 @@ const run = oracleAvailable() ? describe : describe.skip;
 /**
  * Nachrechnung mit den 20 Subjekten: 60 min bei 55 % der Herzfrequenzreserve
  * um 16 Uhr, Abendessen 60 g mit Bolus um 19 Uhr, Nachtmittel 22–6 Uhr.
+ * Wie in DirecNet wird ein Tief behandelt: unter 70 mg/dL zwischen 16 und
+ * 22 Uhr 15 g schnelle KH, hoechstens alle 15 min.
  */
 const nightMean = (n: number, sport: boolean, basalCut: boolean) => {
   const sp = nebelParameters(loadSubject(n)), therapy = loadTherapy(n);
@@ -78,15 +119,20 @@ const nightMean = (n: number, sport: boolean, basalCut: boolean) => {
   ];
   if (sport) ev.push(...exerciseBlock(960, 60, sp.HRrest + 0.55 * (sp.HRmax - sp.HRrest), sp.HRrest));
   if (basalCut) ev.push({ kind: "basal", t: 1260, rateUPerH: 0.8 * basal }, { kind: "basal", t: 1620, rateUPerH: basal });
-  const r = simulate({
+  const run = () => simulate({
     durationMin: 1800, stepMin: 1, parameters: sp, therapy, pump: flatBasalProfile(basal),
     events: ev, sensor: DEFAULT_SENSOR, solver: "rk4",
   });
-  const night = r.G.slice(1319, 1799);                  // G[i] gilt fuer t = i + 1
-  return {
-    night: (night.reduce((a, b) => a + b, 0) / night.length) * MGDL_PER_MMOLL,
-    dayMin: Math.min(...r.G.slice(959, 1259)) * MGDL_PER_MMOLL,   // 16–21 Uhr
-  };
+  let r = run(), treated = 0, last = -Infinity;
+  for (;;) {                                            // G[i] gilt fuer t = i + 1
+    const i = r.G.findIndex((g, j) => j + 1 >= Math.max(960, last + 15) && j + 1 < 1320 && g * MGDL_PER_MMOLL < 70);
+    if (i < 0) break;
+    last = i + 1; treated++;
+    ev.push({ kind: "meal", t: last, fastCarbsG: 15, slowCarbsG: 0 });
+    r = run();
+  }
+  const night = r.G.slice(1319, 1799);
+  return { night: (night.reduce((a, b) => a + b, 0) / night.length) * MGDL_PER_MMOLL, treated };
 };
 const median = (xs: number[]) => {
   const s = [...xs].sort((a, b) => a - b), m = s.length >> 1;
@@ -94,17 +140,16 @@ const median = (xs: number[]) => {
 };
 
 run("Nachwirkung: Kalibrierung", () => {
-  const all = Array.from({ length: 20 }, (_, i) => {
+  const rows = Array.from({ length: 20 }, (_, i) => {
     const rest = nightMean(i + 1, false, false), sport = nightMean(i + 1, true, false);
-    return { drop: sport.night - rest.night, cut: nightMean(i + 1, true, true).night - sport.night, dayMin: sport.dayMin };
+    return { drop: sport.night - rest.night, cut: nightMean(i + 1, true, true).night - sport.night, treated: sport.treated };
   });
-  /* Wer schon am Nachmittag unter 70 faellt, haette gegessen (DirecNet hat
-     Unterzucker waehrend des Trainings behandelt). Ohne Behandlung bliebe
-     dessen Nacht vom Tief bestimmt, nicht von der Nachwirkung. */
-  const rows = all.filter((r) => r.dayMin >= 70);
 
-  it("rechnet mit der Haelfte der Subjekte", () => {
-    expect(rows.length).toBeGreaterThanOrEqual(10);
+  it("behandelt Tiefs wie DirecNet, nicht bei allen", () => {
+    const n = rows.filter((r) => r.treated > 0).length;
+    console.log("Nachwirkung", rows.map((r) => `${r.drop.toFixed(0)}/${r.cut.toFixed(0)}/${r.treated}`).join(" "), "behandelt", n);
+    expect(n).toBeGreaterThan(0);
+    expect(n).toBeLessThan(20);
   });
 
   it("trifft DirecNet 2005: Nacht nach Nachmittagstraining 23 mg/dL tiefer", () => {

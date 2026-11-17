@@ -548,7 +548,7 @@ class Engine {
     this.s.t = t + 1;
     if (this.s.t % 30 === 0){
       this._snaps.push({ t:this.s.t, z:Array.from(this.z) });
-      if (this._snaps.length > 50) this._snaps.shift();     // gut 24 Stunden
+      if (this._snaps.length > 50) this._snaps.shift();     // gut 24 Stunden; mehr als 2 Tage nur mit _pruneHR anpassen
     }
 
     /* Beduerfnisschicht: Reserven, rein Erlebnisebene, keine Physiologie. */
@@ -556,10 +556,24 @@ class Engine {
       N.get(this.z, "EEfast"), N.get(this.z, "EElong"));
 
     if (this._act && this.s.t >= this._act.start + this._act.dur) this._act = null;
-    if (this.s.t % 1440 === 0) this._planDay(Math.floor(this.s.t/1440));
+    if (this.s.t % 1440 === 0){ this._pruneHR(); this._planDay(Math.floor(this.s.t/1440)); }
 
     this._sync();
     if (this.s.t % 5 === 0) this._sample();
+  }
+
+  /* Alte Pulsstuetzstellen entfernen. Die Nachwirkung schaut 12 tau zurueck (afterEffect.ts),
+     Vorhersage und Rueckblick starten hoechstens gut einen Tag vor jetzt. Was vor beidem liegt,
+     wirkt nicht mehr; nur die juengste davon bleibt, heartRateAt traegt ihren Wert bis zur
+     naechsten. Mit dem Gurt waechst die Liste sonst um 1440 Eintraege am Tag, jeder Schritt
+     und jeder Speicherstand schleppt sie mit. Am Tageswechsel, damit Nachrechnen und
+     durchgehender Lauf an derselben Stelle kuerzen. */
+  _pruneHR(){
+    const cut = this.s.t - 2*1440 - 12*N.AFTER_EFFECT.tauMin, inp = this.input;
+    let keep = -1;
+    for (let i = 0; i < inp.length; i++)
+      if (inp[i].kind === "heartRate" && inp[i].t <= cut && (keep < 0 || inp[i].t >= inp[keep].t)) keep = i;
+    if (keep >= 0) this.input = inp.filter((e, i) => e.kind !== "heartRate" || e.t > cut || i === keep);
   }
 
   _sync(){

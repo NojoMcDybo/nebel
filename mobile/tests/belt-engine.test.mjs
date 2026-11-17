@@ -95,3 +95,25 @@ describe("BeltEngine", () => {
     expect(e.mode.id).toBe("schwanger");
   });
 });
+
+describe("Pulsspur ueber Tage", () => {
+  it("alte Stuetzstellen fallen weg, ohne dass sich etwas aendert", () => {
+    const run = (prune) => {
+      const e = make(11);
+      if (!prune) e._pruneHR = () => {};
+      for (let m = 0; m < 8 * 1440; m++) {
+        if (m % 1440 < 240) e.beltBpm(70 + ((m * 37) % 90));   // morgens Gurt, sonst Luecke
+        e.step();
+      }
+      return e;
+    };
+    const a = run(true), b = run(false);
+    expect(a.trace.map((p) => [p.t, p.G, p.sensor])).toEqual(b.trace.map((p) => [p.t, p.G, p.sensor]));
+    expect(a.s).toEqual(b.s);
+    const n = (e) => e.input.filter((x) => x.kind === "heartRate").length;
+    const cut = Math.floor(a.s.t / 1440) * 1440 - 2 * 1440 - 12 * ctx.Nebel.AFTER_EFFECT.tauMin;   // letzter Tageswechsel
+    expect(a.input.filter((x) => x.kind === "heartRate" && x.t <= cut).length).toBe(1);   // nur die juengste davor
+    expect(n(a)).toBeLessThan(n(b));
+    expect(hr(a)).toBe(hr(b));
+  }, 120000);
+});

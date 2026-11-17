@@ -176,9 +176,9 @@ dEElong/dt = p6 · EEfast − p7 · EElong
 `EElong` klingt mit `1/p7 = 10 min` ab. Damit ist die Nachwirkung der Quelle eine halbe Stunde nach der Belastung vorbei; nach einer Stunde Training um 16 Uhr liegt die Nacht im Median nur 1 mg/dL tiefer. Gemessen sind es 23 mg/dL (DirecNet 2005). Nebel ergänzt deshalb einen langen Teil als Eingang, ohne die Gleichungen oben zu ändern (`engine/src/afterEffect.ts`, seit 09.11.2026):
 ```
 L(t)     = ∫ HRR(s) · e^(−(t−s)/600) ds          Belastungsminuten, abklingend
-siFactor = siFactor_Fett · (1 + 0,0045 · L)
+siFactor = siFactor_Fett · (1 + 0,005 · L)
 ```
-Die Herzfrequenzspur wird stückweise exakt integriert und am Anfang jedes Rechenschritts ausgewertet. Der Abfall während der Belastung bleibt bei `p3`, `p4`, `p5` der Quelle.
+Die Herzfrequenzspur wird stückweise exakt integriert und am Anfang jedes Rechenschritts ausgewertet. Der Abfall während der Belastung bleibt bei `p3`, `p4`, `p5`; `p3` und `p4` sind seit 17.11.2026 je Körper kalibriert (`calibrateExercise`, Registry Abschnitt 7).
 
 ### 6.11 Numerische Schutzgrenzen (keine Physiologie)
 ```

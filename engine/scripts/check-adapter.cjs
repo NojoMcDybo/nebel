@@ -55,10 +55,11 @@ ok("COB abgebaut", eng.cob() < 5, eng.cob().toFixed(1)+" g");
 const gly0 = eng.s.gly;
 eng.startActivity(0.85, 30);
 const gSport = eng.s.G; for (let i=0;i<45;i++) eng.step();
-/* Patient_1 ist mit p3 = 2.9 ein schwacher Responder; oberhalb der
-   ventilatorischen Schwelle hebt die Leber den Wert sogar leicht an.
-   Fuer den Wirkungstest deshalb ein starker Responder. */
-ok("Harte Belastung hebt bei schwachem Responder", eng.s.G >= gSport - 1,
+/* Oberhalb der ventilatorischen Schwelle haelt die Leber dagegen: Patient_1
+   (seit der Bewegungskalibrierung 17.11.2026 kein Extrem mehr) faellt bei 85 %
+   kaum, bei 55 % ueber dieselbe Zeit um gut 15 %. Fuer den Wirkungstest
+   deshalb weiter unten ein starker Responder. */
+ok("Harte Belastung: Leber haelt dagegen, Wert faellt kaum", eng.s.G >= gSport - 8,
    `${gSport.toFixed(0)} → ${eng.s.G.toFixed(0)} mg/dL, p3 ${eng.p.p3.toFixed(1)}`);
 ok("Reserven sinken", eng.s.gly < gly0, `${gly0.toFixed(3)} → ${eng.s.gly.toFixed(3)}`);
 ok("Nachwirkung aktiv", eng.s.Z > 0.05, "Z="+eng.s.Z.toFixed(3));
@@ -148,6 +149,7 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   const f = new Engine(seed, 0);
   f.acts = [];
   while (f.s.t < ev + 120){
+    f.acts = [];   // ohne Training: sonst bestimmt ein unbehandeltes Tief den Wert, nicht der Druck
     const h = (f.s.t/60) % 24;
     f.s.asleep = h >= 23 || h < 7;
     f.step();
