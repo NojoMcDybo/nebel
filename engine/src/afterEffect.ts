@@ -41,11 +41,11 @@ export const AFTER_EFFECT = {
    * Mehrwirkung des Insulins je Belastungsminute (Minuten × Anteil der
    * Herzfrequenzreserve) [1/min]. Kalibriert an DirecNet 2005: Nachtmittel
    * 22–6 Uhr nach Nachmittagstraining 23 mg/dL tiefer (131 statt 154 mg/dL).
-   * Nebel, 60 min bei 55 % um 16 Uhr: Median −22 mg/dL. Gegenprobe Taplin
+   * Nebel, 60 min bei 55 % um 16 Uhr, alle 20 mit behandeltem Tief: Median −23 mg/dL. Gegenprobe Taplin
    * 2010: 20 % weniger Basal ueber 6 h gleicht das zu gut 80 % aus.
    * Nachrechnung in tests/afterEffect.test.ts.
    */
-  gainPerLoadMin: 0.005,
+  gainPerLoadMin: 0.0045,
 } as const;
 
 export type AfterEffectConstants = { readonly [K in keyof typeof AFTER_EFFECT]: number };

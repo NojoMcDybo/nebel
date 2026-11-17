@@ -15,8 +15,8 @@ run("Antwortprofil", () => {
     const r = prof(10);
     expect(r.oneUnitDropMgdl).toBeCloseTo(33, -0.5);
     expect(r.mealPeakMgdl).toBeCloseTo(163, -0.5);
-    expect(r.moderateExerciseDropMgdl).toBeCloseTo(37, -0.5);
-    expect(r.hardExerciseRiseMgdl).toBeCloseTo(35, -0.5);
+    expect(r.moderateExerciseDropMgdl).toBeCloseTo(36, -0.5);
+    expect(r.hardExerciseRiseMgdl).toBeCloseTo(18, -0.5);
   });
 
   it("unterscheidet die Personen in der erwarteten Richtung", () => {

@@ -197,7 +197,7 @@ Numerical guard rails without physiological meaning: glucose between 1 and 32 mm
 
 35 parameters, 16 of them different for each person and 19 the same for all. The ranges in the register are the values observed across the 20 data sets, not population distributions. Two parameters (`beta`, `a`) are leftovers of an older exercise model, are not used in any equation and were not taken over.
 
-Worth noting: the exercise response differs between people almost entirely through `p3`, `p4`, `p5`, resting and maximum heart rate, and the ventilatory threshold. `p3` alone spans a factor of 13. The same moderate session lowered the value by 2 to 89 mg/dL depending on the person, and for one body it even rose slightly over an hour. Studies measure something else: in DirecNet the value fell by at least a quarter within 75 minutes in 82 % of participants, and 22 % reached 60 mg/dL or lower. So nebel. scales `p3` and `p4` per body so that one hour at 55 % of heart rate reserve lowers the value by 18 to 54 %, 40 % as the median. Whoever reacts more strongly in the source still reacts more strongly here; only the extremes are compressed. Since then the range is 18 to 56 mg/dL.
+Worth noting: the exercise response differs between people almost entirely through `p3`, `p4`, `p5`, resting and maximum heart rate, and the ventilatory threshold. `p3` alone spans a factor of 13. The same moderate session lowered the value by 2 to 89 mg/dL depending on the person, and for one body it even rose slightly over an hour. Studies measure something else: in DirecNet the value fell by at least a quarter within 75 minutes in 82 % of participants, and 22 % reached 60 mg/dL or lower. So nebel. scales `p3` and `p4` per body so that one hour at 55 % of heart rate reserve lowers the value from 108 mg/dL by 25 to 47 %. Whoever reacts more strongly in the source still reacts more strongly here; only the extremes are compressed. In addition, the muscle in nebel. takes up more glucose when there is more in the blood (in the source it is a fixed flow). In Yardley et al. (2013) the value fell from 166 to 105 mg/dL in 45 minutes on the treadmill, although basal was halved; nebel. gives −66 as the median from 166. And insulin on board counts: during exercise the muscle uses much more glucose in an insulin-dependent way (Schiavon et al. 2021: +81 to +155 % in type 1). With a bolus on board, the same session in nebel. therefore lowers glucose by one and a half times as much in the median.
 
 All 20 data sets are adults with an HbA1c between 5.7 and 7.6 %. Age and sex are not included. Every basal rate holds exactly 108 mg/dL without food, because it was fitted to do so.
 
@@ -269,15 +269,15 @@ A single parameter cannot hit the plasma peak and the maximum effect at the same
 
 ```
 L(t)     = ∫ HRR(s) · e^(−(t−s)/600) ds      decaying exercise minutes
-siFactor = siFactor_fat · (1 + 0.005 · L)
+siFactor = siFactor_fat · (1 + 0.0045 · L)
 ```
 
 - **Decay time 600 min** from the exercise model by Dalla Man, Breton & Cobelli (2009), which describes insulin action as "fast on, slow off". Breton (2008) set his values so that the difference is still measurable after 20 hours.
-- **Strength 0.005 per exercise minute**, calibrated against DirecNet: nebel. gives −22.5 mg/dL as the median.
-- **Counter-check with Taplin et al. (2010):** 20 % less basal over six hours clearly raised the nightly minimum after exercise. In nebel. the same measure raises the night by 21 mg/dL and so nearly cancels the aftereffect (source alone: +29 against −1).
+- **Strength 0.0045 per exercise minute**, calibrated against DirecNet: nebel. gives −23 mg/dL as the median.
+- **Counter-check with Taplin et al. (2010):** 20 % less basal over six hours clearly raised the nightly minimum after exercise. In nebel. the same measure raises the night by 19 mg/dL and so nearly cancels the aftereffect (source alone: +29 against −1).
 - Computed with all 20 people. Whoever drops below 70 mg/dL in the afternoon gets 15 g of fast carbohydrates, as in DirecNet.
 
-**Consequences.** 60 min at 55 % of heart rate reserve make insulin 16 % more effective. After 10 hours a good third of that is left, after 24 hours just under a tenth. The app shows "Aftereffect +X %" and, while reserves are below 62 %, "Reserves · refuel". Nights after training now drop low more often, as in the studies.
+**Consequences.** 60 min at 55 % of heart rate reserve make insulin 14 % more effective. After 10 hours a good third of that is left, after 24 hours just under a tenth. The app shows "Aftereffect +X %" and, while reserves are below 62 %, "Reserves · refuel". Nights after training now drop low more often, as in the studies.
 
 **Limits.** Both studies looked at children and adolescents, while the model people are adults. The aftereffect grows linearly with duration times intensity, without saturation. It is an order of magnitude, not a dose.
 

@@ -101,8 +101,14 @@ export const derivatives = (
   const UGe = D2Slow / p.tmaxG + D2Fast / p.tmaxGFast;
   const EGP = Math.max(0, p.EGP0 * (1 - x3) * (1 + p.p1 * EEfast + p.p2 * EEhigh));
 
-  d[6] = -x1 * Q1 + p.k12 * Q2 - F01n - FR + UGe + EGP - p.p3 * EEfast + (u.uProteinGlucose ?? 0);
-  d[7] = x1 * Q1 - p.k12 * Q2 - x2 * Q2 + p.p3 * EEfast - p.p4 * EEfast - p.p5 * x2 * EElong;
+  const ex = p.exGlucoseRef ? EEfast * G / p.exGlucoseRef : EEfast;   // Nebel: Aufnahme ~ G (Quelle: konstant)
+  // Nebel: Bewegung verstaerkt die insulinabhaengige Aufnahme, verzoegert (EElong auf hrr normiert).
+  // Belegt nur moderat: hoechstens bis zur Schwelle, darueber nimmt sie mit EEhigh ab
+  // (Katecholamine; NEBEL-ANNAHME). Quelle: 1
+  const ins = p.exInsulinGain
+    ? 1 + p.exInsulinGain * Math.min(EElong * p.p7 / p.p6, p.VT_HRR) * Math.max(0, 1 - EEhigh) : 1;
+  d[6] = -x1 * Q1 + p.k12 * Q2 - F01n - FR + UGe + EGP - p.p3 * ex + (u.uProteinGlucose ?? 0);
+  d[7] = x1 * Q1 - p.k12 * Q2 - x2 * ins * Q2 + p.p3 * ex - p.p4 * ex - p.p5 * x2 * EElong;
 
   // Interstitium
   d[8] = (G - IG) / p.tsub;

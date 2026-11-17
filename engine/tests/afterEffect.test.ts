@@ -59,7 +59,7 @@ describe("Nachwirkung: Spur", () => {
     const at = (share: number, dur: number) => afterEffectFactor(60 + dur, exerciseBlock(60, dur, bpm(share), p.HRrest), p);
     expect(at(0.55, 60)).toBeGreaterThan(at(0.55, 30));
     expect(at(0.8, 30)).toBeGreaterThan(at(0.55, 30));
-    expect(at(0.55, 60)).toBeCloseTo(1.16, 2);   // 60 min moderat: Insulin wirkt 16 % staerker
+    expect(at(0.55, 60)).toBeCloseTo(1.14, 2);   // 60 min moderat: Insulin wirkt 14 % staerker
   });
 
   /* Die Horner-Form (ein Durchlauf) gegen die direkte Summe, wie sie bis 17.11.2026 rechnete. */

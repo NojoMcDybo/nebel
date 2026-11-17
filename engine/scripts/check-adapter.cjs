@@ -55,12 +55,16 @@ ok("COB abgebaut", eng.cob() < 5, eng.cob().toFixed(1)+" g");
 const gly0 = eng.s.gly;
 eng.startActivity(0.85, 30);
 const gSport = eng.s.G; for (let i=0;i<45;i++) eng.step();
-/* Oberhalb der ventilatorischen Schwelle haelt die Leber dagegen: Patient_1
-   (seit der Bewegungskalibrierung 17.11.2026 kein Extrem mehr) faellt bei 85 %
-   kaum, bei 55 % ueber dieselbe Zeit um gut 15 %. Fuer den Wirkungstest
-   deshalb weiter unten ein starker Responder. */
-ok("Harte Belastung: Leber haelt dagegen, Wert faellt kaum", eng.s.G >= gSport - 8,
-   `${gSport.toFixed(0)} → ${eng.s.G.toFixed(0)} mg/dL, p3 ${eng.p.p3.toFixed(1)}`);
+/* Oberhalb der ventilatorischen Schwelle haelt die Leber dagegen: aus demselben
+   Ruhezustand senken 30 min bei 85 % weniger als 30 min bei 55 %. */
+{ const run = (share) => { const c = new Engine(20260812, 0); c.acts = [];
+    for (let i = 0; i < 120; i++){ c.acts = []; c.step(); }
+    const g = c.s.G; c.startActivity(share, 30);
+    for (let i = 0; i < 45; i++){ c.acts = []; c.step(); }
+    return g - c.s.G; };
+  const hard = run(0.85), mod = run(0.55);
+  ok("Harte Belastung: Leber haelt dagegen, faellt weniger als moderat", hard < mod - 5,
+     `30 min: 85 % −${hard.toFixed(0)}, 55 % −${mod.toFixed(0)} mg/dL`); }
 ok("Reserven sinken", eng.s.gly < gly0, `${gly0.toFixed(3)} → ${eng.s.gly.toFixed(3)}`);
 ok("Nachwirkung aktiv", eng.s.Z > 0.05, "Z="+eng.s.Z.toFixed(3));
 { const c = new Engine(20260812, 0); c.acts = [];

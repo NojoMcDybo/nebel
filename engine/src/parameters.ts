@@ -24,6 +24,18 @@ export interface SubjectParameters {
   VG: number;     // [L] Verteilungsvolumen Glukose
   VI: number;     // [L] Verteilungsvolumen Insulin
   VT_HRR: number; // [-] ventilatorische Schwelle als Anteil der HF-Reserve
+  /**
+   * [mmol/L] Nebel-Erweiterung: Muskelaufnahme bei Bewegung (p3, p4) waechst mit G,
+   * bezogen auf diesen Wert (Fick: Durchblutung × Extraktion × Glukose). Fehlt = Quelle,
+   * dort ist die Aufnahme unabhaengig von G. Gesetzt in calibration.ts.
+   */
+  exGlucoseRef?: number;
+  /**
+   * [-] Nebel-Erweiterung: Bewegung verstaerkt die insulinabhaengige Verwertung (x2·Q2)
+   * um diesen Faktor × verzoegerte Belastung (EElong normiert, ~15 min Verzug). Fehlt = Quelle,
+   * dort traegt nur p5 diesen Weg (rund 2 %). Gesetzt in calibration.ts.
+   */
+  exInsulinGain?: number;
 }
 
 /** In allen 20 publizierten Subjekten identisch. */
