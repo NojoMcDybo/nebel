@@ -52,7 +52,7 @@ if (!matchMedia("(prefers-reduced-motion: reduce)").matches){
   --paper:#EDF1F1; --card:#FFFFFF; --sink:#E3E9E9;
   --ink:#0A0D0D; --ink2:#576262; --ink3:#5F6A6A;
   --hair:rgba(10,13,13,.11);
-  --low:#B8362B; --high:#8E6410; --ins:#2F6690;
+  --low:#B8362B; --high:#8E6410; --ins:#2F6690; --ok:#2E7D57;
   --rgb-ink:10,13,13; --rgb-card:255,255,255; --rgb-paper:237,241,241;
   --sh:0 1px 2px rgba(10,13,13,.05); --shUp:0 6px 22px rgba(10,13,13,.10);
   --shBtn:0 3px 12px rgba(10,13,13,.16); --shPage:-22px 0 54px rgba(10,13,13,.16);
@@ -66,7 +66,7 @@ html[data-theme="dark"]{
   --paper:#0E1213; --card:#191E20; --sink:#262D2F;
   --ink:#E9EFEF; --ink2:#A3AEAE; --ink3:#7E8A8A;
   --hair:rgba(233,239,239,.14);
-  --low:#FF7063; --high:#E8B44A; --ins:#79B0DB;
+  --low:#FF7063; --high:#E8B44A; --ins:#79B0DB; --ok:#5CC48E;
   --rgb-ink:233,239,239; --rgb-card:25,30,32; --rgb-paper:14,18,19;
   --sh:0 0 0 1px rgba(233,239,239,.07); --shUp:0 0 0 1px rgba(233,239,239,.14), 0 10px 30px rgba(0,0,0,.5);
   --shBtn:0 4px 16px rgba(0,0,0,.5); --shPage:-22px 0 54px rgba(0,0,0,.6);
@@ -300,6 +300,13 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .gate .kshd h2{margin:0; font-size:18px}
 .kshd h2 span{font-weight:400}
 .ksdate{font-family:var(--mono); font-size:10.5px; color:var(--ink3); letter-spacing:.04em; white-space:nowrap}
+.kspos{display:flex; align-items:center; gap:6px; font-family:var(--mono); font-size:10.5px; color:var(--ink3)}
+.kspos[hidden]{display:none}
+.kspos button{width:30px; height:26px; border:0; border-radius:99px; background:var(--sink); color:var(--ink); font:inherit; font-size:15px; line-height:1; cursor:pointer}
+.kspos button:disabled{opacity:.35; cursor:default}
+#ksDay{touch-action:pan-y}
+#ksDay.slide{animation:ksSlide .28s var(--spring)}
+@keyframes ksSlide{from{opacity:.2; transform:translateX(var(--from, 24px))}to{opacity:1; transform:none}}
 .kschips{display:flex; flex-wrap:wrap; gap:5px; margin:0 0 10px}
 .kschips span{font-family:var(--mono); font-size:10.5px; padding:3px 8px; border-radius:99px; background:var(--sink); color:var(--ink2)}
 .ksbig{display:flex; align-items:baseline; gap:10px; margin:0 0 6px}
@@ -320,17 +327,20 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .kswd{display:grid; grid-template-rows:repeat(7,11px); gap:2px; margin-right:-12px; font-family:var(--mono); font-size:8.5px; line-height:11px; color:var(--ink3)}
 .kscal{display:grid; grid-auto-flow:column; grid-template-rows:repeat(7,11px); grid-auto-columns:11px; gap:2px; flex:none}
 .kscal i{border-radius:2px; background:var(--sink)}
-.kscal i.on{background:rgba(var(--rgb-ink), calc(.18 + .82 * var(--k)))}
+.b0{--bc:var(--low)} .b1{--bc:var(--high)} .b2{--bc:color-mix(in srgb, var(--ok) 45%, var(--card))}
+.b3{--bc:color-mix(in srgb, var(--ok) 72%, var(--card))} .b4{--bc:var(--ok)}
+.kscal i.on{background:var(--bc)}
 .kscal i.fut{background:transparent}
 .kscal i.emg{box-shadow:inset 0 0 0 1.5px var(--low)}
 .kscal i.today{outline:1.5px solid var(--ink); outline-offset:1px}
 .ksdist{display:grid; gap:3px; flex:1; min-width:0}
 .ksdist div{display:grid; grid-template-columns:44px 1fr; align-items:center; gap:6px; font-family:var(--mono); font-size:9.5px; color:var(--ink3)}
-.ksdist i{display:block; height:11px; border-radius:3px; background:var(--ink3); opacity:.55; min-width:3px}
-.ksdist .on i{background:var(--ink); opacity:1}
+.ksdist i{display:block; height:11px; border-radius:3px; background:var(--bc); opacity:.5; min-width:3px}
+.ksdist .on i{opacity:1; box-shadow:0 0 0 1.5px var(--ink)}
 .ksempty{font-size:13.5px; color:var(--ink2); margin:0 0 12px}
 .ksbar{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-radius:16px; background:var(--sink); margin:0 0 18px}
 .ksbar[hidden]{display:none}
+.ksbar.simbar{margin:4px 0 14px}
 .ksbar span{font-size:13.5px; font-weight:600}
 .ksbar button{flex:none; height:34px; padding:0 14px; border:0; border-radius:99px; background:var(--ink); color:var(--paper); font:inherit; font-weight:700; font-size:13px}
 .kslinks{display:flex; gap:8px; margin:12px 0 0}
@@ -341,17 +351,26 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .kssub{font-family:var(--mono); font-size:11px; color:var(--ink3); margin:3px 0 12px; line-height:1.4}
 .ksset .hint{margin:8px 0 12px}
 .ksset .statlist.ksstat{background:var(--card)}
+.ksset .seg{background:var(--card); box-shadow:inset 0 0 0 1px var(--hair)}
+.ksset .ksdist i{opacity:1}
 .ksset .kslow{margin:0 0 4px}
 .ksset .kscal i:not(.on):not(.fut){background:var(--card)}
-.kslist{display:grid; gap:6px}
-.kslist button{display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; width:100%; padding:10px 12px; border:0; border-radius:14px;
-  background:var(--card); color:var(--ink); font:inherit; text-align:left; cursor:pointer}
-.kslist button:active{transform:scale(.98)}
-.kslist .nr{font-family:var(--mono); font-size:11px; color:var(--ink3); min-width:26px}
-.kslist .who{font-size:13.5px; font-weight:700; line-height:1.25}
-.kslist .who small{display:block; font-family:var(--mono); font-size:10px; font-weight:400; color:var(--ink3); margin-top:2px}
-.kslist .res{text-align:right; font-size:15px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1.2}
-.kslist .res small{display:block; font-family:var(--mono); font-size:10px; font-weight:400; color:var(--ink3)}
+/* Letzte Karten: eine Reihe zum Durchwischen, jede Karte rastet ein */
+.kslist{display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; margin:0 -16px; padding:2px 16px 6px; scroll-padding:0 16px;
+  scrollbar-width:none; overscroll-behavior-x:contain}
+.kslist::-webkit-scrollbar{display:none}
+.kscard{flex:0 0 78%; scroll-snap-align:start; display:grid; gap:4px; padding:12px 14px 12px; border:0; border-radius:18px; text-align:left; cursor:pointer;
+  background:var(--card); color:var(--ink); font:inherit; box-shadow:inset 4px 0 0 var(--bc)}
+.kscard:active{transform:scale(.98)}
+.kscard .top{display:flex; gap:8px; font-family:var(--mono); font-size:10.5px; color:var(--ink3)}
+.kscard .top b{font-weight:500; color:var(--ink2)}
+.kscard .who{font-size:13.5px; font-weight:700}
+.kscard .res{font-family:var(--mono); font-size:11px; color:var(--ink3)}
+.kscard .res b{font-family:var(--sans); font-size:24px; font-weight:800; letter-spacing:-.03em; color:var(--bc); margin-right:4px}
+.kscard .stp{display:grid; grid-template-columns:repeat(24,1fr); gap:2px; margin-top:4px}
+.kscard .stp i{height:4px; border-radius:2px; background:var(--ink3); opacity:.5}
+.kscard .stp i.l{background:var(--low); opacity:1}
+.kscard .stp i.h{background:var(--high); opacity:1}
 .kslist .empty{font-size:13px; color:var(--ink2); margin:0}
 /* Angebot als Mitteilung von oben: annehmen oder wegwischen (hoch oder zur Seite) */
 .ksdrop{position:fixed; left:0; right:0; top:0; z-index:95; display:flex; justify-content:center; pointer-events:none;
@@ -710,7 +729,7 @@ button.slow{opacity:.5; filter:blur(.7px); transition:opacity .3s, filter .3s}
   transition:transform .22s var(--spring), opacity .3s var(--spring)}
 .move .mvx:active{transform:scale(.96)}
 .move .mvx[hidden]{display:none}
-.homehint{margin:8px 2px 20px}
+.homemode{margin:6px 0 28px}
 .mvplan{margin-top:14px; padding-top:12px; border-top:1px solid var(--hair)}
 .mvplan[hidden]{display:none}
 .mvh{font-family:var(--mono); font-size:9.5px; letter-spacing:.11em; text-transform:uppercase; color:var(--ink3); margin:0 0 6px}
@@ -901,14 +920,12 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     <div class="hero">
       <h1>nebel.</h1>
     </div>
-    <div class="ksbar" id="ksBar" hidden><span id="ksBarT"></span><button type="button" id="ksBarGo"></button></div>
 
     <div class="seg tall homemode" id="homeModeSeg">
       <span class="knob"></span>
       <button data-m="geraet" aria-pressed="true">Gerät</button>
       <button data-m="alltag" aria-pressed="false">Ganzer Alltag</button>
     </div>
-    <p class="hint homehint" id="homeModeHint">Gerät: nur Werte und deine Entscheidungen. Ganzer Alltag: dazu Überraschungen und andere Leute.</p>
 
     <div class="eyebrow row"><span>Wer bist du heute?</span><span class="act" id="actTag"></span></div>
     <div class="people" id="people" role="radiogroup" aria-label="Person wählen"></div>
@@ -989,6 +1006,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
         <span class="day" id="dayLabel">Tag 1</span>
       </div>
     </div>
+    <div class="ksbar simbar" id="ksBar" hidden><span id="ksBarT"></span><button type="button" id="ksBarGo"></button></div>
 
     <div class="readout" id="readout">
       <div class="valrow">
@@ -1317,7 +1335,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     </div>
     <p class="hint">Die tägliche Herausforderung: ein Tag für alle, ein Versuch, bewertet nach der Zeit im Zielbereich.</p>
     <div class="statlist ksstat" id="ksSetStats"></div>
-    <div class="kslow"><div class="kswd" aria-hidden="true"><span>Mo</span><span></span><span>Mi</span><span></span><span>Fr</span><span></span><span></span></div><div class="kscal" id="ksSetCal"></div></div>
+    <div class="kslow"><div class="kswd" aria-hidden="true"><span>Mo</span><span></span><span>Mi</span><span></span><span>Fr</span><span></span><span></span></div><div class="kscal" id="ksSetCal"></div><div class="ksdist" id="ksSetDist"></div></div>
     <div class="ksh">Letzte Karten</div>
     <div class="kslist" id="ksList"></div>
     <div class="kslinks"><button class="btn soft" id="ksPlayBtn" type="button">Heute spielen</button><button class="btn soft" id="ksHistBtn" type="button">Verlauf</button></div>
@@ -1373,7 +1391,8 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
 
 <div class="gate" id="ksCard" role="dialog" aria-modal="true" aria-labelledby="ksT" hidden>
   <div class="box ks">
-    <div class="kshd"><h2 id="ksT">nebel. <b>Daily Dose of T1D</b> <span id="ksNr"></span></h2><span class="ksdate" id="ksDate"></span></div>
+    <div class="kshd"><h2 id="ksT">nebel. <b>Daily Dose of T1D</b> <span id="ksNr"></span></h2><span class="ksdate" id="ksDate"></span>
+      <span class="kspos" id="ksPosWrap" hidden><button type="button" id="ksPrev" aria-label="Ältere Karte">‹</button><span id="ksPos"></span><button type="button" id="ksNext" aria-label="Neuere Karte">›</button></span></div>
     <div id="ksDay">
       <div class="kschips" id="ksChips"></div>
       <div class="ksbig"><b id="ksTir"></b><span id="ksWord"></span></div>
@@ -3694,6 +3713,7 @@ function ksDistOf(mark){
 }
 const KS_WD = ["Mo", "", "Mi", "", "Fr", "", ""];
 const KS_BUCKETS = ["< 50", "50–70", "70–80", "80–90", "≥ 90"];
+const KS_BCOL = [["--low", 1], ["--high", 1], ["--ok", .45], ["--ok", .72], ["--ok", 1]];   // wie .b0–.b4 im CSS
 /* Tageskurve im Stil der Auswertung: Zielband, Grenzen 70 und 180, Blut als Linie, Sensor als Punkte. */
 function ksPlot(x, X0, Y0, W, H, cv, k){
   const lo = 40, hi = 400, padR = 30*k, padB = 14*k, w = W - padR, h = H - padB, rgb = col("--rgb-ink");
@@ -3727,12 +3747,18 @@ function ksDrawChart(e){
 }
 const ksStat = rows => rows.map(([k, v]) => `<div><span class="k">${k}</span><span class="v">${v}</span></div>`).join("");
 /* Eine Karte: der gespielte Tag (falls es einen gibt) und darunter der Verlauf. */
-const ksCalHTML = mark => ksCalOf(mark).map(c => `<i class="${(c.fut ? "fut" : c.h ? "on" : "") + (c.h && c.h.emergencies ? " emg" : "") + (c.mark ? " today" : "")}"`
-    + (c.h ? ` style="--k:${(c.h.tir / 100).toFixed(2)}" title="${c.d} · ${c.h.tir} %"` : ` title="${c.d}"`) + "></i>").join("");
+const ksCalHTML = mark => ksCalOf(mark).map(c => `<i class="${(c.fut ? "fut" : c.h ? "on b" + ksBucket(c.h.tir) : "") + (c.h && c.h.emergencies ? " emg" : "") + (c.mark ? " today" : "")}"`
+    + (c.h ? ` title="${c.d} · ${Number(c.h.tir)} %"` : ` title="${c.d}"`) + "></i>").join("");
+const ksDistHTML = mark => { const D = ksDistOf(mark);
+  return KS_BUCKETS.map((b, i) => `<div class="${i === D.mine ? "on" : ""}"><span>${b} %</span><i class="b${i}" style="width:${Math.max(2, Math.round(100 * D.cnt[i] / D.max))}%" title="${D.cnt[i]}"></i></div>`).join(""); };
 function ksShowCard(e){
   ksCur = e || null;
   $("ksDay").hidden = !e; $("ksEmpty").hidden = !!e; $("ksShare").hidden = !e; $("ksNr").textContent = e ? "#" + e.nr : "";
   $("ksDate").textContent = e ? ksDateTxt(e.datum) : "";
+  const pos = e ? KSD.hist.indexOf(e) : -1;
+  $("ksPosWrap").hidden = pos < 0 || KSD.hist.length < 2;
+  $("ksPos").textContent = pos < 0 ? "" : `${pos + 1} / ${KSD.hist.length}`;
+  $("ksPrev").disabled = pos <= 0; $("ksNext").disabled = pos < 0 || pos >= KSD.hist.length - 1;
   $("ksClose").firstElementChild.textContent = ksOver ? "Weiter frei spielen" : "Schließen";
   if (e){
     $("ksChips").innerHTML = ksChipsOf(e).map(t => `<span>${ksEsc(t)}</span>`).join("");
@@ -3743,13 +3769,28 @@ function ksShowCard(e){
   $("ksStats").innerHTML = ksStat(ksAllOf());
   const mark = e ? e.datum : KS_TODAY.date;
   $("ksCal").innerHTML = ksCalHTML(mark);
-  const D = ksDistOf(mark);
-  $("ksDist").innerHTML = KS_BUCKETS.map((b, i) => `<div class="${i === D.mine ? "on" : ""}"><span>${b} %</span><i style="width:${Math.max(2, Math.round(100 * D.cnt[i] / D.max))}%" title="${D.cnt[i]}"></i></div>`).join("");
+  $("ksDist").innerHTML = ksDistHTML(mark);
   $("ksCard").hidden = false; pager.inert = true;
   if (e) ksDrawChart(e);
   (e ? $("ksShare") : $("ksClose")).focus({ preventScroll:true });
 }
 function ksHideCard(){ $("ksCard").hidden = true; pager.inert = false; }
+/* Durch die Karten wischen wie durch Fotos: nach rechts wischen zeigt die aeltere, nach links die neuere. */
+function ksStep(d){
+  const H = KSD.hist, j = H.indexOf(ksCur) + d;
+  if (!ksCur || j < 0 || j >= H.length) return;
+  ksShowCard(H[j]);
+  const day = $("ksDay"); day.style.setProperty("--from", d < 0 ? "-24px" : "24px");
+  day.classList.remove("slide"); void day.offsetWidth; day.classList.add("slide");
+}
+$("ksPrev").onclick = () => ksStep(-1);
+$("ksNext").onclick = () => ksStep(1);
+{ let sx = null, sy = 0; const day = $("ksDay");
+  day.addEventListener("pointerdown", e => { sx = e.clientX; sy = e.clientY; });
+  day.addEventListener("pointerup", e => { if (sx == null) return; const dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) ksStep(dx > 0 ? -1 : 1); });
+  day.addEventListener("pointercancel", () => { sx = null; });
+  $("ksCard").addEventListener("keydown", e => { if (e.key === "ArrowLeft") ksStep(-1); if (e.key === "ArrowRight") ksStep(1); }); }
 $("ksClose").onclick = () => ksOver ? ksLeave() : ksHideCard();
 const KS_EMOJI = { o:"🟩", h:"🟨", l:"🟥" };
 function ksText(e){
@@ -3801,13 +3842,14 @@ function ksCanvas(e){
   x.fillStyle = C("--ink3"); x.font = M(8.5); KS_WD.forEach((d, i) => x.fillText(d, pad*k, (y + i*13 + 9)*k));
   ksCalOf(e.datum).forEach((cc, i) => { const cx = cal0 + Math.floor(i / 7) * 13, cy = y + (i % 7) * 13;
     if (cc.fut) return;
-    x.fillStyle = cc.h ? `rgba(${rgb},${(.18 + .82 * cc.h.tir / 100).toFixed(2)})` : C("--sink"); x.fillRect(cx*k, cy*k, 11*k, 11*k);
+    const bc = cc.h ? KS_BCOL[ksBucket(cc.h.tir)] : ["--sink", 1];
+    x.globalAlpha = bc[1]; x.fillStyle = C(bc[0]); x.fillRect(cx*k, cy*k, 11*k, 11*k); x.globalAlpha = 1;
     if (cc.h && cc.h.emergencies){ x.strokeStyle = C("--low"); x.lineWidth = 1.5*k; x.strokeRect((cx + .75)*k, (cy + .75)*k, 9.5*k, 9.5*k); }
     if (cc.mark){ x.strokeStyle = C("--ink"); x.lineWidth = 1.5*k; x.strokeRect((cx - 1.5)*k, (cy - 1.5)*k, 14*k, 14*k); } });
   const D = ksDistOf(e.datum), dx = cal0 + 10*13 + 14, dw = Wc - pad - dx - 50 - 22;   // Platz fuer die Zahl rechts
   KS_BUCKETS.forEach((b, i) => { const cy = y + i * 14 + 8;
     x.fillStyle = C("--ink3"); x.font = M(9.5); x.fillText(b + " %", dx*k, (cy + 9)*k);
-    x.globalAlpha = i === D.mine ? 1 : .55; x.fillStyle = C(i === D.mine ? "--ink" : "--ink3");
+    x.globalAlpha = KS_BCOL[i][1] * (i === D.mine ? 1 : .5); x.fillStyle = C(KS_BCOL[i][0]);
     const bw = Math.max(3, dw * D.cnt[i] / D.max); x.fillRect((dx + 50)*k, cy*k, bw*k, 11*k); x.globalAlpha = 1;
     x.fillStyle = C("--ink3"); x.fillText(String(D.cnt[i]), (dx + 50 + bw + 5)*k, (cy + 9)*k); });
   return c;
@@ -3853,18 +3895,20 @@ function ksPaintSet(){
     : `#${KS_D.nr} · heute ${p.name}, ${ksModeTxt(KS_D.mode)}`;
   $("ksSetStats").innerHTML = ksStat(ksAllOf());
   $("ksSetCal").innerHTML = ksCalHTML(KS_TODAY.date);
-  const last = KSD.hist.slice(-5).reverse();
-  $("ksList").innerHTML = last.length ? last.map((e, i) => { const q = PERSONAS.find(x => x.id === e.person);
-    return `<button type="button" data-i="${i}"><span class="nr">#${Number(e.nr) || ""}</span>`
-      + `<span class="who">${ksEsc(q ? q.name : "–")}<small>${ksEsc(ksDateTxt(e.datum))} · ${ksEsc(ksModeTxt(e.mode))}</small></span>`
-      + `<span class="res">${Number(e.tir) || 0} %<small>${KS_WORDS[ksGrade(e)]}</small></span></button>`; }).join("")
+  $("ksSetDist").innerHTML = ksDistHTML(null);
+  const last = KSD.hist.slice(-10).reverse();
+  $("ksList").innerHTML = last.length ? last.map((e, i) => { const q = PERSONAS.find(x => x.id === e.person), tir = Number(e.tir) || 0;
+    return `<button type="button" class="kscard b${ksBucket(tir)}" data-i="${i}"><span class="top"><b>#${Number(e.nr) || ""}</b>${ksEsc(ksDateTxt(e.datum))}</span>`
+      + `<span class="who">${ksEsc(q ? q.name : "–")} · ${ksEsc(ksModeTxt(e.mode))}</span>`
+      + `<span class="res"><b>${tir} %</b> ${KS_WORDS[ksGrade(e)]}</span>`
+      + `<span class="stp">${[...String(e.stripe || "")].slice(0, 24).map(c => `<i class="${c === "l" || c === "h" ? c : ""}"></i>`).join("")}</span></button>`; }).join("")
     : `<p class="empty">Noch keine Karte.</p>`;
   $("ksList").querySelectorAll("button").forEach(b => b.onclick = () => { closeSheets(); setTimeout(() => ksShowCard(last[+b.dataset.i]), 300); });
 }
 /* Im Daily-Dose-Lauf fehlt alles, was neu beginnen oder den Tag aendern wuerde. */
 if (KS){
   document.body.classList.add("ks");
-  ["people", "pcGo", "btnReset", "homeModeSeg", "homeModeHint"].forEach(id => { $(id).hidden = true; });
+  ["people", "pcGo", "btnReset", "homeModeSeg"].forEach(id => { $(id).hidden = true; });
   document.querySelector(".selfhint").hidden = true;
   ["therapySeg", "dayMode", "modeSeg"].forEach(id => { const f = $(id).closest(".field"); f.hidden = true;
     if (f.nextElementSibling && f.nextElementSibling.matches("p.hint")) f.nextElementSibling.hidden = true; });

@@ -680,9 +680,17 @@ Anlass: Frage nach dem Modus, der über Nacht die Basalrate senkt. Das ist kein 
 - **Prüfungen.** `check-adapter.cjs`: harte Belastung jetzt als Vergleich aus demselben Ruhezustand, 30 min bei 85 % gegen 55 % (−6 gegen −18). Registry-Tabelle: Sport moderat −26 bis −44, hart 0 bis +74; Profiltest Patient 10: −36 / +18. Neuer Test: Bolus an Bord ≥ 1,4-fach.
 - **Offen.** Tims KE 12 (Nachtrag 40) macht jede Mahlzeit mit Bolus schon ohne Training zum langsamen Abfall (107 → 70 in 2 h); mit Training landet Tim deshalb schnell im Unterzucker. Harte Belastung (`p2`) bleibt Quelle.
 
-## 42. Nachtrag 17.11.2026 — Startseite, Tagesplan, Daily-Dose-Block
+## 46. Nachtrag 17.11.2026 — Startseite, Tagesplan, Daily-Dose-Block
 
 - Der Schalter Gerät / Ganzer Alltag steht jetzt auch auf der Startseite über „Wer bist du heute?“, mit einem Satz Erklärung. Beide Schalter (Startseite und Einstellungen) setzen denselben Zustand. Im Daily-Dose-Lauf ist er wie in den Einstellungen ausgeblendet.
 - Die Bewegungskarte unter „Schlafen gehen“ zeigt den Tagesplan: geplante Alltagsbewegung und Training des laufenden Tages mit Uhrzeit, Dauer und Stand (läuft, vorbei, verschoben, abgesagt). Er steht unter den situativen Knöpfen (Training absagen, in der App Pulsgurt und Ruhepuls).
 - Widerspruch geprüft gegen „Alltagsbewegung kündigt sich nicht an“: Spontanes (Treppenhaus, Bus verpasst) bleibt draußen, es steht in keinem Plan. Geplante Wege und Termine kennt die Person auch im echten Leben. Mit Pulsgurt ruht der Plan und wird nicht gezeigt. Steht ein Plan da, heißt die Karte im Leerlauf „Gerade keine Bewegung“ statt „Nichts geplant“.
 - Daily Dose in den Einstellungen: ein Block mit Stand von heute, Schalter, Fortschritt (gespielt, Serie, längste Serie, Schnitt), Kalender der letzten zehn Wochen und den letzten fünf Karten. Jede Karte lässt sich direkt wieder öffnen.
+
+## 47. Nachtrag 17.11.2026 — Daily Dose: Farben und Wischen, Leiste auf der Simulation
+
+- Kalender und Verteilung zeigen die Zeit im Ziel als Farbe: unter 50 % rot (`--low`), 50–70 % gelb (`--high`), 70–80, 80–90 und ab 90 % in drei Stufen Grün (neues Token `--ok`, hell #2E7D57, dunkel #5CC48E). Die Stufen folgen den Grenzen der Verteilung; 70 % ist das Ziel aus Battelino 2019. Das Teilbild nutzt dieselben Farben.
+- Widerspruch geprüft: Bisher gab es kein Grün; Zielbereich und Werte zeigten sich in Tinte. Grün gilt nur für die Daily-Dose-Ansichten, die Kurven und der Sensorwert bleiben wie sie sind.
+- Die letzten zehn Karten stehen in den Einstellungen als Reihe, die man seitlich durchwischt (einrastend). Eine geöffnete Karte lässt sich nach rechts (älter) und links (neuer) wischen oder mit Pfeilknöpfen und Pfeiltasten durchblättern; die Position steht dabei („4 / 6“).
+- Der Schalter „Täglich aus/an“ hebt sich im Block durch eigene Fläche ab. Auf der Startseite entfällt der Erklärsatz unter Gerät / Ganzer Alltag; die Erklärung steht weiter in den Einstellungen.
+- Die Daily-Dose-Leiste (Stand von heute, Spielen/Weiter) steht nicht mehr auf der Startseite, sondern fest oben auf der Simulationsseite unter der Kopfzeile. Sie erscheint dort, sobald die Daily Dose täglich an ist oder ein Lauf aktiv ist. Die Nummern 46 und 47 ersetzen doppelt vergebene 42 und 43.
