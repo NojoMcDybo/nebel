@@ -62,7 +62,7 @@ export const EXERCISE_CALIBRATION = {
 
 /** Relativer Glukoseabfall nach `minutes` bei `hrr`, mit p3/p4 ×k, aus dem Gleichgewicht z0. */
 export const exerciseDrop = (
-  p: Parameters, k: number, hrr = EXERCISE_CALIBRATION.hrr, minutes: number = EXERCISE_CALIBRATION.minutes,
+  p: Parameters, k: number, hrr: number = EXERCISE_CALIBRATION.hrr, minutes: number = EXERCISE_CALIBRATION.minutes,
   basal = basalEquilibrium(p, EXERCISE_CALIBRATION.glucoseMmolL), z0: StateVector = initialState(p, basal),
 ): number => {
   const q = { ...p, p3: p.p3 * k, p4: p.p4 * k };
