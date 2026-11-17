@@ -679,3 +679,10 @@ Anlass: Frage nach dem Modus, der über Nacht die Basalrate senkt. Das ist kein 
 - **Nachwirkung zurück auf 0,0045.** Ohne Wiederanstieg bleibt mehr vom Tag in der Nacht; DirecNet-Nacht mit 0,0045 im Median −23 (13 von 20 behandelt), Taplin-Verhältnis 1,1. Die Werte aus Nachtrag 43 (0,005, Anzeige +16 %) sind damit überholt; Anzeigegrenzen der Nachwirkung unverändert.
 - **Prüfungen.** `check-adapter.cjs`: harte Belastung jetzt als Vergleich aus demselben Ruhezustand, 30 min bei 85 % gegen 55 % (−6 gegen −18). Registry-Tabelle: Sport moderat −26 bis −44, hart 0 bis +74; Profiltest Patient 10: −36 / +18. Neuer Test: Bolus an Bord ≥ 1,4-fach.
 - **Offen.** Tims KE 12 (Nachtrag 40) macht jede Mahlzeit mit Bolus schon ohne Training zum langsamen Abfall (107 → 70 in 2 h); mit Training landet Tim deshalb schnell im Unterzucker. Harte Belastung (`p2`) bleibt Quelle.
+
+## 42. Nachtrag 17.11.2026 — Startseite, Tagesplan, Daily-Dose-Block
+
+- Der Schalter Gerät / Ganzer Alltag steht jetzt auch auf der Startseite über „Wer bist du heute?“, mit einem Satz Erklärung. Beide Schalter (Startseite und Einstellungen) setzen denselben Zustand. Im Daily-Dose-Lauf ist er wie in den Einstellungen ausgeblendet.
+- Die Bewegungskarte unter „Schlafen gehen“ zeigt den Tagesplan: geplante Alltagsbewegung und Training des laufenden Tages mit Uhrzeit, Dauer und Stand (läuft, vorbei, verschoben, abgesagt). Er steht unter den situativen Knöpfen (Training absagen, in der App Pulsgurt und Ruhepuls).
+- Widerspruch geprüft gegen „Alltagsbewegung kündigt sich nicht an“: Spontanes (Treppenhaus, Bus verpasst) bleibt draußen, es steht in keinem Plan. Geplante Wege und Termine kennt die Person auch im echten Leben. Mit Pulsgurt ruht der Plan und wird nicht gezeigt. Steht ein Plan da, heißt die Karte im Leerlauf „Gerade keine Bewegung“ statt „Nichts geplant“.
+- Daily Dose in den Einstellungen: ein Block mit Stand von heute, Schalter, Fortschritt (gespielt, Serie, längste Serie, Schnitt), Kalender der letzten zehn Wochen und den letzten fünf Karten. Jede Karte lässt sich direkt wieder öffnen.

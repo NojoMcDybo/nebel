@@ -333,7 +333,26 @@ html[data-theme="dark"] .tgl .moon{color:var(--paper)}
 .ksbar[hidden]{display:none}
 .ksbar span{font-size:13.5px; font-weight:600}
 .ksbar button{flex:none; height:34px; padding:0 14px; border:0; border-radius:99px; background:var(--ink); color:var(--paper); font:inherit; font-weight:700; font-size:13px}
-.kslinks{display:flex; gap:8px; margin:-8px 0 20px}
+.kslinks{display:flex; gap:8px; margin:12px 0 0}
+.kslinks .btn{flex:1}
+/* Daily Dose in den Einstellungen: ein Block mit Schalter, Fortschritt und den letzten Karten */
+.ksset{background:var(--sink); border-radius:22px; padding:16px 16px 14px; margin:6px 0 22px}
+.ksset h4{margin:0; font-size:17px; font-weight:800; letter-spacing:-.02em}
+.kssub{font-family:var(--mono); font-size:11px; color:var(--ink3); margin:3px 0 12px; line-height:1.4}
+.ksset .hint{margin:8px 0 12px}
+.ksset .statlist.ksstat{background:var(--card)}
+.ksset .kslow{margin:0 0 4px}
+.ksset .kscal i:not(.on):not(.fut){background:var(--card)}
+.kslist{display:grid; gap:6px}
+.kslist button{display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; width:100%; padding:10px 12px; border:0; border-radius:14px;
+  background:var(--card); color:var(--ink); font:inherit; text-align:left; cursor:pointer}
+.kslist button:active{transform:scale(.98)}
+.kslist .nr{font-family:var(--mono); font-size:11px; color:var(--ink3); min-width:26px}
+.kslist .who{font-size:13.5px; font-weight:700; line-height:1.25}
+.kslist .who small{display:block; font-family:var(--mono); font-size:10px; font-weight:400; color:var(--ink3); margin-top:2px}
+.kslist .res{text-align:right; font-size:15px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1.2}
+.kslist .res small{display:block; font-family:var(--mono); font-size:10px; font-weight:400; color:var(--ink3)}
+.kslist .empty{font-size:13px; color:var(--ink2); margin:0}
 /* Angebot als Mitteilung von oben: annehmen oder wegwischen (hoch oder zur Seite) */
 .ksdrop{position:fixed; left:0; right:0; top:0; z-index:95; display:flex; justify-content:center; pointer-events:none;
   padding:max(10px, env(safe-area-inset-top)) 12px 0; transform:translateY(-130%); transition:transform .5s var(--spring)}
@@ -691,6 +710,19 @@ button.slow{opacity:.5; filter:blur(.7px); transition:opacity .3s, filter .3s}
   transition:transform .22s var(--spring), opacity .3s var(--spring)}
 .move .mvx:active{transform:scale(.96)}
 .move .mvx[hidden]{display:none}
+.homehint{margin:8px 2px 20px}
+.mvplan{margin-top:14px; padding-top:12px; border-top:1px solid var(--hair)}
+.mvplan[hidden]{display:none}
+.mvh{font-family:var(--mono); font-size:9.5px; letter-spacing:.11em; text-transform:uppercase; color:var(--ink3); margin:0 0 6px}
+.mvplan ul{list-style:none; margin:0; padding:0; display:grid; gap:5px}
+.mvplan li{display:grid; grid-template-columns:42px 1fr auto; gap:8px; align-items:baseline; font-size:13px}
+.mvplan .tm{font-family:var(--mono); font-size:11.5px; color:var(--ink3); font-variant-numeric:tabular-nums}
+.mvplan .st{font-family:var(--mono); font-size:10.5px; color:var(--ink3)}
+.mvplan li.live .pn{font-weight:700}
+.mvplan li.live .st{color:var(--ink)}
+.mvplan li.dead .pn, .mvplan li.done .pn{color:var(--ink3)}
+.mvplan li.dead .pn{text-decoration:line-through}
+.mvplan li.moved .st{color:var(--high)}
 
 /* ─── Schnellwahl im Essen-Menü ─── */
 .quick{
@@ -871,6 +903,13 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     </div>
     <div class="ksbar" id="ksBar" hidden><span id="ksBarT"></span><button type="button" id="ksBarGo"></button></div>
 
+    <div class="seg tall homemode" id="homeModeSeg">
+      <span class="knob"></span>
+      <button data-m="geraet" aria-pressed="true">Gerät</button>
+      <button data-m="alltag" aria-pressed="false">Ganzer Alltag</button>
+    </div>
+    <p class="hint homehint" id="homeModeHint">Gerät: nur Werte und deine Entscheidungen. Ganzer Alltag: dazu Überraschungen und andere Leute.</p>
+
     <div class="eyebrow row"><span>Wer bist du heute?</span><span class="act" id="actTag"></span></div>
     <div class="people" id="people" role="radiogroup" aria-label="Person wählen"></div>
     <div class="person" id="personCard"></div>
@@ -1027,6 +1066,7 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
       <div class="sub" id="mvSub">Bewegung kommt, wie sie kommt.</div>
       <div class="bar" id="mvBarWrap" style="display:none"><b id="mvBar" style="width:0%"></b></div>
       <button class="mvx" id="mvCancel" type="button" hidden>Training absagen</button>
+      <div class="mvplan" id="mvPlan" hidden><div class="mvh">Tagesplan</div><ul id="mvPlanList"></ul></div>
     </div>
 
     <div style="margin-top:18px">
@@ -1267,16 +1307,21 @@ button.fxc[aria-expanded="true"] .caret{transform:rotate(90deg)}
     <input type="range" id="dayWeek" min="6" max="40" step="1" value="24" aria-label="Schwangerschaftswoche">
   </div>
   <p class="hint" id="dayHint"></p>
-  <div class="field">
-    <label><span>Daily Dose of T1D</span></label>
+  <div class="ksset" id="ksSet">
+    <h4>Daily Dose of T1D</h4>
+    <p class="kssub" id="ksSetSub"></p>
     <div class="seg tall" id="ksSeg">
       <span class="knob"></span>
       <button data-ks="aus" aria-pressed="true">Täglich aus</button>
       <button data-ks="an" aria-pressed="false">Täglich an</button>
     </div>
+    <p class="hint">Die tägliche Herausforderung: ein Tag für alle, ein Versuch, bewertet nach der Zeit im Zielbereich.</p>
+    <div class="statlist ksstat" id="ksSetStats"></div>
+    <div class="kslow"><div class="kswd" aria-hidden="true"><span>Mo</span><span></span><span>Mi</span><span></span><span>Fr</span><span></span><span></span></div><div class="kscal" id="ksSetCal"></div></div>
+    <div class="ksh">Letzte Karten</div>
+    <div class="kslist" id="ksList"></div>
+    <div class="kslinks"><button class="btn soft" id="ksPlayBtn" type="button">Heute spielen</button><button class="btn soft" id="ksHistBtn" type="button">Verlauf</button></div>
   </div>
-  <p class="hint">Die tägliche Herausforderung: ein Tag für alle, ein Versuch, bewertet nach der Zeit im Zielbereich.</p>
-  <div class="kslinks"><button class="btn soft" id="ksPlayBtn" type="button">Heute spielen</button><button class="btn soft" id="ksHistBtn" type="button">Verlauf</button></div>
   <div class="field">
     <label><span>Simulation</span></label>
     <div class="seg tall" id="modeSeg">
@@ -1983,11 +2028,11 @@ const pressSeg = (seg, pick) => [...seg.querySelectorAll("button")].forEach(x =>
 function syncCfg(){
   pressSeg($("unitSeg"), b => (b.dataset.u === "mmol") === MMOL);
   pressSeg($("themeSeg"), b => b.dataset.t === root.dataset.theme);
-  pressSeg($("modeSeg"), b => (b.dataset.m === "alltag") === FULLDAY);
+  ["modeSeg", "homeModeSeg"].forEach(id => pressSeg($(id), b => (b.dataset.m === "alltag") === FULLDAY));
   pressSeg($("therapySeg"), b => (b.dataset.th === "pen") === PEN);
   pressSeg($("iqSeg"), b => (b.dataset.iq === "an") === eng.basalIQ);
   pressSeg($("ksSeg"), b => (b.dataset.ks === "an") === (KSD.consent === true));
-  ["unitSeg","therapySeg","iqSeg","ksSeg","modeSeg","themeSeg","langSeg"].forEach(id => moveKnob($(id)));
+  ["unitSeg","therapySeg","iqSeg","ksSeg","modeSeg","homeModeSeg","themeSeg","langSeg"].forEach(id => moveKnob($(id)));
   $("dayMode").value = eng.mode.id; $("dayWeek").value = eng.mode.week || 24; paintDay();
 }
 /* Jeder Modus nennt Quelle und Zahl der Personen; Annahmen stehen als solche da. */
@@ -2029,12 +2074,16 @@ $("cfgDone").onclick = () => {
   b.classList.add("ok");                                   // Haken zeichnet sich, wie bei „Verstanden“
   setTimeout(() => { closeSheets(); setTimeout(() => b.classList.remove("ok"), 450); }, 520);
 };
-wireSeg($("modeSeg"), b => {
+/* Derselbe Schalter steht in den Einstellungen und auf der Startseite: beide gleich halten. */
+const pickMode = b => {
   FULLDAY = eng.variability = b.dataset.m === "alltag";
   fcKey = "";
   try { localStorage.setItem(MODE_KEY, FULLDAY ? "alltag" : "geraet"); } catch(e){}
   if (!FULLDAY){ hypoUntil = -1; hypoRound = 0; invPick = null; $("remark").classList.remove("on"); }
-});
+  ["modeSeg", "homeModeSeg"].forEach(id => { pressSeg($(id), x => (x.dataset.m === "alltag") === FULLDAY); moveKnob($(id)); });
+};
+wireSeg($("modeSeg"), pickMode);
+wireSeg($("homeModeSeg"), pickMode);
 wireSeg($("therapySeg"), b => {
   const pen = b.dataset.th === "pen";
   if (pen === PEN) return;
@@ -2624,6 +2673,7 @@ function paintMove(){
   } else {
     if (fresh){
       $("mvName").textContent = eng.reality ? "Du planst selbst" : "Nichts geplant";
+      if (!eng.reality && planToday().length) $("mvName").textContent = "Gerade keine Bewegung";   // der Plan steht darunter
       $("mvWhen").textContent = "";
       $("mvSub").textContent = eng.reality
         ? "Trag deine Einheit ein, wenn sie stattfindet. Alltagsbewegung kommt weiter von allein."
@@ -2642,6 +2692,24 @@ function paintMove(){
   $("mvBeat").style.display = beat ? "block" : "none";
   $("mvBarWrap").style.display = bar >= 0 ? "block" : "none";
   if (bar >= 0) $("mvBar").style.width = clamp(bar, 0, 100).toFixed(1) + "%";
+  paintPlan();
+}
+/* Tagesplan: was die Person heute vorhat. Spontanes (Treppenhaus, Bus verpasst)
+   steht in keinem Plan und bleibt eine Ueberraschung. Mit Pulsgurt ruht der Plan. */
+const PLAN_WORDS = { dead:"abgesagt", live:"läuft", done:"vorbei", moved:"verschoben", next:"" };
+let lastPlan = "";
+const planToday = () => eng.beltT != null ? [] : eng.acts.filter(a => !a.spont && Math.floor(a.start / 1440) === Math.floor(eng.s.t / 1440));
+function paintPlan(){
+  const t = eng.s.t, day = Math.floor(t / 1440), act = eng._act;
+  const rows = planToday().map(a => {
+    const st = a.dead ? "dead" : a.logged ? (act && act.name === a.name && t < act.start + act.dur ? "live" : "done") : a.tries ? "moved" : "next";
+    return { t:a.start, n:a.name, d:a.dur, st };
+  });
+  const key = rows.map(r => r.t + r.st).join();
+  if (key === lastPlan) return;
+  lastPlan = key;
+  $("mvPlan").hidden = !rows.length;
+  $("mvPlanList").innerHTML = rows.map(r => `<li class="${r.st}"><span class="tm">${fmtT(r.t)}</span><span class="pn">${ksEsc(r.n)} · ${r.d} min</span><span class="st">${PLAN_WORDS[r.st]}</span></li>`).join("");
 }
 function renderLog(){
   const line = e => {
@@ -3659,6 +3727,8 @@ function ksDrawChart(e){
 }
 const ksStat = rows => rows.map(([k, v]) => `<div><span class="k">${k}</span><span class="v">${v}</span></div>`).join("");
 /* Eine Karte: der gespielte Tag (falls es einen gibt) und darunter der Verlauf. */
+const ksCalHTML = mark => ksCalOf(mark).map(c => `<i class="${(c.fut ? "fut" : c.h ? "on" : "") + (c.h && c.h.emergencies ? " emg" : "") + (c.mark ? " today" : "")}"`
+    + (c.h ? ` style="--k:${(c.h.tir / 100).toFixed(2)}" title="${c.d} · ${c.h.tir} %"` : ` title="${c.d}"`) + "></i>").join("");
 function ksShowCard(e){
   ksCur = e || null;
   $("ksDay").hidden = !e; $("ksEmpty").hidden = !!e; $("ksShare").hidden = !e; $("ksNr").textContent = e ? "#" + e.nr : "";
@@ -3672,8 +3742,7 @@ function ksShowCard(e){
   }
   $("ksStats").innerHTML = ksStat(ksAllOf());
   const mark = e ? e.datum : KS_TODAY.date;
-  $("ksCal").innerHTML = ksCalOf(mark).map(c => `<i class="${(c.fut ? "fut" : c.h ? "on" : "") + (c.h && c.h.emergencies ? " emg" : "") + (c.mark ? " today" : "")}"`
-    + (c.h ? ` style="--k:${(c.h.tir / 100).toFixed(2)}" title="${c.d} · ${c.h.tir} %"` : ` title="${c.d}"`) + "></i>").join("");
+  $("ksCal").innerHTML = ksCalHTML(mark);
   const D = ksDistOf(mark);
   $("ksDist").innerHTML = KS_BUCKETS.map((b, i) => `<div class="${i === D.mine ? "on" : ""}"><span>${b} %</span><i style="width:${Math.max(2, Math.round(100 * D.cnt[i] / D.max))}%" title="${D.cnt[i]}"></i></div>`).join("");
   $("ksCard").hidden = false; pager.inert = true;
@@ -3765,6 +3834,7 @@ $("ksPlayBtn").onclick = () => {
 };
 wireSeg($("ksSeg"), b => { KSD.consent = b.dataset.ks === "an"; ksSave(); ksPaintBar(); });
 function ksPaintBar(){
+  ksPaintSet();
   const bar = $("ksBar"), p = PERSONAS.find(x => x.id === KS_D.person), done = KSD.hist.find(h => h.datum === KS_D.date);
   $("ksPlayBtn").hidden = KS;
   bar.hidden = !KS && KSD.consent !== true;
@@ -3775,10 +3845,26 @@ function ksPaintBar(){
   $("ksBarGo").textContent = KS ? "Freies Spiel" : done ? "Karte" : "Spielen";
   $("ksBarGo").onclick = () => KS ? ksLeave() : done ? ksShowCard(done) : ksEnter();
 }
+/* Einstellungen: Stand von heute, Fortschritt und die letzten fuenf Karten zum Wiederansehen. */
+function ksPaintSet(){
+  const p = PERSONAS.find(x => x.id === KS_D.person), done = KSD.hist.find(h => h.datum === KS_D.date);
+  $("ksSetSub").textContent = KS ? `#${KS_D.nr} läuft · ${p.name}, ${ksModeTxt(KS_D.mode)}`
+    : done ? `#${KS_D.nr} gespielt · ${done.tir} % · ${KS_WORDS[ksGrade(done)]}`
+    : `#${KS_D.nr} · heute ${p.name}, ${ksModeTxt(KS_D.mode)}`;
+  $("ksSetStats").innerHTML = ksStat(ksAllOf());
+  $("ksSetCal").innerHTML = ksCalHTML(KS_TODAY.date);
+  const last = KSD.hist.slice(-5).reverse();
+  $("ksList").innerHTML = last.length ? last.map((e, i) => { const q = PERSONAS.find(x => x.id === e.person);
+    return `<button type="button" data-i="${i}"><span class="nr">#${Number(e.nr) || ""}</span>`
+      + `<span class="who">${ksEsc(q ? q.name : "–")}<small>${ksEsc(ksDateTxt(e.datum))} · ${ksEsc(ksModeTxt(e.mode))}</small></span>`
+      + `<span class="res">${Number(e.tir) || 0} %<small>${KS_WORDS[ksGrade(e)]}</small></span></button>`; }).join("")
+    : `<p class="empty">Noch keine Karte.</p>`;
+  $("ksList").querySelectorAll("button").forEach(b => b.onclick = () => { closeSheets(); setTimeout(() => ksShowCard(last[+b.dataset.i]), 300); });
+}
 /* Im Daily-Dose-Lauf fehlt alles, was neu beginnen oder den Tag aendern wuerde. */
 if (KS){
   document.body.classList.add("ks");
-  ["people", "pcGo", "btnReset"].forEach(id => { $(id).hidden = true; });
+  ["people", "pcGo", "btnReset", "homeModeSeg", "homeModeHint"].forEach(id => { $(id).hidden = true; });
   document.querySelector(".selfhint").hidden = true;
   ["therapySeg", "dayMode", "modeSeg"].forEach(id => { const f = $(id).closest(".field"); f.hidden = true;
     if (f.nextElementSibling && f.nextElementSibling.matches("p.hint")) f.nextElementSibling.hidden = true; });
