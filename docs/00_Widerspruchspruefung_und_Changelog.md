@@ -694,3 +694,16 @@ Anlass: Frage nach dem Modus, der über Nacht die Basalrate senkt. Das ist kein 
 - Die letzten zehn Karten stehen in den Einstellungen als Reihe, die man seitlich durchwischt (einrastend). Eine geöffnete Karte lässt sich nach rechts (älter) und links (neuer) wischen oder mit Pfeilknöpfen und Pfeiltasten durchblättern; die Position steht dabei („4 / 6“).
 - Der Schalter „Täglich aus/an“ hebt sich im Block durch eigene Fläche ab. Auf der Startseite entfällt der Erklärsatz unter Gerät / Ganzer Alltag; die Erklärung steht weiter in den Einstellungen.
 - Die Daily-Dose-Leiste (Stand von heute, Spielen/Weiter) steht nicht mehr auf der Startseite, sondern fest oben auf der Simulationsseite unter der Kopfzeile. Sie erscheint dort, sobald die Daily Dose täglich an ist oder ein Lauf aktiv ist. Die Nummern 46 und 47 ersetzen doppelt vergebene 42 und 43.
+
+## 48. Nachtrag 18.11.2026 — Herzfrequenz-Kinetik
+
+**Befund:** Eine Einheit stand als Rechteck in der Herzfrequenzspur: sofort auf dem Ziel, am Ende sofort in Ruhe. Harte Einheiten blieben auf derselben Höhe, statt nach oben zu driften. py-mgipsim rechnet den Puls aus einem eigenen Modell; dessen Gleichungen stehen nicht im Simulator-Paper (Rashid 2019, Abschnitt 5.3.2), sondern in der dort zitierten Masterarbeit von Svendby (2016, Oslo).
+
+**Entscheidung:** Neues Modul `engine/src/heartRateKinetics.ts` aus Svendby 2016, Kapitel 10, nicht aus dem GPL-Code. Die Intensität in der App bleibt ein Herzfrequenzziel und wird über das Gleichgewicht in eine Leistung umgerechnet; die Schwelle `pT` ist `VT_HRR` des Körpers, `τL` 30 s für alle (Registry Abschnitt 11). Die Engine-Gleichungen bleiben, der Orakelabgleich ist unberührt. `exerciseBlock` bleibt für Tests und Kalibrierung; das Antwortprofil nutzt `kineticExerciseBlock`.
+
+**Adapter:** `_beginActivity` erzeugt die Spur im Minutenraster aus der Kinetik. Jeder Pulspunkt trägt den Kinetikzustand (`hk`), damit eine neue Einheit mitten in der Erholung dort weitermacht; er wird mit der Eingabe gespeichert, Nachrechnen bleibt bitgleich. Der Pulsgurt umgeht die Kinetik.
+
+**Folgen:** Unterhalb der Schwelle senkt dieselbe Einheit wie bisher (je Subjekt 94–100 % des Rechtecks), Kalibrierung und Nachwirkung bleiben. Oberhalb der Schwelle driftet der Puls, und der Wert steigt stärker oder fällt weniger. Spalte „Hart“ im Antwortprofil: Median +14 statt +17. Zwei Adapterprüfungen lasen den Puls in der Startminute, die jetzt noch Ruhe ist; sie lesen jetzt nach 1 bis 4 Minuten.
+
+Geprüft: Typen sauber, Tests 161 grün, 5 übersprungen (Orakel-Referenzwerte fehlen lokal), Adapterprüfung vollständig grün, gebaute Seite im Browser (Antwortprofil zeigt die neuen Werte, Einheit per Skript gestartet, keine Konsolenfehler). Nicht geprüft: Bedienung über die Oberfläche, Mobile-App.
+

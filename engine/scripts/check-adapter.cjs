@@ -104,7 +104,8 @@ const firstAlltag = plan.acts.filter(a => !a.warn).sort((a,b) => a.start-b.start
 while (plan.s.t <= firstAlltag.start) plan.step();
 ok("Geplante Alltagsbewegung startet", !!plan._act && plan._act.name === firstAlltag.name,
    `${firstAlltag.name} um ${String(Math.floor(firstAlltag.start/60)%24).padStart(2,"0")}:${String(firstAlltag.start%60).padStart(2,"0")}`);
-ok("… und hebt die Herzfrequenz", window.Nebel.heartRateAt(firstAlltag.start, plan.input, plan.p.HRrest) > plan.p.HRrest + 5);
+/* Die Kinetik beginnt in Ruhe; nach drei Minuten ist der Puls oben. */
+ok("… und hebt die Herzfrequenz", window.Nebel.heartRateAt(firstAlltag.start + 3, plan.input, plan.p.HRrest) > plan.p.HRrest + 5);
 
 const post = new Engine(20260812, 0);
 for (let i=0;i<30;i++) post.step();
@@ -281,13 +282,13 @@ ok("Fortsetzen nach Neuladen bitgleich", a.z.every((v,i) => v === b.z[i]) && a.l
   const run = (name, inten, pat) => { const c = new Engine(20260812, 9); c.acts = [];
     for (let i = 0; i < 60; i++){ c.acts = []; c.step(); }
     const g0 = c.s.G; c._beginActivity(name, inten, 33, pat);
-    const hr = [0, 1, 2].map(k => N_hr(c, c.s.t + k));
+    const hr = [1, 3, 4].map(k => N_hr(c, c.s.t + k));   // nach 0,9 · nach zweimal 0,5 · wieder 0,9
     const F = c.forecast(60, 120, 5);
     for (let i = 0; i < 33; i++){ c.acts = []; c.step(); }
     return { d: c.s.G - g0, hr, F }; };
   const N_hr = (c, t) => window.Nebel.heartRateAt(t, c.input, c.p.HRrest);
   const flat = run("flach", 0.92), iv = run("Intervalle", 0.92, [[1, 0.9], [2, 0.5]]);
-  ok("Intervalle wechseln die Herzfrequenz", iv.hr[0] > iv.hr[1] + 20 && Math.abs(iv.hr[1] - iv.hr[2]) < 1,
+  ok("Intervalle wechseln die Herzfrequenz", iv.hr[0] > iv.hr[1] + 10 && iv.hr[2] > iv.hr[1] + 10,
      iv.hr.map(Math.round).join(" / ") + " bpm");
   ok("… und heben weniger als eine harte Linie", iv.d < flat.d - 10, `${iv.d.toFixed(0)} statt ${flat.d.toFixed(0)} mg/dL`);
   ok("Bewegung steht in der Wirkung", iv.F.move.some(v => Math.abs(v) > 5), "max " + Math.max(...iv.F.move.map(Math.abs)).toFixed(0) + " mg/dL/h");

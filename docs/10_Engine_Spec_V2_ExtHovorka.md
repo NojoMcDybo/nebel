@@ -180,6 +180,8 @@ siFactor = siFactor_Fett · (1 + 0,0045 · L)
 ```
 Die Herzfrequenzspur wird stückweise exakt integriert und am Anfang jedes Rechenschritts ausgewertet. Der Abfall während der Belastung bleibt bei `p3`, `p4`, `p5`; `p3` und `p4` sind seit 17.11.2026 je Körper kalibriert (`calibrateExercise`, Registry Abschnitt 7). Im Nebel-Parametersatz wirken beide zusätzlich mit G/`exGlucoseRef` (6 mmol/L): Die Muskelaufnahme wächst mit der Glukose, in der Quelle ist sie ein fester Fluss (Nachtrag 44). Außerdem verstärkt Bewegung die insulinabhängige Verwertung: `x2·Q2 × (1 + exInsulinGain · min(EElong·p7/p6, VT_HRR) · (1 − EEhigh))`, `exInsulinGain` = 1,8 (Nachtrag 45).
 
+Woher `uHR` kommt: Die App setzt eine Einheit seit 18.11.2026 nicht mehr als Rechteck, sondern rechnet den Pulsverlauf aus einer Herzfrequenz-Kinetik (Svendby 2016; `engine/src/heartRateKinetics.ts`, Registry Abschnitt 11, Nachtrag 48). Die Gleichungen oben bleiben unverändert; der Pulsgurt liefert `uHR` direkt.
+
 ### 6.11 Numerische Schutzgrenzen (keine Physiologie)
 ```
 Q1 ∈ [VG, 32 · VG]   entspricht G ∈ [1, 32] mmol/L

@@ -14,7 +14,8 @@ import type { Parameters, TherapySettings } from "../parameters.js";
 import { MGDL_PER_MMOLL } from "../units.js";
 import { simulate } from "../simulate.js";
 import { flatBasalProfile } from "../pump.js";
-import { exerciseBlock, type SimEvent } from "../events.js";
+import type { SimEvent } from "../events.js";
+import { kineticExerciseBlock } from "../heartRateKinetics.js";
 import { DEFAULT_SENSOR } from "../observation.js";
 
 export interface ResponseProfile {
@@ -52,13 +53,13 @@ export const responseProfile = (p: Parameters, therapy: TherapySettings): Respon
   const S = PROFILE_SCENARIOS, t0 = 60;
   const meal: SimEvent = { kind: "meal", t: t0, fastCarbsG: S.mealG * S.mealFastShare, slowCarbsG: S.mealG * (1 - S.mealFastShare) };
   const bolus: SimEvent = { kind: "bolus", t: t0 - S.bolusLeadMin, units: S.mealG / therapy.carbRatioGPerU };
-  const hr = (share: number) => p.HRrest + share * (p.HRmax - p.HRrest);
 
   const one = run([{ kind: "bolus", t: 0, units: 1 }], 480);
   const withBolus = run([bolus, meal], 480);
   const noBolus = run([meal], 480);
-  const moderate = run(exerciseBlock(t0, S.moderate.durationMin, hr(S.moderate.hrrShare), p.HRrest), 300);
-  const hard = run(exerciseBlock(t0, S.hard.durationMin, hr(S.hard.hrrShare), p.HRrest), 300);
+  // Wie in der App: Intensitaet als Herzfrequenzziel, Verlauf aus der Kinetik.
+  const moderate = run(kineticExerciseBlock(t0, S.moderate.durationMin, S.moderate.hrrShare, p), 300);
+  const hard = run(kineticExerciseBlock(t0, S.hard.durationMin, S.hard.hrrShare, p), 300);
 
   return {
     startMgdl: one[0]!,

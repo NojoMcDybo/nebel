@@ -104,37 +104,37 @@ Nicht im Datensatz: Alter und Geschlecht. Alle 20 halten mit ihrer Basalrate exa
 
 Datensatzfehler: Das Feld `total_daily_basal` passt nicht zu `basal` × 24 (Verhältnis 1,02 bis 2,44, bei Patient 1 16,9 gegen 27,3 U). Bedeutung unklar; Nebel nutzt das Feld nicht.
 
-### Verhalten im Nebel-Parametersatz (26.09.2026, Bewegung neu am 09.11. und 17.11.2026)
+### Verhalten im Nebel-Parametersatz (26.09.2026, Bewegung neu am 09.11., 17.11. und 18.11.2026)
 
-Gerechnet aus dem Gleichgewicht bei 108 mg/dL, ohne Sensorfehler. Die Bewegungsspalten enthalten seit 09.11.2026 die lange Nachwirkung (Abschnitt 9), seit 17.11.2026 die Bewegungskalibrierung (Abschnitt 7). „60 g" = 24 g schnell + 36 g langsam, Bolus nach KE-Faktor 10 min vorher. „Sport" = 45 min bei 55 % der Herzfrequenzreserve, nüchtern. „Hart" = 20 min bei 90 %.
+Gerechnet aus dem Gleichgewicht bei 108 mg/dL, ohne Sensorfehler. Die Bewegungsspalten enthalten seit 09.11.2026 die lange Nachwirkung (Abschnitt 9), seit 17.11.2026 die Bewegungskalibrierung (Abschnitt 7), seit 18.11.2026 den Herzfrequenzverlauf aus der Kinetik (Abschnitt 11). „60 g" = 24 g schnell + 36 g langsam, Bolus nach KE-Faktor 10 min vorher. „Sport" = 45 min bei 55 % der Herzfrequenzreserve, nüchtern. „Hart" = 20 min bei 90 %.
 
 | P | kg | HbA1c | Basal U/h | 1 U senkt | 60 g + Bolus: Spitze / Tief | 60 g ohne Bolus | Sport moderat | Hart |
 |---|---|---|---|---|---|---|---|---|
 | 1 | 79 | 6,5 | 1,14 | 23 | 131 / 98 | 191 | −28 | 0 |
-| 2 | 74 | 7,6 | 1,45 | 18 | 134 / 105 | 186 | −26 | +9 |
-| 3 | 70 | 6,2 | 1,25 | 31 | 138 / 101 | 201 | −40 | +35 |
-| 4 | 73 | 6,4 | 0,93 | 38 | 159 / 108 | 255 | −41 | +74 |
-| 5 | 64 | 6,9 | 0,77 | 36 | 164 / 108 | 274 | −43 | +15 |
-| 6 | 65 | 6,5 | 0,59 | 37 | 152 / 105 | 271 | −44 | +7 |
-| 7 | 62 | 7,0 | 2,00 | 16 | 142 / 108 | 186 | −31 | +43 |
-| 8 | 68 | 6,9 | 0,73 | 24 | 129 / 92 | 209 | −38 | +21 |
-| 9 | 66 | 6,3 | 0,98 | 25 | 138 / 99 | 216 | −27 | +22 |
+| 2 | 74 | 7,6 | 1,45 | 18 | 134 / 105 | 186 | −26 | +8 |
+| 3 | 70 | 6,2 | 1,25 | 31 | 138 / 101 | 201 | −41 | +29 |
+| 4 | 73 | 6,4 | 0,93 | 38 | 159 / 108 | 255 | −42 | +61 |
+| 5 | 64 | 6,9 | 0,77 | 36 | 164 / 108 | 274 | −44 | +15 |
+| 6 | 65 | 6,5 | 0,59 | 37 | 152 / 105 | 271 | −44 | 0 |
+| 7 | 62 | 7,0 | 2,00 | 16 | 142 / 108 | 186 | −33 | +34 |
+| 8 | 68 | 6,9 | 0,73 | 24 | 129 / 92 | 209 | −39 | +16 |
+| 9 | 66 | 6,3 | 0,98 | 25 | 138 / 99 | 216 | −27 | +12 |
 | 10 | 71 | 6,3 | 0,46 | 33 | 163 / 108 | 299 | −36 | +18 |
-| 11 | 84 | 6,2 | 1,77 | 20 | 127 / 99 | 171 | −26 | +17 |
-| 12 | 83 | 5,7 | 1,09 | 23 | 128 / 95 | 186 | −32 | +8 |
-| 13 | 70 | 7,1 | 1,26 | 28 | 186 / 108 | 278 | −44 | +66 |
-| 14 | 77 | 5,8 | 0,51 | 35 | 136 / 90 | 236 | −39 | +10 |
-| 15 | 85 | 5,9 | 1,19 | 21 | 137 / 107 | 194 | −40 | +47 |
-| 16 | 66 | 6,1 | 0,39 | 38 | 145 / 86 | 290 | −38 | +4 |
-| 17 | 81 | 7,2 | 1,50 | 33 | 144 / 105 | 216 | −32 | +3 |
-| 18 | 88 | 6,9 | 1,56 | 31 | 134 / 103 | 190 | −35 | 0 |
-| 19 | 73 | 6,4 | 1,15 | 32 | 168 / 108 | 260 | −33 | +46 |
-| 20 | 75 | 6,7 | 1,00 | 36 | 160 / 108 | 261 | −35 | +55 |
-| **Median** | | | | **31** | **142** | **216** | **−36** | **+17** |
+| 11 | 84 | 6,2 | 1,77 | 20 | 127 / 99 | 171 | −26 | +7 |
+| 12 | 83 | 5,7 | 1,09 | 23 | 128 / 95 | 186 | −32 | +3 |
+| 13 | 70 | 7,1 | 1,26 | 28 | 186 / 108 | 278 | −45 | +58 |
+| 14 | 77 | 5,8 | 0,51 | 35 | 136 / 90 | 236 | −40 | +2 |
+| 15 | 85 | 5,9 | 1,19 | 21 | 137 / 107 | 194 | −40 | +42 |
+| 16 | 66 | 6,1 | 0,39 | 38 | 145 / 86 | 290 | −38 | +5 |
+| 17 | 81 | 7,2 | 1,50 | 33 | 144 / 105 | 216 | −32 | 0 |
+| 18 | 88 | 6,9 | 1,56 | 31 | 134 / 103 | 190 | −36 | 0 |
+| 19 | 73 | 6,4 | 1,15 | 32 | 168 / 108 | 260 | −33 | +39 |
+| 20 | 75 | 6,7 | 1,00 | 36 | 160 / 108 | 261 | −36 | +37 |
+| **Median** | | | | **31** | **142** | **216** | **−36** | **+14** |
 
 Die App bietet zehn davon als Personen an (4, 6, 7, 8, 10, 11, 13, 14, 15, 18), siehe `09_Personen.md`.
 
-Lesart: Die größte Streuung lag in der Bewegungsantwort (Quelle: −2 bis −89 mg/dL bei derselben moderaten Einheit), getragen von `p3`. Seit der Bewegungskalibrierung (Abschnitt 7) sind es −26 bis −44 aus 108; aus höherem Wert und mit Insulin an Bord fällt es mehr. Patient 1, das bisherige Standardsubjekt, ist bei Insulin und moderater Bewegung am schwachen Rand.
+Lesart: Die größte Streuung lag in der Bewegungsantwort (Quelle: −2 bis −89 mg/dL bei derselben moderaten Einheit), getragen von `p3`. Seit der Bewegungskalibrierung (Abschnitt 7) sind es −26 bis −45 aus 108; aus höherem Wert und mit Insulin an Bord fällt es mehr. Patient 1, das bisherige Standardsubjekt, ist bei Insulin und moderater Bewegung am schwachen Rand.
 
 Einschränkung: Alle 20 Subjekte sind Erwachsene mit HbA1c zwischen 5.7 und 7.6 %. Kinder, Jugendliche und schlecht eingestellte Verläufe sind **nicht** abgedeckt. Das gehört in den Model Validity Envelope und in die Kommunikation gegenüber Nutzern.
 
@@ -370,3 +370,49 @@ Nur im Modus „Ganzer Alltag“ (`eng.variability`). Im Modus „Gerät“ blei
 | Unterzucker-Fenster | Blut < 62 oder Sensor < 70 | NEBEL-ANNAHME |
 
 Quellen: Ruan et al. 2017, [DOI](https://doi.org/10.1109/TBME.2016.2590498) · Visentin et al. 2016, [DOI](https://doi.org/10.1109/TBME.2016.2535241) · Hinshaw et al. 2013, [DOI](https://doi.org/10.2337/db12-1759) · Kanapka et al. 2022, [DOI](https://doi.org/10.1089/dia.2021.0548) · Hughes et al. 2023, [DOI](https://doi.org/10.1089/dia.2023.0005)
+
+## 11. Herzfrequenz-Kinetik (`engine/src/heartRateKinetics.ts`, seit 18.11.2026)
+
+Bis 17.11.2026 setzte die App eine Einheit als Rechteck in die Herzfrequenzspur: sofort auf das Ziel, am Ende sofort zurück auf Ruhe. Seit 18.11.2026 rechnet eine Kinetik den Verlauf. Die Intensität bleibt ein Herzfrequenzziel (Anteil der Reserve im Gleichgewicht). Die Engine-Gleichungen sind unverändert; der Orakelabgleich bleibt unberührt. Der Pulsgurt umgeht die Kinetik, dort gilt der gemessene Puls.
+
+Quelle: Svendby SR (2016), *Mathematical Modelling of Heart Rate During Cycling Exercise*, Masterarbeit, Universität Oslo, [hdl 10852/52702](http://hdl.handle.net/10852/52702), Kapitel 10 (Gl. 10.4–10.20, Tabelle 10.1). Rashid et al. 2019 ([DOI](https://doi.org/10.1016/j.compchemeng.2019.106565)), Abschnitt 5.3.2, nennen sie als Herzfrequenzmodell ihres Simulators, aus dem py-mgipsim hervorging. Umgesetzt aus der Arbeit, nicht aus dem GPL-Code.
+
+### 11.1 Gleichungen
+
+Drei Anteile der Reserve: `νL` schnell (Sauerstoffbedarf der Muskeln), `νG` langsamer (Laktatabbau, oberhalb der Schwelle ohne Gleichgewicht), `νM` sehr langsam (Wärme, Stoffwechsel). `p` = Leistung als Anteil der maximalen aeroben Leistung.
+
+```
+νLmax' = νLmax − νM/2         νGmax' = νGmax − νM/2         νMmax konstant
+DL(p)  = νLmax' · 2 · (1/(1 + e^(−p/αL)) − 0,5)
+dνL/dt = (DL(p) − νL) / τL
+dG/dt  = p0 + (e^(p/pT) − 1)/τp − (r0 + 1 − e^(−p/pT)) · (1 − e^(−G/α)) / τr
+dM/dt  = (β·p − M) / τM
+νG     = νGmax' · (1 − e^(−(G − G0)/αG))
+νM     = νMmax / (1 + e^(−(M − M0)/αM))
+τr = r0·(1 − e^(−G0/α)) / p0          τp = (e − 1) / ((r0 + 1 − e^(−1))(1 − e^(−GT/α))/τr − p0)
+HRR    = νL + νG + νM − νM(0)
+```
+
+### 11.2 Parameter
+
+| Parameter | Wert | Status | Beleg |
+|---|---|---|---|
+| `α`, `αL`, `αG`, `αM` | 0,3 · 0,2 · 0,82 · 0,12 | Q | Tabelle 10.1 |
+| `β` | 2 | Q | Tabelle 10.1 („Annahme“ in der Arbeit) |
+| `p0` | 0,15 /min (0,0025 /s) | Q | Tabelle 10.1, umgerechnet |
+| `r0`, `G0`, `M0`, `GT` | 0,17 · 0,25 · 0,6 · 1 | Q | Tabelle 10.1, Kap. 10.6 |
+| `τM` | 25 min (1500 s) | Q | Tabelle 10.1 („Annahme“ in der Arbeit) |
+| `νLmax`, `νGmax`, `νMmax` | 0,5 · 0,5 · 0,1 | Q | Kap. 10.2 |
+| `τr`, `τp` | 0,64 min · 1,6 min bei pT = 0,8 | Q, abgeleitet | Gl. 10.17/10.18; die Arbeit nennt 38,5 s und 97,1 s |
+| `τL` | 0,5 min (30 s) für alle | N, aus Q übernommen | typischer Wert, Kap. 11.1; die Arbeit fittet ihn je Person |
+| `pT` | `VT_HRR` des Körpers | N | Unterhalb der Schwelle ist die Herzfrequenz in der Arbeit linear in der Leistung, Leistungs- und Reserveanteil fallen zusammen. Die Arbeit fittet `pT` je Person |
+| Ruheabzug `νM(0)` | 0,07 % der Reserve | N | damit Ruhe exakt `HRrest` bleibt |
+| Intensität → Leistung | Umkehr des Gleichgewichts; oberhalb der Schwelle `pT + (f − HRR(pT))` | N | die App spricht in Herzfrequenzzielen |
+
+### 11.3 Verhalten und Folgen
+
+Beispiel `HRrest` 60, `HRmax` 190, `VT_HRR` 0,786, 60 min bei 55 % (Ziel 131 bpm): nach 1 min 115, nach 5 min 125, am Ende 131; 1 min danach 85, nach 10 min 68, nach 30 min Ruhe. 20 min bei 90 %: driftet bis 186 bpm, 5 min danach 126, nach 20 min 92.
+
+Glukose, alle 20 Subjekte aus 108 mg/dL, 60 min: unterhalb der Schwelle senkt die Kinetik im Median wie das Rechteck (55 %: −36,5 statt −36,9; 30 %: −25,6 statt −26,9; je Subjekt 94–100 %). Die Kalibrierung von `p3`/`p4` (Abschnitt 7) und der Nachwirkung (Abschnitt 9), beide am Rechteck gerechnet, bleibt deshalb gültig. Oberhalb der Schwelle steigt der Puls weiter, `EEhigh` wächst, die Leber gibt mehr ab: 60 min bei 85 % heben den Wert jetzt im Median um 12 mg/dL, statt ihn um 12 zu senken. Das Antwortprofil (Abschnitt 4, Spalte „Hart“) rechnet seit 18.11.2026 mit der Kinetik: Median +14 statt +17.
+
+Einschränkungen: Die Arbeit misst Radfahren bei wenigen gesunden Erwachsenen; Gehen, Laufen und Krafttraining sind nicht belegt. `β` und `τM` nennt sie selbst Annahmen. Abgesichert durch `tests/heartRateKinetics.test.ts` und `scripts/check-adapter.cjs`.

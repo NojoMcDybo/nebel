@@ -8,6 +8,7 @@ export * from "./solver.js";
 export * from "./observation.js";
 export * from "./nutrition.js";
 export * from "./afterEffect.js";
+export * from "./heartRateKinetics.js";
 export * from "./simulate.js";
 export * from "./realtime.js";
 export * from "./scenario/needs.js";

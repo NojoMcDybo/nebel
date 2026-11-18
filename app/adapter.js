@@ -365,13 +365,16 @@ class Engine {
   /* Eine Einheit beginnt JETZT — selbst gestartet oder aus dem Tagesplan. */
   _beginActivity(name, inten, dur, pat){
     const t = this.s.t, d = Math.max(2, Math.round(dur));
-    const hr = f => this.p.HRrest + f*(this.p.HRmax - this.p.HRrest);
-    const pts = [];
-    if (pat) for (let m = 0; m < d; ) for (const [len, f] of pat)
-      for (let k = 0; k < len && m < d; k++, m++) pts.push({ t: t + m, bpm: hr(f) });
-    else pts.push({ t, bpm: hr(inten) }, { t: t + d - 1, bpm: hr(inten) });
-    pts.push({ t: t + d, bpm: this.p.HRrest });
-    this._setHeartRate(pts);
+    /* Intensitaet je Minute als Herzfrequenzziel; den Verlauf (Anstieg, Drift ueber der
+       Schwelle, Erholung) rechnet die Kinetik (heartRateKinetics.ts, Svendby 2016).
+       Laeuft noch eine Erholung, geht es von deren Zustand weiter; er steht an jedem
+       Pulspunkt der Spur (hk) und wird mit der Eingabe gespeichert. */
+    const f = [];
+    if (pat) for (let m = 0; m < d; ) for (const [len, x] of pat)
+      for (let k = 0; k < len && m < d; k++, m++) f.push(x);
+    else for (let m = 0; m < d; m++) f.push(inten);
+    const prev = this.input.find(e => e.kind === "heartRate" && e.t === t && e.hk);
+    this._setHeartRate(N.kineticHeartRateTrace(t, f, this.p, prev ? prev.hk : undefined));
     this.events.push({ kind:"move", t, name, dur: d, inten });
     this._act = { name, inten, start:t, dur:d };
   }
@@ -401,7 +404,8 @@ class Engine {
       if (e.kind === "heartRate" && e.t >= anchorT) this.input.splice(i, 1);
     }
     if (anchorT >= 0) this.input.push({ kind:"heartRate", t:anchorT, bpm:keep });
-    for (const p of points) this.input.push({ kind:"heartRate", t:p.t, bpm:p.bpm });
+    for (const p of points) this.input.push(p.hk ? { kind:"heartRate", t:p.t, bpm:p.bpm, hk:Array.from(p.hk) }
+                                                 : { kind:"heartRate", t:p.t, bpm:p.bpm });
   }
 
   /* Tagesplan abarbeiten. Training wird angekuendigt; niemand startet es bei
