@@ -707,3 +707,33 @@ Anlass: Frage nach dem Modus, der über Nacht die Basalrate senkt. Das ist kein 
 
 Geprüft: Typen sauber, Tests 161 grün, 5 übersprungen (Orakel-Referenzwerte fehlen lokal), Adapterprüfung vollständig grün, gebaute Seite im Browser (Antwortprofil zeigt die neuen Werte, Einheit per Skript gestartet, keine Konsolenfehler). Nicht geprüft: Bedienung über die Oberfläche, Mobile-App.
 
+## 49. Nachtrag 25.11.2026 — Insulinaufnahme 70 min, Mahlzeitenanstieg geprüft
+
+**Befund:** Beim Testen wirkten die Verläufe schlüssig, forderten aber nie. Abgleich mit dem Mahlzeitentest von Hirsch et al. 2024 ([DOI](https://doi.org/10.2337/dc24-0838)): 37 g Kohlenhydrate, schnelles Analogon 10 min vorher, 61 Erwachsene, Anstieg 105 ± 42 mg/dL, Spitze nach 81 ± 27 min. In nebel. (37 g schnell, Bolus nach KE-Faktor, Median der 20): +31 mg/dL, Spitze nach 49 min. Zwei Ursachen:
+
+- **Das Insulin wirkt zu früh.** Nachgerechneter Clamp mit 0,2 U/kg: Mit `tmaxI` 50 wirkt Insulin am stärksten nach 91 min. Heise et al. 2017 ([DOI](https://doi.org/10.1007/s40262-017-0514-8), sechs Studien mit 218 Erwachsenen, Clamp in drei): für Insulin aspart etwa 131 min, aus den berichteten Unterschieden zu Fiasp zurückgerechnet. 50 min war am 26.09. nur gegen die Fachinformation geprüft (Nachtrag 9).
+- **Der größere Teil: die Insulinempfindlichkeiten der Quellsätze.** Gegen die Nominalwerte, die py-mgipsim für das Hovorka-Modell führt (`SIT` 51,2, `SID` 8,2 × 10⁻⁴), liegt `SIT` (Verteilung ins Gewebe) im Median bei 121, `SID` (Verwertung) bei 1,08. Die Glukose verteilt sich dadurch auf etwa 0,56 statt 0,27 L/kg; ohne Bolus steigt dieselbe Mahlzeit nur um 71 mg/dL. Mit Nominalwerten und `tmaxI` 90 trifft der Anstieg die Studie (+114), aber das Insulin wird zu stark: In einer eigenen Nachrechnung (Basal, KE- und Korrekturfaktor je Person neu eingestellt) müsste der Korrekturfaktor im Median das 2,8-Fache betragen, und 8 % der Zeit lägen unter 70.
+
+**Entscheidung:** `tmaxI` 50 → **70 min** in `engine/src/calibration.ts`. Gewählt ist der größte Wert, der alle bestehenden Prüfungen hält:
+
+| `tmaxI` | Wirkmaximum im Clamp | 1 U: stärkster Abfall / Tiefpunkt | Restwirkung nach 6 h (Vorhersage) | Taplin-Verhältnis | Anstieg nach 37 g |
+|---|---|---|---|---|---|
+| 50 | 91 min | 1,0 h / 3,5 h | – | 1,11 | +31 |
+| **70** | **110 min** | **1,2 h / 4,4 h** | **13 %** | **1,35** | **+41** |
+| 75 | – | – | 16 % | – | – |
+| 80 | 119 min | 1,4 h / 4,8 h | 19 % | 1,50 | – |
+| 90 | 128 min | 1,5 h / 5,3 h | – | 1,64 | +47 |
+| Grenze | ~131 min (Heise 2017) | Maximum 1–3 h, Tiefpunkt ≤ 5 h (Fachinformation) | < 15 % | < 1,5 | 105 ± 42 |
+
+Die Plasmaspitze kommt mit 70 min nach 79 min (Fachinformation 40, Heise ~66); Vorrang hat wie bisher die Wirkung. Das Basalgleichgewicht und die Bewegungskalibrierung (`p3`/`p4`, aus dem Gleichgewicht gerechnet) hängen nicht von `tmaxI` ab.
+
+**Folgen:**
+- Startseite und Hilfe sagen jetzt „am stärksten nach ein bis zwei Stunden, vorbei nach vier bis fünf“ (DE und EN, Doc 05).
+- Fett-Insulinresistenz neu gefittet (`scripts/nutrition-calibration.cjs --fit`): `fatResistancePerG` 0,020 → 0,018 (Fit 0,0176), Wolpert-Szenario im Mittel 1,43 (Ziel 1,42). Eiweiß unverändert, Paterson rechnet ohne Bolus.
+- Nachwirkung: DirecNet-Nacht im Median −23 wie zuvor, 12 statt 13 von 20 behandelt. Die Basalsenkung nach Taplin hebt die Nacht nur noch um 15 statt 19 mg/dL, weil ein Teil ihrer Wirkung nach 6 Uhr fällt.
+- Antwortprofil (Registry Abschnitt 4) neu gerechnet: „1 U senkt“ im Median 30 statt 31, „60 g + Bolus“ Spitze im Median 152 statt 142. Sport- und Ohne-Bolus-Spalten unverändert. `tests/profile.test.ts` auf Patient 10 nachgezogen (31, 186).
+- Mit 50 min gerechnet und als Stand 26.09. gekennzeichnet bleiben: Registry 5.3 (Sensor) und die Korrekturfaktor-Prüfung in Registry 6.
+- Doc 40/41 (DE und EN): Abschnitt 6.2 neu, Zeitleiste bis 25.11. nachgetragen, Insulin-Zeiten in der Kurzfassung, Hirsch 2024 und Heise 2017 in den Quellen.
+
+**Offen:** Der Anstieg nach dem Essen liegt weiter bei etwa 40 % des gemessenen. Das liegt an den Quellsätzen, nicht an `tmaxI`, und braucht eine Neuanpassung je Person gegen mehrere Ziele zugleich (Mahlzeitentest, Clamp, Korrekturfaktor, Bewegung, Nüchternwert).
+

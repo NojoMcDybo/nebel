@@ -24,13 +24,14 @@ Fünf Dinge soll nebel. zeigen, die man von außen kaum sieht:
 - **Korrigieren, wo es Belege gibt.** An drei Stellen passten die Quellwerte nicht zu Fachinformation und Studien: Das Insulin wirkte zu träge, der Sensor hinkte zu weit hinterher, und die Wirkung von Sport war nach Minuten vorbei statt nach vielen Stunden. Diese Stellen sind an Studien kalibriert und einzeln dokumentiert.
 - **Eigene Schichten.** Sensor, Pumpe und Alltag kommen im Quellmodell nicht vor. Diese Teile hat nebel. selbst gebaut und kennzeichnet sie auch so.
 - **Oktober 2026: Veröffentlichung.** Nach einer rechtlichen Einordnung und mit Zustimmung der Autoren der Referenzbibliothek ist nebel. seit dem 28.10. öffentlich, unter einer Open-Source-Lizenz und ohne kommerzielle Absicht.
-- **November 2026: Feinschliff.** Reserven und Hunger, ein abgestimmtes Bewegungssystem, die lange Nachwirkung von Sport und eine neue Wischgeste fürs iPhone.
+- **November 2026: Feinschliff.** Reserven und Hunger, ein abgestimmtes Bewegungssystem, die lange Nachwirkung von Sport und eine neue Wischgeste fürs iPhone. Danach mmol/L, der Modus „Ganzer Alltag“ mit Unterzucker zur falschen Zeit, der Pen als zweite Therapieform, Tagesmodi wie Hitze oder Schlafmangel, die Tageschallenge „Daily Dose of T1D“, eine iPhone-App mit echtem Puls vom Brustgurt und ein Puls, der bei harter Belastung nach oben driftet.
+- **Ende November 2026: Abgleich mit echten Mahlzeiten.** Nach dem Essen stieg der Zucker in nebel. nur etwa ein Drittel so stark wie bei echten Menschen. Ein Teil lag daran, dass das Insulin zu früh wirkte. Das ist nach Messungen korrigiert: Es wirkt jetzt am stärksten nach ein bis zwei Stunden. Der größere Teil steckt in den Parametersätzen und ist noch offen.
 
 ## Was die Simulation berücksichtigt
 
 **Essen.** Schnelle und langsame Kohlenhydrate, wie lange man isst, Fett und Eiweiß. Fett verzögert die Aufnahme und schwächt das Insulin über Stunden. Eiweiß liefert Stunden später zusätzlichen Zucker. Was man wirklich gegessen hat, weicht von der Schätzung ab.
 
-**Insulin.** Bolus, verzögerter Bolus, Basalrate, temporäre Basalrate und Pumpenpause. Insulin wirkt nach einigen Minuten, am stärksten nach etwa einer Stunde, und nach drei bis vier Stunden ist die Wirkung vorbei.
+**Insulin.** Bolus, verzögerter Bolus, Basalrate, temporäre Basalrate und Pumpenpause. Insulin wirkt nach einigen Minuten, am stärksten nach ein bis zwei Stunden, und nach vier bis fünf Stunden ist die Wirkung vorbei.
 
 **Bewegung.** Alltagsbewegung und angekündigtes Training. Moderate Belastung senkt den Wert, harte kann ihn heben. Danach wirkt Insulin viele Stunden lang stärker, oft bis in die Nacht.
 

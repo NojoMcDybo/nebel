@@ -45,7 +45,7 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 | Hunger | Bedürfnis in der Erlebnisschicht, kein 17. Zustand. Leberglykogen ist V2-Kandidat | 22.09.2026 |
 | Personen | Zehn erfundene Figuren auf zehn veröffentlichten Körpern, wählbar auf der Startseite; Standard Lena (Subjekt 10) | 26.09.2026 |
 | Eigenes Profil | Keine Werteingabe (Zweckbestimmung, DSGVO). Später Ähnlichkeits-Fragen ohne Zahlen | 26.09.2026 |
-| Nebel-Kalibrierung | `tsub` 5 min, `tmaxI` 50 min, zentral in `engine/src/calibration.ts` | 26.09.2026 |
+| Nebel-Kalibrierung | `tsub` 5 min, `tmaxI` 50 min (seit 25.11.2026 70 min), zentral in `engine/src/calibration.ts` | 26.09.2026 |
 | Fett und Eiweiß | In der Engine, ohne neuen Zustand: Magenverzögerung, Fett-Insulinresistenz ab 20 g pro Mahlzeit, späte Glukose aus Eiweiß. Kalibriert an Wolpert 2013 und Paterson 2016 | 26.09.2026 |
 | Trendpfeil | Sieben feste Stufen wie Dexcom G6, mit Schrägpfeilen; dahinter die Differenz zum vorigen Wert | 26.09.2026 |
 | Veröffentlichung | Repository öffentlich, App auf GitHub Pages über eine Action. Zehn Parametersätze als eigene GPL-Datei, Schriften lokal, Impressum aus Repository-Variablen | 12.10.2026 |
@@ -95,3 +95,5 @@ Die drei `.docx` im Projektwurzelverzeichnis bleiben unverändert als historisch
 | Tagesmodi | Schwangerschaft (Woche 6–40), zweite Zyklushälfte, 4 h Schlaf, Hitzetag, Morgen nach Alkohol; je Modus Quelle und Personenzahl in der App. Basal gilt als eingestellt (Nüchternwert bleibt), KE- und Korrekturfaktor bleiben; Alkohol an den Unterzuckern kalibriert, nicht an der Spitze. Krankheit und Stress bewusst nicht. Werte in `12_Tagesmodi.md` | 14.11.2026 |
 | Eigene Person: 20 Körper, 5. Frage, Insulin fein | Grundlage ist jetzt der ähnlichste aller 20 Datensätze; neue Frage „harter Sport hebt“; „Insulinwirkung fein“ in fünf Stufen (×0,7 bis ×1,4) skaliert kb1–kb3 und alle Dosen gegenläufig, die Kurve bei passender Therapie bleibt exakt gleich. Neutrale Benennung statt „bei mir“, kein Alter bei der eigenen Person | 14.11.2026 |
 | Anzeige unter dem Sensorwert | „letzter Messwert vor X min“ statt „dein Körper vor etwa …“: zeigt, wie alt die Zahl ist; die Sensorverzögerung steht weiter in den Erklärtexten | 14.11.2026 |
+| Herzfrequenz-Kinetik | Puls einer Einheit aus dem Kinetikmodell von Svendby 2016 statt als Rechteck. Intensität in der App bleibt ein Herzfrequenzziel; harte Einheiten driften nach oben, der Pulsgurt umgeht die Kinetik (Changelog Nachtrag 48) | 18.11.2026 |
+| Insulinaufnahme 70 min | `tmaxI` 50 → 70 min nach einem nachgerechneten Clamp (Heise 2017: Wirkmaximum ~131 min, Nebel vorher 91, jetzt 110) und dem Mahlzeitentest von Hirsch 2024 (Anstieg 105 ± 42 mg/dL, Nebel vorher +31, jetzt +41). Größter Wert, der Fachinformation und alle Prüfungen hält. Fett-Insulinresistenz neu gefittet (0,018). Der größere Teil des flachen Anstiegs liegt an den Quellsätzen und ist offen (Changelog Nachtrag 49) | 25.11.2026 |

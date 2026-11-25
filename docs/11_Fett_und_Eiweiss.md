@@ -118,7 +118,7 @@ Die angekommene Menge ist die exakte Faltung aus Gleichverteilung (Essdauer) und
 R(t)     = k · max(0, Fett − 20 g) · Glocke(t − t_Mahlzeit)
 Glocke(s) = (s/3τ)³ · e^(3 − s/τ)          Gipfel 1 bei s = 3τ
 siFactor = 1 / (1 + R),   si' = si(G) · siFactor
-k = 0,020 pro g,   τ = 110 min (Gipfel nach 5,5 h)
+k = 0,018 pro g,   τ = 110 min (Gipfel nach 5,5 h)   seit 25.11.2026, vorher 0,020 (Nachtrag 49)
 ```
 
 Der Faktor wirkt auf alle drei Insulinpfade (`kb1`, `kb2`, `kb3`). Mehrere Mahlzeiten addieren sich in `R`. Die Form `1/(1+R)` bleibt positiv und sättigt.

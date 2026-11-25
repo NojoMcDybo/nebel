@@ -1,6 +1,6 @@
 # nebel. in detail: how it came about, decisions and foundations
 
-*Detailed version, as of 10 November 2026. The short version without formulas is [nebel. in brief](41_Entstehung_kompakt.en.md).*
+*Detailed version, as of 10 November 2026; timeline and section 6.2 updated on 25 November 2026. The short version without formulas is [nebel. in brief](41_Entstehung_kompakt.en.md).*
 
 nebel. is a type 1 diabetes simulator that runs in the browser. It is aimed at the family and friends of people with type 1 diabetes and tries to let them experience what a day with this condition demands: constant attention, the delay between a decision and its effect, and the uncertainty of a number that is never quite right. The app runs without installation at https://nojomcdybo.github.io/nebel/ (German) and https://nojomcdybo.github.io/nebel/en/ (English). Source code and documentation are open at https://github.com/NojoMcDybo/nebel.
 
@@ -52,7 +52,11 @@ It started with an interactive prototype (`index.html`) with its own simplified 
 | 10 Nov 2026 | Swipe gesture for the iPhone reworked. These texts on how nebel. came about added to the start page, in German and English |
 | 11 Nov 2026 | Web app for the iPhone home screen. Training types alternate hard and easy minutes, exercise shows up in the effect chart, the sensor scatters less. Release v1.2.0 |
 | 12 Nov 2026 | Review and legal check of the live site. Start of the iPhone app with real heart rate from a chest strap |
-| 13 Nov 2026 | After Reddit feedback: settings with mmol/L, "Full daily life" mode with lows at the wrong time, body feeling, rollercoaster, remarks, day plan and invitations. Sitemap for Google. Release v1.3.0 |
+| 13 Nov 2026 | After Reddit feedback: settings with mmol/L, "Full daily life" mode with lows at the wrong time, body feeling, rollercoaster, remarks, day plan and invitations. Sitemap for Google. Pen as a second therapy, Basal-IQ as an option on the pump. iPhone app: heart rate from the strap drives the simulation, alarms, Live Activity and widgets. Release v1.3.0 |
+| 14 Nov 2026 | Instead of a body delay, the line under the sensor value says how old the last reading is. Own person from five questions without numbers, based on the closest of the 20 bodies. Day modes: pregnancy, second half of the cycle, lack of sleep, hot day, morning after alcohol. Daily challenge "Daily Dose of T1D". Tim as the tenth character, David dropped. Own resting heart rate for the chest strap |
+| 17 Nov 2026 | Exercise calibrated per body, muscle uptake grows with glucose, insulin on board strengthens exercise. Review of performance, storage and accessibility. Start page with the daily-life switch, day plan in the exercise card, Daily Dose with colours and calendar |
+| 18 Nov 2026 | The heart rate of a session follows a kinetic model instead of a rectangle; hard sessions drift upwards |
+| 24/25 Nov 2026 | Meal rises checked against a study: in nebel. only about a third of the measured rise. Insulin absorption set to 70 min from clamp data, fat-induced insulin resistance recalibrated. The larger part of the cause lies in the parameter sets and is still open |
 
 ---
 
@@ -248,18 +252,23 @@ Where a source value demonstrably does not match reality, nebel. corrects it wit
 
 ExtHovorka delays interstitial glucose with `tsub` = 15 min. The ISPAD guideline gives 5 to 10 min (Tauschmann et al. 2022), and the G6 error model estimates 3.8 min (Vettoretti et al. 2019). nebel. uses 5 min. This is allowed because no other state reads `IG`. The correction affects only the observation, not the body.
 
-### 6.2 Insulin absorption: `tmaxI` 50 minutes
+### 6.2 Insulin absorption: `tmaxI` 70 minutes
 
-During testing, one unit without food barely did anything. With the source values (58 to 131 min), 1 U lowered glucose by 2 mg/dL after one hour, acted most strongly after 1.7 h, and the lowest point came after 6 h. The prescribing information for insulin aspart gives onset after 10 to 20 min, maximum after 1 to 3 h, duration 3 to 5 h and a plasma peak after about 40 min.
+During testing, one unit without food barely did anything. With the source values (58 to 131 min), 1 U lowered glucose by 2 mg/dL after one hour, acted most strongly after 1.7 h, and the lowest point came after 6 h. The prescribing information for insulin aspart gives onset after 10 to 20 min, maximum after 1 to 3 h, duration 3 to 5 h and a plasma peak after about 40 min. On 26 Sep 2026 every person therefore got 50 min. A single parameter cannot hit the plasma peak and the maximum effect at the same time. The effect takes priority, because only the effect is visible.
 
-| `tmaxI` | Plasma peak | Steepest drop | Lowest point | 1 U lowers by (median) |
-|---|---|---|---|---|
-| Source (58 to 131 min) | 122 min | 1.7 h | 6.1 h | 29 mg/dL |
-| 40 min | 49 min | 0.8 h | 3.0 h | 32 mg/dL |
-| **50 min** | **59 min** | **1.0 h** | **3.5 h** | **31 mg/dL** |
-| 55 min | 64 min | 1.1 h | 3.7 h | 31 mg/dL |
+In November the curves felt plausible during testing but never demanding. A comparison with a meal test showed why: 37 g of carbohydrate with a bolus 10 min before raised glucose in nebel. by 31 mg/dL in the median. In 61 adults it was 105 ± 42 mg/dL, with the peak after 81 min (Hirsch et al. 2024). Part of this came from the insulin. In a recomputed clamp with 0.2 U/kg, insulin with 50 min acted most strongly after 91 min. For insulin aspart it is about 131 min (Heise et al. 2017, six trials with 218 adults, a clamp in three of them, back-calculated from the reported differences).
 
-A single parameter cannot hit the plasma peak and the maximum effect at the same time. The effect takes priority, because only the effect is visible. 50 min put the maximum and duration within the limits of the prescribing information, and the plasma peak comes about 20 min late. Since then the start page says: "peaks after about an hour, over after three to four".
+| `tmaxI` | Plasma peak | Maximum effect in the clamp | Steepest drop after 1 U | Lowest point | Rise after 37 g |
+|---|---|---|---|---|---|
+| Source (58 to 131 min) | 117 min | 140 min | 1.7 h | 6.1 h | +46 mg/dL |
+| 50 min (26 Sep to 24 Nov) | 59 min | 91 min | 1.0 h | 3.5 h | +31 mg/dL |
+| **70 min** | **79 min** | **110 min** | **1.2 h** | **4.4 h** | **+41 mg/dL** |
+| 90 min | 98 min | 128 min | 1.5 h | 5.3 h | +47 mg/dL |
+| Measured | 40 to 66 min | about 131 min | | duration 3 to 5 h | +105 ± 42 mg/dL |
+
+90 min would hit the maximum effect from the clamp. But then the lowest point would only come after 5.3 h, after the end of the duration in the prescribing information, and almost a fifth of the effect would remain after six hours. Since 25 Nov 2026 nebel. therefore uses 70 min, the largest value that keeps all existing checks: maximum and duration within the prescribing information, at most 15 % of the effect left after six hours, and the counter-check on the aftereffect of exercise (Taplin et al. 2010) still holds. Since then the start page says: "peaks after one to two hours, over after four to five". Fat-induced insulin resistance was recalibrated afterwards (section 6.4).
+
+This only lifts the rise after a meal from 31 to 41 mg/dL. The larger part of the gap comes from the insulin sensitivities of the 20 source sets. Compared with the nominal values py-mgipsim lists for the Hovorka model, glucose distribution into tissue is 2.4 times as sensitive in the median, while its disposal there is only an eighth as sensitive. Glucose therefore spreads over about twice the volume and rises by only 71 mg/dL after the same meal even without a bolus. With the nominal values it rises about as much as in the study, but insulin then acts too strongly in daily life. This point is open. It needs a refit per person against several measurements at once.
 
 ### 6.3 Long aftereffect of exercise
 
@@ -274,7 +283,7 @@ siFactor = siFactor_fat · (1 + 0.0045 · L)
 
 - **Decay time 600 min** from the exercise model by Dalla Man, Breton & Cobelli (2009), which describes insulin action as "fast on, slow off". Breton (2008) set his values so that the difference is still measurable after 20 hours.
 - **Strength 0.0045 per exercise minute**, calibrated against DirecNet: nebel. gives −23 mg/dL as the median.
-- **Counter-check with Taplin et al. (2010):** 20 % less basal over six hours clearly raised the nightly minimum after exercise. In nebel. the same measure raises the night by 19 mg/dL and so nearly cancels the aftereffect (source alone: +29 against −1).
+- **Counter-check with Taplin et al. (2010):** 20 % less basal over six hours clearly raised the nightly minimum after exercise. In nebel. the same measure raises the night by 15 mg/dL and so cancels about three quarters of the aftereffect (source alone: +29 against −1). Before the slower insulin absorption (section 6.2) it was 19 mg/dL; now part of the effect falls after 6 am.
 - Computed with all 20 people. Whoever drops below 70 mg/dL in the afternoon gets 15 g of fast carbohydrates, as in DirecNet.
 
 **Consequences.** 60 min at 55 % of heart rate reserve make insulin 14 % more effective. After 10 hours a good third of that is left, after 24 hours just under a tenth. The app shows "Aftereffect +X %" and, while reserves are below 62 %, "Reserves · refuel". Nights after training now drop low more often, as in the studies.
@@ -292,7 +301,7 @@ siFactor = siFactor_fat · (1 + 0.0045 · L)
 **Fat lowers insulin sensitivity.**
 
 ```
-R(t)     = 0.020 · max(0, fat − 20 g) · bell(t − t_meal)     peak after 5.5 h
+R(t)     = 0.018 · max(0, fat − 20 g) · bell(t − t_meal)     peak after 5.5 h
 siFactor = 1/(1 + R)
 ```
 
@@ -567,46 +576,48 @@ Entries marked "PubMed" were checked against PubMed on 9 November 2026.
 11. Baysal N, Cameron F, Buckingham BA, et al. (2014). A novel method to detect pressure-induced sensor attenuations (PISA) in an artificial pancreas. *J Diabetes Sci Technol* 8(6):1091–1096. [DOI](https://doi.org/10.1177/1932296814553267) (PubMed)
 12. Dexcom Canada. Using Dexcom G6 Trend Arrows. https://s3-us-west-2.amazonaws.com/dexcommisc/Canada+HCP/Using+the+Trend+Arrows_with+ranges_ENGLISH.pdf
 13. American Diabetes Association (2026). Standards of Care in Diabetes, section 6: Glycemic Goals, Hypoglycemia, and Hyperglycemic Crises. *Diabetes Care* 49(Suppl. 1):S132. https://diabetesjournals.org/care/article/49/Supplement_1/S132/163927/
+14. Hirsch IB, Beck RW, Marak MC, et al. (2024). A randomized comparison of postprandial glucose excursion using inhaled insulin versus rapid-acting analog insulin in adults with type 1 diabetes using multiple daily injections of insulin or automated insulin delivery. *Diabetes Care* 47(9):1682–1687. [DOI](https://doi.org/10.2337/dc24-0838) (PubMed)
+15. Heise T, Pieber TR, Danne T, Erichsen L, Haahr H (2017). A pooled analysis of clinical pharmacology trials investigating the pharmacokinetic and pharmacodynamic characteristics of fast-acting insulin aspart in adults with type 1 diabetes. *Clin Pharmacokinet* 56(5):551–559. [DOI](https://doi.org/10.1007/s40262-017-0514-8) (PubMed)
 
 ### Exercise
 
-14. Tsalikian E, Mauras N, Beck RW, et al. (Diabetes Research in Children Network, DirecNet) (2005). Impact of exercise on overnight glycemic control in children with type 1 diabetes mellitus. *J Pediatr* 147(4):528–534. [DOI](https://doi.org/10.1016/j.jpeds.2005.04.065) (PubMed)
-15. Taplin CE, Cobry E, Messer L, McFann K, Chase HP, Fiallo-Scharer R (2010). Preventing post-exercise nocturnal hypoglycemia in children with type 1 diabetes. *J Pediatr* 157(5):784–788. [DOI](https://doi.org/10.1016/j.jpeds.2010.06.004) (PubMed)
-16. Dalla Man C, Breton MD, Cobelli C (2009). Physical activity into the meal glucose-insulin model of type 1 diabetes: in silico studies. *J Diabetes Sci Technol* 3(1):56–67. [DOI](https://doi.org/10.1177/193229680900300107) (PubMed)
-17. Breton MD (2008). Physical activity – the major unaccounted impediment to closed loop control. *J Diabetes Sci Technol* 2(1):169–174. [DOI](https://doi.org/10.1177/193229680800200127) (PubMed)
+16. Tsalikian E, Mauras N, Beck RW, et al. (Diabetes Research in Children Network, DirecNet) (2005). Impact of exercise on overnight glycemic control in children with type 1 diabetes mellitus. *J Pediatr* 147(4):528–534. [DOI](https://doi.org/10.1016/j.jpeds.2005.04.065) (PubMed)
+17. Taplin CE, Cobry E, Messer L, McFann K, Chase HP, Fiallo-Scharer R (2010). Preventing post-exercise nocturnal hypoglycemia in children with type 1 diabetes. *J Pediatr* 157(5):784–788. [DOI](https://doi.org/10.1016/j.jpeds.2010.06.004) (PubMed)
+18. Dalla Man C, Breton MD, Cobelli C (2009). Physical activity into the meal glucose-insulin model of type 1 diabetes: in silico studies. *J Diabetes Sci Technol* 3(1):56–67. [DOI](https://doi.org/10.1177/193229680900300107) (PubMed)
+19. Breton MD (2008). Physical activity – the major unaccounted impediment to closed loop control. *J Diabetes Sci Technol* 2(1):169–174. [DOI](https://doi.org/10.1177/193229680800200127) (PubMed)
 
 ### Fat and protein
 
-18. Wolpert HA, Atakov-Castillo A, Smith SA, Steil GM (2013). Dietary fat acutely increases glucose concentrations and insulin requirements in patients with type 1 diabetes. *Diabetes Care* 36(4):810–816. [DOI](https://doi.org/10.2337/dc12-0092) (PubMed)
-19. Paterson MA, Smart CEM, Lopez PE, et al. (2016). Influence of dietary protein on postprandial blood glucose levels in individuals with type 1 diabetes mellitus using intensive insulin therapy. *Diabet Med* 33(5):592–598. [DOI](https://doi.org/10.1111/dme.13011) (PubMed)
-20. Smart CEM, Evans M, O'Connell SM, et al. (2013). Both dietary protein and fat increase postprandial glucose excursions in children with type 1 diabetes, and the effect is additive. *Diabetes Care* 36(12):3897–3902. [DOI](https://doi.org/10.2337/dc13-1195) (PubMed)
-21. O'Connell SM, O'Toole NMA, Cronin CN, et al. (2021). Does dietary fat cause a dose dependent glycemic response in youth with type 1 diabetes? *Pediatr Diabetes* 22(8):1108–1114. [DOI](https://doi.org/10.1111/pedi.13273) (PubMed)
-22. Paterson M, Bell KJ, O'Connell SM, Smart CE, Shafat A, King B (2015). The role of dietary protein and fat in glycaemic control in type 1 diabetes: implications for intensive diabetes management. *Curr Diab Rep* 15(9):61. [DOI](https://doi.org/10.1007/s11892-015-0630-5)
-23. Lupoli R, Pisano F, Capaldo B (2019). Postprandial glucose control in type 1 diabetes: importance of the gastric emptying rate. *Nutrients* 11(7):1559. [DOI](https://doi.org/10.3390/nu11071559)
-24. Faggionato E, Schiavon M, Ekhlaspour L, et al., Dalla Man C (2026). Quantifying the effect of fat and protein on the postprandial glucose excursion in individuals with type 1 diabetes using an automated insulin delivery system. *J Diabetes Sci Technol*, OnlineFirst. [DOI](https://doi.org/10.1177/19322968261440943)
-25. Cai Y, et al. (2023). The effect of the modified fat-protein unit algorithm … a randomized crossover trial. *Nutr Metab* 20:43. [DOI](https://doi.org/10.1186/s12986-023-00757-w)
-26. Margaritis K, et al. (2025). Dietary fat and protein intake and their impact on glycemic control in pediatric type 1 diabetes: a narrative review. *Children* 12:1664. [DOI](https://doi.org/10.3390/children12121664)
+20. Wolpert HA, Atakov-Castillo A, Smith SA, Steil GM (2013). Dietary fat acutely increases glucose concentrations and insulin requirements in patients with type 1 diabetes. *Diabetes Care* 36(4):810–816. [DOI](https://doi.org/10.2337/dc12-0092) (PubMed)
+21. Paterson MA, Smart CEM, Lopez PE, et al. (2016). Influence of dietary protein on postprandial blood glucose levels in individuals with type 1 diabetes mellitus using intensive insulin therapy. *Diabet Med* 33(5):592–598. [DOI](https://doi.org/10.1111/dme.13011) (PubMed)
+22. Smart CEM, Evans M, O'Connell SM, et al. (2013). Both dietary protein and fat increase postprandial glucose excursions in children with type 1 diabetes, and the effect is additive. *Diabetes Care* 36(12):3897–3902. [DOI](https://doi.org/10.2337/dc13-1195) (PubMed)
+23. O'Connell SM, O'Toole NMA, Cronin CN, et al. (2021). Does dietary fat cause a dose dependent glycemic response in youth with type 1 diabetes? *Pediatr Diabetes* 22(8):1108–1114. [DOI](https://doi.org/10.1111/pedi.13273) (PubMed)
+24. Paterson M, Bell KJ, O'Connell SM, Smart CE, Shafat A, King B (2015). The role of dietary protein and fat in glycaemic control in type 1 diabetes: implications for intensive diabetes management. *Curr Diab Rep* 15(9):61. [DOI](https://doi.org/10.1007/s11892-015-0630-5)
+25. Lupoli R, Pisano F, Capaldo B (2019). Postprandial glucose control in type 1 diabetes: importance of the gastric emptying rate. *Nutrients* 11(7):1559. [DOI](https://doi.org/10.3390/nu11071559)
+26. Faggionato E, Schiavon M, Ekhlaspour L, et al., Dalla Man C (2026). Quantifying the effect of fat and protein on the postprandial glucose excursion in individuals with type 1 diabetes using an automated insulin delivery system. *J Diabetes Sci Technol*, OnlineFirst. [DOI](https://doi.org/10.1177/19322968261440943)
+27. Cai Y, et al. (2023). The effect of the modified fat-protein unit algorithm … a randomized crossover trial. *Nutr Metab* 20:43. [DOI](https://doi.org/10.1186/s12986-023-00757-w)
+28. Margaritis K, et al. (2025). Dietary fat and protein intake and their impact on glycemic control in pediatric type 1 diabetes: a narrative review. *Children* 12:1664. [DOI](https://doi.org/10.3390/children12121664)
 
 ### Children (researched, not adopted)
 
-27. Wilinska ME, Chassin LJ, Acerini CL, Allen JM, Dunger DB, Hovorka R (2010). Simulation environment to evaluate closed-loop insulin delivery systems in type 1 diabetes. *J Diabetes Sci Technol* 4(1):132–144. [DOI](https://doi.org/10.1177/193229681000400117) (PubMed)
-28. Félix et al. (2022). ETH model with exercise, five children from the DiaActive study. *PLOS Comput Biol*. [DOI](https://doi.org/10.1371/journal.pcbi.1010289)
-29. Statistical virtual population with exercise (2019). *PLOS ONE*. [DOI](https://doi.org/10.1371/journal.pone.0217301)
+29. Wilinska ME, Chassin LJ, Acerini CL, Allen JM, Dunger DB, Hovorka R (2010). Simulation environment to evaluate closed-loop insulin delivery systems in type 1 diabetes. *J Diabetes Sci Technol* 4(1):132–144. [DOI](https://doi.org/10.1177/193229681000400117) (PubMed)
+30. Félix et al. (2022). ETH model with exercise, five children from the DiaActive study. *PLOS Comput Biol*. [DOI](https://doi.org/10.1371/journal.pcbi.1010289)
+31. Statistical virtual population with exercise (2019). *PLOS ONE*. [DOI](https://doi.org/10.1371/journal.pone.0217301)
 
 ### Law
 
-30. Regulation (EU) 2017/745 on medical devices (MDR), Art. 2(1).
-31. MDCG 2019-11 rev.1 (June 2025): Guidance on qualification and classification of software in Regulation (EU) 2017/745 – MDR and Regulation (EU) 2017/746 – IVDR. https://health.ec.europa.eu/document/download/b45335c5-1679-4c71-a91c-fc7a4d37f12b_en?filename=mdcg_2019_11_en.pdf
-32. Directive (EU) 2024/2853 on liability for defective products, Art. 2(2).
-33. GNU General Public License v3. https://www.gnu.org/licenses/gpl-3.0.html
-34. Munich Regional Court I (LG München I), judgment of 20 January 2022, ref. 3 O 17493/20 (Google Fonts).
-35. GitHub Docs: About GitHub Pages; GitHub General Privacy Statement. https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages
+32. Regulation (EU) 2017/745 on medical devices (MDR), Art. 2(1).
+33. MDCG 2019-11 rev.1 (June 2025): Guidance on qualification and classification of software in Regulation (EU) 2017/745 – MDR and Regulation (EU) 2017/746 – IVDR. https://health.ec.europa.eu/document/download/b45335c5-1679-4c71-a91c-fc7a4d37f12b_en?filename=mdcg_2019_11_en.pdf
+34. Directive (EU) 2024/2853 on liability for defective products, Art. 2(2).
+35. GNU General Public License v3. https://www.gnu.org/licenses/gpl-3.0.html
+36. Munich Regional Court I (LG München I), judgment of 20 January 2022, ref. 3 O 17493/20 (Google Fonts).
+37. GitHub Docs: About GitHub Pages; GitHub General Privacy Statement. https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages
 
 ### Interface
 
-36. Embla Carousel, DragHandler and DragTracker. https://github.com/davidjerleke/embla-carousel
-37. Swiper, touch events (onTouchStart, onTouchMove, onTouchEnd). https://github.com/nolimits4web/swiper
-38. W3C Pointer Events, section "Implicit pointer capture". https://www.w3.org/TR/pointerevents/
+38. Embla Carousel, DragHandler and DragTracker. https://github.com/davidjerleke/embla-carousel
+39. Swiper, touch events (onTouchStart, onTouchMove, onTouchEnd). https://github.com/nolimits4web/swiper
+40. W3C Pointer Events, section "Implicit pointer capture". https://www.w3.org/TR/pointerevents/
 
 ### Project documentation
 

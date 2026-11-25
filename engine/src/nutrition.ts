@@ -48,8 +48,10 @@ export const NUTRITION = {
    * Fett verlangen rund 42 % mehr Insulin fuer denselben mittleren Blutzucker
    * ueber zwoelf Stunden — im Mittel der 20 Subjekte des Datensatzes. Zwei Kinderstudien liegen links und rechts davon:
    * Smart 2013 (gemischt) zeigt mehr, O'Connell 2021 (reines Fett) weniger.
+   * 25.11. mit tmaxI 70 neu gefittet (0,0176, gerundet), vorher 0,020 bei
+   * tmaxI 50. Changelog Nachtrag 49.
    */
-  fatResistancePerG: 0.020,
+  fatResistancePerG: 0.018,
   /**
    * Fett bis zu dieser Menge pro Mahlzeit senkt die Insulinsensitivitaet
    * nicht [g]. Keine physiologische Schwelle — O'Connell 2021 findet keine.

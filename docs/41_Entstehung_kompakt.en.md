@@ -24,13 +24,14 @@ nebel. wants to get five things across that are hard to see from the outside:
 - **Correct where there is evidence.** In three places the source values did not match the prescribing information and the studies: insulin acted too slowly, the sensor lagged too far behind, and the effect of exercise was gone after minutes instead of many hours. These three places are calibrated against studies and documented one by one.
 - **Own layers.** The source model has no sensor, no pump and no everyday life. nebel. built these parts itself and labels them as such.
 - **October 2026: publication.** After a legal assessment and with the consent of the authors of the reference library, nebel. has been public since 28 October, under an open-source licence and with no commercial intent.
-- **November 2026: polish.** Reserves and hunger, a consistent exercise system, the long aftereffect of exercise and a new swipe gesture for the iPhone.
+- **November 2026: polish.** Reserves and hunger, a consistent exercise system, the long aftereffect of exercise and a new swipe gesture for the iPhone. Then mmol/L, the "Full daily life" mode with lows at the wrong time, the pen as a second therapy, day modes such as heat or lack of sleep, the daily challenge "Daily Dose of T1D", an iPhone app with real heart rate from a chest strap, and a heart rate that drifts upwards during hard exercise.
+- **Late November 2026: checked against real meals.** After eating, glucose in nebel. rose only about a third as much as in real people. Part of this was because insulin acted too early. That has been corrected using measurements: it now acts most strongly after one to two hours. The larger part lies in the parameter sets and is still open.
 
 ## What the simulation takes into account
 
 **Food.** Fast and slow carbohydrates, how long you take to eat, fat and protein. Fat slows absorption and weakens insulin for hours. Protein adds extra glucose hours later. What you actually ate differs from your estimate.
 
-**Insulin.** Bolus, extended bolus, basal rate, temporary basal rate and pump suspend. Insulin starts working after a few minutes, peaks after about an hour, and its effect is over after three to four hours.
+**Insulin.** Bolus, extended bolus, basal rate, temporary basal rate and pump suspend. Insulin starts working after a few minutes, peaks after one to two hours, and its effect is over after four to five hours.
 
 **Exercise.** Everyday activity and announced training. Moderate exercise lowers the value, hard exercise can raise it. Afterwards insulin works more strongly for many hours, often into the night.
 

@@ -29,15 +29,20 @@ export const NEBEL_CALIBRATION = {
   tsub: 5,
   /**
    * Subkutane Insulinaufnahme [min], fuer alle Subjekte gleich. Quelle 58–131 min
-   * (Median 109): 1 U wirkt dort am staerksten nach 1,7 h, Tiefpunkt nach 6,1 h.
-   * Fachinformation Insulin aspart (NovoRapid) 5.1/5.2: Maximum nach 1–3 h,
-   * Wirkdauer 3–5 h, Plasmaspitze 40 min (IQR 30–40). Mit 50 min: Maximum 1,0 h,
-   * Tiefpunkt 3,5 h (Median der 20). Die Plasmaspitze kommt dann nach ~59 min;
-   * beides zugleich trifft das Modell mit einem Parameter nicht, Vorrang hat die
-   * sichtbare Wirkung. Das Basalgleichgewicht haengt nicht von tmaxI ab.
-   * Changelog Nachtrag 9.
+   * (Median 109). Fachinformation Insulin aspart (NovoRapid) 5.1/5.2: Maximum nach
+   * 1–3 h, Wirkdauer 3–5 h. 26.09. auf 50 min gesetzt (Nachtrag 9). Nachgeprueft
+   * 25.11. im nachgerechneten Clamp, 0,2 U/kg, Median der 20: mit 50 min wirkt
+   * Insulin am staerksten nach 91 min, gemessen sind ~131 min (Heise et al. 2017,
+   * doi 10.1007/s40262-017-0514-8, gepoolt, aus Differenzen zurueckgerechnet).
+   * Mit 70 min: Wirkmaximum 110 min, 1 U senkt am staerksten nach 1,2 h,
+   * Tiefpunkt 4,4 h, nach 6 h noch 13 % der Wirkung (check-adapter). 70 ist der
+   * groesste Wert, der die Fachinformation (Tiefpunkt <= 5 h), die 6-h-Pruefung
+   * (< 15 %) und die Taplin-Gegenprobe haelt; 90 traefe den Clamp (128 min), der
+   * Tiefpunkt kaeme dann erst nach 5,3 h. Die Plasmaspitze kommt nach 79 min
+   * (Fachinformation 40, Heise ~66); Vorrang hat die Wirkung. Das
+   * Basalgleichgewicht haengt nicht von tmaxI ab. Changelog Nachtrag 49.
    */
-  tmaxI: 50,
+  tmaxI: 70,
   /**
    * Bewegung: Muskelaufnahme proportional zu G, bezogen auf 6 mmol/L. In der Quelle
    * ist sie ein fester Fluss, ein Training senkt dann aus 170 so viel wie aus 108.

@@ -13,8 +13,8 @@ run("Antwortprofil", () => {
 
   it("trifft die Registry-Tabelle fuer Patient 10", () => {
     const r = prof(10);
-    expect(r.oneUnitDropMgdl).toBeCloseTo(33, -0.5);
-    expect(r.mealPeakMgdl).toBeCloseTo(163, -0.5);
+    expect(r.oneUnitDropMgdl).toBeCloseTo(31, -0.5);
+    expect(r.mealPeakMgdl).toBeCloseTo(186, -0.5);
     expect(r.moderateExerciseDropMgdl).toBeCloseTo(36, -0.5);
     expect(r.hardExerciseRiseMgdl).toBeCloseTo(18, -0.5);
   });

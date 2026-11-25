@@ -21,7 +21,7 @@ Kalibrierstatus-Legende:
 | `kb3` | 1/min pro mU/L | Verstärkung Insulinwirkung EGP-Suppression | 1.898e-4 | 8.254e-4 | 1.710e-3 | Q |
 | `EGP0` | mmol/min | Endogene Glukoseproduktion bei null Insulinwirkung | 0.563 | 1.547 | 2.875 | Q |
 | `F01` | mmol/min/kg | Nicht-insulinabhängige Glukoseaufnahme pro kg | 2.444e-3 | 8.425e-3 | 2.037e-2 | Q |
-| `tmaxI` | min | Zeitkonstante der subkutanen Insulinabsorption | 57.9 | 109.0 | 130.7 | Q — **im Nebel-Parametersatz 50 min für alle (N, an Fachinformation kalibriert, Abschnitt 7)** |
+| `tmaxI` | min | Zeitkonstante der subkutanen Insulinabsorption | 57.9 | 109.0 | 130.7 | Q — **im Nebel-Parametersatz 70 min für alle (N, an Fachinformation und Clamp kalibriert, Abschnitt 7)** |
 | `p3` | mmol/min | Bewegungsgetriebener Glukosefluss ins periphere Kompartiment | 1.886 | 9.699 | 25.72 | Q |
 | `p4` | mmol/min | Bewegungsgetriebener peripherer Verbrauch | 1.598 | 2.851 | 4.844 | Q |
 | `p5` | mmol | Verlängerter Nacheffekt der Belastung (über `x2`) | 0.944 | 3.212 | 5.169 | Q |
@@ -104,33 +104,33 @@ Nicht im Datensatz: Alter und Geschlecht. Alle 20 halten mit ihrer Basalrate exa
 
 Datensatzfehler: Das Feld `total_daily_basal` passt nicht zu `basal` × 24 (Verhältnis 1,02 bis 2,44, bei Patient 1 16,9 gegen 27,3 U). Bedeutung unklar; Nebel nutzt das Feld nicht.
 
-### Verhalten im Nebel-Parametersatz (26.09.2026, Bewegung neu am 09.11., 17.11. und 18.11.2026)
+### Verhalten im Nebel-Parametersatz (26.09.2026, Bewegung neu am 09.11., 17.11. und 18.11.2026, Insulin neu am 25.11.2026)
 
 Gerechnet aus dem Gleichgewicht bei 108 mg/dL, ohne Sensorfehler. Die Bewegungsspalten enthalten seit 09.11.2026 die lange Nachwirkung (Abschnitt 9), seit 17.11.2026 die Bewegungskalibrierung (Abschnitt 7), seit 18.11.2026 den Herzfrequenzverlauf aus der Kinetik (Abschnitt 11). „60 g" = 24 g schnell + 36 g langsam, Bolus nach KE-Faktor 10 min vorher. „Sport" = 45 min bei 55 % der Herzfrequenzreserve, nüchtern. „Hart" = 20 min bei 90 %.
 
 | P | kg | HbA1c | Basal U/h | 1 U senkt | 60 g + Bolus: Spitze / Tief | 60 g ohne Bolus | Sport moderat | Hart |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 79 | 6,5 | 1,14 | 23 | 131 / 98 | 191 | −28 | 0 |
-| 2 | 74 | 7,6 | 1,45 | 18 | 134 / 105 | 186 | −26 | +8 |
-| 3 | 70 | 6,2 | 1,25 | 31 | 138 / 101 | 201 | −41 | +29 |
-| 4 | 73 | 6,4 | 0,93 | 38 | 159 / 108 | 255 | −42 | +61 |
-| 5 | 64 | 6,9 | 0,77 | 36 | 164 / 108 | 274 | −44 | +15 |
-| 6 | 65 | 6,5 | 0,59 | 37 | 152 / 105 | 271 | −44 | 0 |
-| 7 | 62 | 7,0 | 2,00 | 16 | 142 / 108 | 186 | −33 | +34 |
-| 8 | 68 | 6,9 | 0,73 | 24 | 129 / 92 | 209 | −39 | +16 |
-| 9 | 66 | 6,3 | 0,98 | 25 | 138 / 99 | 216 | −27 | +12 |
-| 10 | 71 | 6,3 | 0,46 | 33 | 163 / 108 | 299 | −36 | +18 |
-| 11 | 84 | 6,2 | 1,77 | 20 | 127 / 99 | 171 | −26 | +7 |
-| 12 | 83 | 5,7 | 1,09 | 23 | 128 / 95 | 186 | −32 | +3 |
-| 13 | 70 | 7,1 | 1,26 | 28 | 186 / 108 | 278 | −45 | +58 |
-| 14 | 77 | 5,8 | 0,51 | 35 | 136 / 90 | 236 | −40 | +2 |
-| 15 | 85 | 5,9 | 1,19 | 21 | 137 / 107 | 194 | −40 | +42 |
-| 16 | 66 | 6,1 | 0,39 | 38 | 145 / 86 | 290 | −38 | +5 |
-| 17 | 81 | 7,2 | 1,50 | 33 | 144 / 105 | 216 | −32 | 0 |
-| 18 | 88 | 6,9 | 1,56 | 31 | 134 / 103 | 190 | −36 | 0 |
-| 19 | 73 | 6,4 | 1,15 | 32 | 168 / 108 | 260 | −33 | +39 |
-| 20 | 75 | 6,7 | 1,00 | 36 | 160 / 108 | 261 | −36 | +37 |
-| **Median** | | | | **31** | **142** | **216** | **−36** | **+14** |
+| 1 | 79 | 6,5 | 1,14 | 21 | 141 / 101 | 191 | −28 | 0 |
+| 2 | 74 | 7,6 | 1,45 | 16 | 143 / 106 | 186 | −26 | +8 |
+| 3 | 70 | 6,2 | 1,25 | 30 | 149 / 102 | 201 | −41 | +29 |
+| 4 | 73 | 6,4 | 0,93 | 36 | 176 / 108 | 255 | −42 | +61 |
+| 5 | 64 | 6,9 | 0,77 | 35 | 183 / 108 | 274 | −44 | +15 |
+| 6 | 65 | 6,5 | 0,59 | 35 | 170 / 106 | 271 | −44 | 0 |
+| 7 | 62 | 7,0 | 2,00 | 15 | 152 / 108 | 186 | −33 | +34 |
+| 8 | 68 | 6,9 | 0,73 | 22 | 141 / 98 | 209 | −39 | +16 |
+| 9 | 66 | 6,3 | 0,98 | 23 | 151 / 103 | 216 | −27 | +12 |
+| 10 | 71 | 6,3 | 0,46 | 31 | 186 / 108 | 299 | −36 | +18 |
+| 11 | 84 | 6,2 | 1,77 | 19 | 135 / 101 | 171 | −26 | +7 |
+| 12 | 83 | 5,7 | 1,09 | 22 | 138 / 98 | 186 | −32 | +3 |
+| 13 | 70 | 7,1 | 1,26 | 27 | 205 / 108 | 278 | −45 | +58 |
+| 14 | 77 | 5,8 | 0,51 | 33 | 151 / 96 | 236 | −40 | +2 |
+| 15 | 85 | 5,9 | 1,19 | 19 | 147 / 108 | 194 | −40 | +42 |
+| 16 | 66 | 6,1 | 0,39 | 36 | 166 / 93 | 290 | −38 | +5 |
+| 17 | 81 | 7,2 | 1,50 | 32 | 157 / 104 | 216 | −32 | 0 |
+| 18 | 88 | 6,9 | 1,56 | 30 | 144 / 103 | 190 | −36 | 0 |
+| 19 | 73 | 6,4 | 1,15 | 31 | 185 / 108 | 260 | −33 | +39 |
+| 20 | 75 | 6,7 | 1,00 | 34 | 178 / 108 | 261 | −36 | +37 |
+| **Median** | | | | **30** | **152** | **216** | **−36** | **+14** |
 
 Die App bietet zehn davon als Personen an (4, 6, 7, 8, 10, 11, 13, 14, 15, 18), siehe `09_Personen.md`.
 
@@ -267,7 +267,7 @@ Wo ein Quellwert nachweislich nicht zur Wirklichkeit passt, wird er an genau ein
 | Parameter | Quelle | Nebel | Status | Beleg |
 |---|---|---|---|---|
 | `tsub` | 15 min | **5 min** | N, an Q kalibriert | ISPAD 5–10 min; Vettoretti 2019 τ = 3,8 min. Nur Beobachtungsschicht (W9) |
-| `tmaxI` | 58–131 min | **50 min** für alle | N, an Q kalibriert | Fachinformation Insulin aspart: Maximum 1–3 h, Wirkdauer 3–5 h. Changelog Nachtrag 9 |
+| `tmaxI` | 58–131 min | **70 min** für alle (seit 25.11.2026, vorher 50) | N, an Q kalibriert | Fachinformation Insulin aspart: Maximum 1–3 h, Wirkdauer 3–5 h. Clamp nach Heise et al. 2017 ([DOI](https://doi.org/10.1007/s40262-017-0514-8)): Wirkmaximum ~131 min, Nebel 110 (mit 50 min: 91). Größter Wert, der Tiefpunkt ≤ 5 h, < 15 % Restwirkung nach 6 h und die Taplin-Gegenprobe hält. Changelog Nachtrag 9 und 49 |
 | `exGlucoseRef` | – (Aufnahme fest) | **6 mmol/L**: Muskelaufnahme `p3`/`p4` × G/6 | N, Erweiterung (seit 17.11.2026) | Fick: Aufnahme = Durchblutung × Extraktion × Glukose. Yardley 2013 ([PMC3579339](https://pmc.ncbi.nlm.nih.gov/articles/PMC3579339)): 45 min bei 60 % VO2max, Basal halbiert, 166 → 105 mg/dL (−61); Kraft 151 → 122 (−29). Nebel aus 166: Median −66. In Ruhe ohne Wirkung. Changelog Nachtrag 44 |
 | `exInsulinGain` | – (nur `p5`, rund 2 %) | **1,8**: Verwertung `x2·Q2` × (1 + 1,8 · Belastung) | N, Erweiterung (seit 17.11.2026) | Schiavon et al. 2021 ([DOI](https://doi.org/10.1152/ajpendo.00084.2021)), Tracer-Clamp, 60 min bei 65 % VO2max: bei T1D insulinabhängige Verwertung +81 bis +155 %, verzögert; Mitte +118 % bei 0,65. Belastung = `EElong` auf HRR normiert (gut 15 min Verzug), höchstens bis zur Schwelle, darüber mit `1 − EEhigh` abnehmend (Nebel-Annahme). Romeres et al. 2020 ([DOI](https://doi.org/10.2337/dc20-0611)): hohes Insulin blockiert den Anstieg der Leberabgabe, das trägt die Quelle schon über `x3`. Folge: mit Bolus an Bord senkt dieselbe Einheit im Median 1,5-mal so viel. Changelog Nachtrag 45 |
 | `p3`, `p4` | je Subjekt | **× k je Körper** | N, an Q kalibriert (seit 17.11.2026) | Ziel: im Gleichgewicht bei 108 mg/dL fällt der Wert in 60 min bei 55 % HRR um 25 % + 22 % · (1 − e^(−eigen/0,35)), also 25–47 %, Median gut ein Drittel (Nachtrag 44; zuvor 18–54 %). DirecNet 2005 (Tsalikian et al., [PMC2258153](https://pmc.ncbi.nlm.nih.gov/articles/PMC2258153)): 75 min, 82 % fallen um ≥ 25 %, 22 % auf ≤ 60 mg/dL; der Median 40 % ist Nebel-Annahme. Gegenprobe T1DEXI 2023: aerob −18 ± 39 mg/dL in ~30 min (Nebel 30 min: Median −33 aus 108, nüchtern und ohne Anpassung). Reihenfolge der Körper bleibt; `p5`, `p2` und die Schwelle bleiben Quelle. Changelog Nachtrag 43 |
@@ -285,7 +285,7 @@ Drei Wirkungen als Eingänge, kein neuer Zustand. Herleitung, Studien und Grenze
 |---|---|---|---|---|
 | `fatGastricDelayMinPerG` | 1,0 | min/g | N | Richtung: Smart 2013, Lupoli 2019, Faggionato 2026. Größe angenommen, Lodefalk 2008 ungelesen |
 | `fatGastricDelayMaxMin` | 120 | min | N | Obergrenze, Annahme |
-| `fatResistancePerG` | 0,020 | 1/g | N, an Q kalibriert | Wolpert 2013: Insulinfaktor 1,42 für +50 g Fett, im Mittel der 20 Subjekte getroffen (1,43) |
+| `fatResistancePerG` | 0,018 (seit 25.11.2026, vorher 0,020) | 1/g | N, an Q kalibriert | Wolpert 2013: Insulinfaktor 1,42 für +50 g Fett, im Mittel der 20 Subjekte getroffen (1,43) |
 | `fatResistanceThresholdG` | 20 | g pro Mahlzeit | N | Bezugspunkt „gewöhnliches Essen“, keine Physiologie (O'Connell 2021 findet keine Schwelle). Begründung und Nachrechnung in Doc 11 |
 | `fatResistanceTauMin` | 110 | min | N | Gipfel 3τ = 5,5 h: Wolpert (Mehrbedarf 5–10 h), O'Connell (4–8 h) |
 | `proteinGlucoseYield` | 0,19 | g Glukose / g Eiweiß | N, an Q kalibriert | Paterson 2016, kleinste Quadrate auf vier Punkte, alle in den 95-%-KI |
@@ -296,7 +296,7 @@ Drei Wirkungen als Eingänge, kein neuer Zustand. Herleitung, Studien und Grenze
 
 ```
 Magen:     τ_M = min(120, 1,0 · Fett)          Lieferung = Faltung Gleichverteilung(Essdauer) * Exp(τ_M)
-Fett:      R = Σ 0,020 · max(0, Fett − 20) · (s/330)³ · e^(3 − s/110)
+Fett:      R = Σ 0,018 · max(0, Fett − 20) · (s/330)³ · e^(3 − s/110)
            siFactor = 1 / (1 + R)              wirkt auf kb1, kb2, kb3
 Eiweiß:    uProteinGlucose = Σ 0,19 · Eiweiß/0,180156 · d/dt Erlang₃(s; 90)   [mmol/min] → dQ1/dt
 ```
@@ -349,7 +349,7 @@ Szenario: Gleichgewicht, 60 min bei 55 % um 16 Uhr, 60 g mit Bolus um 19 Uhr, Na
 | Größe (Median) | Studie | Quelle allein | Nebel | Rolle |
 |---|---|---|---|---|
 | Nacht nach Training gegen ohne | −23 (DirecNet 2005) | −1 (Stand 09.11., 10 Subjekte) | −23 | Kalibrierung |
-| 20 % weniger Basal 21–3 Uhr hebt die Nacht | gleicht aus (Taplin 2010) | +29 (Stand 09.11.) | +19 (Verhältnis 1,1) | Gegenprobe |
+| 20 % weniger Basal 21–3 Uhr hebt die Nacht | gleicht aus (Taplin 2010) | +29 (Stand 09.11.) | +15 (Verhältnis 1,35; seit 25.11.2026 mit `tmaxI` 70, vorher +19 / 1,1) | Gegenprobe |
 
 Einschränkungen: Beide Studien messen Kinder und Jugendliche, die 20 Subjekte sind Erwachsene. Linear in Dauer × Intensität, keine Sättigung. Abgesichert durch `tests/afterEffect.test.ts` und `scripts/check-adapter.cjs`.
 

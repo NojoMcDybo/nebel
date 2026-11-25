@@ -28,7 +28,7 @@ const MGDL = N.MGDL_PER_MMOLL;
    Wo Quellwerte nachweislich nicht zur Wirklichkeit passen, korrigiert die
    Engine sie an genau einer Stelle: engine/src/calibration.ts. Derzeit die
    Sensorverzoegerung tsub (15 -> 5 min) und die Insulinaufnahme tmaxI
-   (58–131 -> 50 min). Beleg und Begruendung stehen dort. */
+   (58–131 -> 70 min). Beleg und Begruendung stehen dort. */
 const toMgdl = (mmol) => mmol * MGDL;
 
 /* Mahlzeitentypen. slow ist der Anteil langsamer Kohlenhydrate; er trifft
